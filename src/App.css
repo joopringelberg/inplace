@@ -1,0 +1,50 @@
+.App-logo {
+  animation: App-logo-spin infinite 20s linear;
+  height: 80px;
+}
+
+.App-header {
+  /* background-color: #222;
+  height: 150px;
+  padding: 20px;
+  color: white; */
+}
+
+.App-title {
+  font-size: 1.5em;
+}
+
+.App-intro {
+  font-size: large;
+}
+
+@keyframes App-logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.App-border-right{
+  border-right: 2px solid gray;
+  padding-right: 4px;
+}
+
+.CardClipBoardShown{
+  position: fixed;
+  bottom: 50%;
+  left: 10px;
+}
+
+.CardClipBoardHidden{
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  opacity: 0;
+}
+
+.clipboardCard{
+  -moz-transition: transform 1s;
+  -webkit-transition: transform 1s;
+  -ms-transition: transform 1s;
+  -o-transition: transform 1s;
+  transition: transform 1s;
+}

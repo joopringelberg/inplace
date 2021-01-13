@@ -1,0 +1,9 @@
+node_modules
+.idea
+package-lock.json
+test.json
+public
+dist
+temp
+test*.json
+release.sh

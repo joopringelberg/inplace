@@ -1,0 +1,50 @@
+{
+  "name": "InPlace",
+  "version": "0.8.0",
+  "description": "A client for the browser.",
+  "private": true,
+  "homepage": "https://inplace.one",
+  "scripts": {
+    "watch": "webpack --watch",
+    "symlinks": "./createPerspectivesLinks.sh",
+    "build": "./build.sh"
+  },
+  "author": "Joop Ringelberg <joop.ringelberg@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joopringelberg/inplace.git"
+  },
+  "browserslist": [
+    "defaults"
+  ],
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "perspectives-core": "git+https://github.com/joopringelberg/perspectives-core.git#v0.9.0",
+    "perspectives-proxy": "git+https://github.com/joopringelberg/perspectives-proxy.git#v1.7.0",
+    "perspectives-react": "https://github.com/joopringelberg/perspectives-react.git#v0.9.0",
+    "react": "^17.0.1",
+    "react-bootstrap": "^1.4.0",
+    "react-dom": "^17.0.1",
+    "@primer/octicons-react": "^11.0.0",
+    "bootstrap": "^4.3.1",
+    "@babel/polyfill": "^7.12.1",
+    "prop-types": "^15.7.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.5",
+    "@babel/preset-env": "^7.4.5",
+    "@babel/preset-react": "^7.0.0",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^8.0.6",
+    "@babel/plugin-syntax-dynamic-import": "^7.2.0",
+    "webpack": "^4.32.2",
+    "webpack-cli": "^3.3.12",
+    "ignore-loader": "^0.1.2",
+    "style-loader": "^0.23.1",
+    "css-loader": "^2.1.1",
+    "clean-webpack-plugin": "^3.0.0",
+    "html-webpack-plugin": "^3.2.0",
+    "eslint": "^5.16.0",
+    "eslint-plugin-react": "^7.13.0"
+  }
+}
