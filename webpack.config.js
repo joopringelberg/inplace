@@ -1,4 +1,5 @@
 const path = require("path");
+const webpack = require('webpack');
 
 const config = {
   entry:
@@ -8,10 +9,14 @@ const config = {
       filename: '[name].js',
       path: path.resolve(__dirname, 'docs')
     },
-  externals: { react: "commonjs2 react", "perspectives-proxy": "commonjs2 perspectives-proxy"},
   watch: false,
   mode: "development",
-  target: "browserlist",
+  target: "web",
+  plugins: [
+      new webpack.ProvidePlugin({
+        react: 'react',
+      }),
+    ],
   module: {
     rules: [
       {

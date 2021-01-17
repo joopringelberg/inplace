@@ -1,3 +1,23 @@
+// BEGIN LICENSE
+// Perspectives Distributed Runtime
+// Copyright (C) 2019 Joop Ringelberg (joopringelberg@perspect.it), Cor Baars
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+//
+// Full text of this license can be found in the LICENSE file in the projects root.
+// END LICENSE
+
 import React, { Component } from "react";
 import "./App.css";
 import { ServiceWorkerChannelPromise } from 'perspectives-proxy';
@@ -42,19 +62,20 @@ import {configurePDRproxy} from 'perspectives-proxy';
 
 configurePDRproxy("serviceWorkerChannel");
 
+import {couchdbHost, couchdbPort} from "./couchdbconfig.js";
+
 class App extends Component
 {
   constructor(props)
   {
     super(props);
     const component = this;
-    const urlParams = new URLSearchParams(window.location.search);
     this.state =
       { notLoggedIn:  true
       , username: ""
       , password: ""
-      , host: atob( urlParams.get("host") )
-      , port: isNaN( parseInt ( urlParams.get("port") ) ) ? 5984 : parseInt ( urlParams.get("port") )
+      , host: couchdbHost
+      , port: couchdbPort
       , authenticationFeedback: undefined
       , resetAccount: false
       , couchdbInstalled: false
@@ -88,23 +109,23 @@ class App extends Component
           {
             ServiceWorkerChannelPromise.then( function (proxy)
               {
-                proxy.resetAccount(component.state.username)(component.state.password)(component.state.host)(component.state.port)
-                  (function(success) // eslint-disable-line
+                proxy.resetAccount(component.state.username, component.state.password, component.state.host, component.state.port,
+                  function(success) // eslint-disable-line
                   {
                     if (!success)
                     {
                       alert("Unfortunately your account could not be reset and may be in an undefined state. You can reset by hand by opening Fauxton and removing all three databases whose name starts with your username.");
                     }
                     window.location.reload();
-                  })();
-              } );
+                  });
+                });
           }
           else
           {
             ServiceWorkerChannelPromise.then( function (proxy)
               {
-                proxy.authenticate(component.state.username)(component.state.password)(component.state.host)(component.state.port)
-                  (function(n) // eslint-disable-line
+                proxy.authenticate(component.state.username, component.state.password, component.state.host, component.state.port,
+                  function(n) // eslint-disable-line
                   {
                     return function()
                     {
@@ -121,9 +142,9 @@ class App extends Component
                         case 2:
                           component.setState({notLoggedIn: false});
                           break;
-                    }
-                  };
-                  })();
+                        }
+                      };
+                    });
              });
          }
        }};
