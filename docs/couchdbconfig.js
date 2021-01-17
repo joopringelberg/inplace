@@ -1,4 +1,4 @@
 module.exports = {
-    "couchdbHost": "http://127.0.0.1"
+    "couchdbHost": "https://127.0.0.1"
   , "couchdbPort": "6984"
 };
