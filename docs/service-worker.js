@@ -14,7 +14,7 @@ onmessage =
         mode: "cors"})
       .then( function()
     {
-      fetch( "https://127.0.0.1:6984/localusers/joop");
+      fetch( "https://127.0.0.1:6984/localusers/joop", {credentials: "include"});
     });
 
   };
