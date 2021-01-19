@@ -1,7 +1,7 @@
 
 
-self.onmessage(
-  function(m)
+onmessage =
+  function()
   {
     let myHeaders = new Headers();
     myHeaders.append('Authenticate', 'Basic joop:geheim');
@@ -15,5 +15,4 @@ self.onmessage(
       fetch( "https://127.0.0.1:6984/localusers/joop");
     });
 
-  }
-);
+  };
