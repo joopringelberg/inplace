@@ -23,7 +23,7 @@ if ('serviceWorker' in navigator) {
          serviceWorker.addEventListener('statechange', function(e) {
            console.log(e.target.state);
          });
-         serviceWorker.postMessage('authenticate');
+         // serviceWorker.postMessage('authenticate');
        }
      }).catch(function(error) {
        // Something went wrong during registration. The service-worker.js file
@@ -55,3 +55,32 @@ const test =
    };
 
 // test();
+
+function test2()
+{
+  const body = {name: "joop", password: "geheim"};
+  const xhr = new XMLHttpRequest();
+  xhr.open("POST", "https://127.0.0.1:6984/_session", true, "joop", "geheim");
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.onerror = function(msg){("AJAX request failed" + msg);};
+  xhr.ontimeout = function(msg){("AJAX request timed out" + msg);};
+  // xhr.responseType = options.responseType;
+  xhr.withCredentials = true;
+  xhr.send( JSON.stringify( body ) );
+  xhr.onload = function ()
+    {
+      const xhr = new XMLHttpRequest();
+      xhr.open("GET", "https://127.0.0.1:6984/localusers/joop");
+      xhr.onerror = function(msg){("AJAX request failed" + msg);};
+      xhr.ontimeout = function(msg){("AJAX request timed out" + msg);};
+      // xhr.responseType = options.responseType;
+      xhr.withCredentials = true;
+      xhr.send();
+      xhr.onload = function ()
+        {
+
+        };
+
+    };
+}
+test2();
