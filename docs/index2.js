@@ -17,11 +17,13 @@ if ('serviceWorker' in navigator) {
          serviceWorker = registration.active;
        }
 
-       if (serviceWorker) {
+       if (serviceWorker)
+       {
          console.log(serviceWorker.state);
          serviceWorker.addEventListener('statechange', function(e) {
            console.log(e.target.state);
          });
+         serviceWorker.postMessage('authenticate');
        }
      }).catch(function(error) {
        // Something went wrong during registration. The service-worker.js file
