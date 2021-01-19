@@ -23,7 +23,7 @@ if ('serviceWorker' in navigator) {
          serviceWorker.addEventListener('statechange', function(e) {
            console.log(e.target.state);
          });
-         // serviceWorker.postMessage('authenticate');
+         serviceWorker.postMessage('authenticate');
        }
      }).catch(function(error) {
        // Something went wrong during registration. The service-worker.js file
