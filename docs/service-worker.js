@@ -46,3 +46,10 @@ onmessage = function ()
 
     };
 };
+
+var isBrowser=new Function("try {return this===window;}catch(e){ return false;}");
+
+if (isBrowser())
+{
+  console.log("isBrowser returns true in service worker")
+}
