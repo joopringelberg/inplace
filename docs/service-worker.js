@@ -3,7 +3,8 @@
 onmessage =
   function()
   {
-    const isBrowser=new Function("try {return this===window;}catch(e){ return false;}");
+    const isBrowser=new Function("{ try { return this===window; } catch(e) { try { return this===self; } catch(e) { return false; } } }");
+    
     if (isBrowser())
     {
       console.log("isBrowser returns true in service worker")
