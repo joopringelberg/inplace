@@ -13,3 +13,6 @@ ln -s ../../perspectives-core perspectives-core
 ln -s ../../perspectives-serviceworker perspectives-serviceworker
 
 cd ..
+
+cd docs
+ln -sf ../../perspectives-serviceworker/dist/perspectives-serviceworker.js perspectives-serviceworker.js
