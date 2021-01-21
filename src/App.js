@@ -124,26 +124,23 @@ class App extends Component
           {
             ServiceWorkerChannelPromise.then( function (proxy)
               {
-                proxy.authenticate(component.state.username, component.state.password, component.state.host, component.state.port,
+                proxy.authenticate(component.state.username, component.state.password, component.state.host, component.state.port).then(
                   function(n) // eslint-disable-line
                   {
-                    return function()
-                    {
-                      switch (n) {
-                        // UnknownUser
-                        case 0:
-                          component.setState({authenticationFeedback: "This combination of username and password is unknown."});
-                          break;
-                        // WrongPassword
-                        case 1:
-                          component.setState({authenticationFeedback: "Detected a valid Couchdb System Admin who is not yet an InPlace user. However, an error occurred on creating a new InPlace account!"});
-                          break;
-                        // OK
-                        case 2:
-                          component.setState({notLoggedIn: false});
-                          break;
-                        }
-                      };
+                    switch (n) {
+                      // UnknownUser
+                      case 0:
+                        component.setState({authenticationFeedback: "This combination of username and password is unknown."});
+                        break;
+                      // WrongPassword
+                      case 1:
+                        component.setState({authenticationFeedback: "Detected a valid Couchdb System Admin who is not yet an InPlace user. However, an error occurred on creating a new InPlace account!"});
+                        break;
+                      // OK
+                      case 2:
+                        component.setState({notLoggedIn: false});
+                        break;
+                      }
                     });
              });
          }
