@@ -1,5 +1,4 @@
 const path = require("path");
-const webpack = require('webpack');
 
 const config = {
   entry:
@@ -12,11 +11,13 @@ const config = {
   watch: false,
   mode: "development",
   target: "web",
-  plugins: [
-      new webpack.ProvidePlugin({
-        react: 'react',
-      }),
-    ],
+  resolve: {
+    alias: {
+      "react": path.resolve(__dirname, "node_modules/react"),
+      "@primer/octicons-react": path.resolve(__dirname, "node_modules/@primer/octicons-react"),
+      "react-bootstrap": path.resolve(__dirname, "node_modules/react-bootstrap")
+    }
+  },
   module: {
     rules: [
       {
