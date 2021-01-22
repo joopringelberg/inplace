@@ -20,7 +20,7 @@
 
 import React, { Component } from "react";
 import "./App.css";
-import { ServiceWorkerChannelPromise } from 'perspectives-proxy';
+import { SharedWorkerChannelPromise } from 'perspectives-proxy';
 import PropTypes from "prop-types";
 
 import "./externals.js";
@@ -107,7 +107,7 @@ class App extends Component
         {
           if (component.state.resetAccount)
           {
-            ServiceWorkerChannelPromise.then( function (proxy)
+            SharedWorkerChannelPromise.then( function (proxy)
               {
                 proxy.resetAccount(component.state.username, component.state.password, component.state.host, component.state.port,
                   function(success) // eslint-disable-line
@@ -122,7 +122,7 @@ class App extends Component
           }
           else
           {
-            ServiceWorkerChannelPromise.then( function (proxy)
+            SharedWorkerChannelPromise.then( function (proxy)
               {
                 proxy.authenticate(component.state.username, component.state.password, component.state.host, component.state.port).then(
                   function(n) // eslint-disable-line
@@ -169,11 +169,11 @@ class App extends Component
           }
         });
     // Find out if we're already logged in.
-    ServiceWorkerChannelPromise.then( function (proxy)
+    SharedWorkerChannelPromise.then( function (proxy)
     {
       proxy.isUserLoggedIn().then( function (userIsLoggedIn)
         {
-          if (userIsLoggedIn)
+          if (userIsLoggedIn && component.state.notLoggedIn )
           {
             component.setState( {notLoggedIn: false} );
           }
