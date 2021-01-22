@@ -15,5 +15,5 @@ ln -s ../../perspectives-workers perspectives-workers
 cd ..
 
 cd docs
-ln -sf ../../perspectives-serviceworker/dist/perspectives-serviceWorker.js perspectives-serviceWorker.js
-ln -sf ../../perspectives-serviceworker/dist/perspectives-sharedWorker.js perspectives-sharedWorker.js
+ln -sf ../../perspectives-workers/dist/perspectives-serviceWorker.js perspectives-serviceWorker.js
+ln -sf ../../perspectives-workers/dist/perspectives-sharedWorker.js perspectives-sharedWorker.js

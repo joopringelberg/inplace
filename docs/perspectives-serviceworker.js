@@ -1,1 +1,1 @@
-../../perspectives-serviceworker/dist/perspectives-serviceWorker.js
+../../perspectives-workers/dist/perspectives-serviceWorker.js

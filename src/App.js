@@ -60,7 +60,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import {configurePDRproxy} from 'perspectives-proxy';
 
-configurePDRproxy("serviceWorkerChannel");
+configurePDRproxy("sharedWorkerChannel");
 
 import {couchdbHost, couchdbPort} from "./couchdbconfig.js";
 
