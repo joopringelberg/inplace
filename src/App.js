@@ -168,6 +168,17 @@ class App extends Component
             component.setState( {usersConfigured: true } );
           }
         });
+    // Find out if we're already logged in.
+    ServiceWorkerChannelPromise.then( function (proxy)
+    {
+      proxy.isUserLoggedIn().then( function (userIsLoggedIn)
+        {
+          if (userIsLoggedIn)
+          {
+            component.setState( {notLoggedIn: false} );
+          }
+        });
+    });
   }
 
   handleKeyDown(event)
