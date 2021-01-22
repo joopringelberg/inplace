@@ -1,0 +1,1 @@
+../../perspectives-serviceworker/dist/perspectives-sharedWorker.js

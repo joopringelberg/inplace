@@ -10,9 +10,10 @@ ln -s ../../perspectives-proxy perspectives-proxy
 ln -s ../../perspectives-react perspectives-react
 ln -s ../../perspectives-core perspectives-core
 
-ln -s ../../perspectives-serviceworker perspectives-serviceworker
+ln -s ../../perspectives-workers perspectives-workers
 
 cd ..
 
 cd docs
-ln -sf ../../perspectives-serviceworker/dist/perspectives-serviceworker.js perspectives-serviceworker.js
+ln -sf ../../perspectives-serviceworker/dist/perspectives-serviceWorker.js perspectives-serviceWorker.js
+ln -sf ../../perspectives-serviceworker/dist/perspectives-sharedWorker.js perspectives-sharedWorker.js
