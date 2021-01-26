@@ -20,7 +20,7 @@
 
 import React, { Component } from "react";
 import "./App.css";
-import { SharedWorkerChannelPromise, configurePDRproxy } from 'perspectives-proxy';
+import { SharedWorkerChannelPromise, configurePDRproxy, PDRProxy } from 'perspectives-proxy';
 import PropTypes from "prop-types";
 
 import "./externals.js";
@@ -76,6 +76,8 @@ class App extends Component
       , resetAccount: false
       , couchdbInstalled: false
       , usersConfigured: false
+      , isFirstChannel: false
+
 
       // Card clipboard data:
       , selectedCard: undefined
@@ -144,7 +146,6 @@ class App extends Component
     this.handleKeyDown = this.handleKeyDown.bind(this);
     this.context_ = {setSelectedCard: this.state.setSelectedCard};
     this.usesSharedWorker = typeof SharedWorker != "undefined";
-    // this.ChannelPromise = this.usesSharedWorker ? SharedWorkerChannelPromise : InternalChannelPromise;
     if (this.usesSharedWorker)
     {
       configurePDRproxy("sharedWorkerChannel");
@@ -186,6 +187,8 @@ class App extends Component
           }
         });
     });
+    // Check if our channel is the first.
+    SharedWorkerChannelPromise.then( proxy => proxy.channelId.then( channelId => component.setState({ isFirstChannel: channelId == 1000000 })))
   }
 
   handleKeyDown(event)
@@ -263,7 +266,7 @@ class App extends Component
             <div onKeyDown={component.handleKeyDown}>
               <CardClipBoard card={component.state.selectedCard} positiontomoveto={component.state.positionToMoveTo}/>
               <AppContext.Provider value={component.state}>
-                <AppSwitcher usesSharedWorker={component.usesSharedWorker}/>
+                <AppSwitcher usesSharedWorker={component.usesSharedWorker} isFirstChannel={component.state.isFirstChannel}/>
               </AppContext.Provider>
             </div>
           );
@@ -313,7 +316,7 @@ class AppSwitcher extends React.PureComponent
     const component = this;
     return  <Container>
               <MySystem>
-                <Navbar bg={component.props.usesSharedWorker ? "light" : "bg-danger"} expand="lg" role="banner" aria-label="Main menu bar" className="justify-content-between">
+                <Navbar bg={component.props.usesSharedWorker || !component.props.isFirstChannel ? "light" : "danger"} expand="lg" role="banner" aria-label="Main menu bar" className="justify-content-between">
                   <Navbar.Brand tabIndex="-1" href="#home">InPlace</Navbar.Brand>
                   <Nav>
                     <FileDropZone
