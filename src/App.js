@@ -20,7 +20,7 @@
 
 import React, { Component } from "react";
 import "./App.css";
-import { SharedWorkerChannelPromise } from 'perspectives-proxy';
+import { SharedWorkerChannelPromise, configurePDRproxy } from 'perspectives-proxy';
 import PropTypes from "prop-types";
 
 import "./externals.js";
@@ -57,10 +57,6 @@ import Tooltip from 'react-bootstrap/Tooltip';
 import {TrashcanIcon, DesktopDownloadIcon, BroadcastIcon} from '@primer/octicons-react';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
-
-import {configurePDRproxy} from 'perspectives-proxy';
-
-configurePDRproxy("sharedWorkerChannel");
 
 import {couchdbHost, couchdbPort} from "./couchdbconfig.js";
 
@@ -147,6 +143,17 @@ class App extends Component
        }};
     this.handleKeyDown = this.handleKeyDown.bind(this);
     this.context_ = {setSelectedCard: this.state.setSelectedCard};
+    this.usesSharedWorker = typeof SharedWorker != "undefined";
+    // this.ChannelPromise = this.usesSharedWorker ? SharedWorkerChannelPromise : InternalChannelPromise;
+    if (this.usesSharedWorker)
+    {
+      configurePDRproxy("sharedWorkerChannel");
+    }
+    else
+    {
+      // configurePDRproxy( "hostPageChannel", { pageHostingPDRPort });
+      import( "perspectives-pageworker" ).then( pageWorker => configurePDRproxy( "hostPageChannel", { pageHostingPDRPort: pageWorker.default }));
+    }
   }
 
   componentDidMount ()
@@ -256,7 +263,7 @@ class App extends Component
             <div onKeyDown={component.handleKeyDown}>
               <CardClipBoard card={component.state.selectedCard} positiontomoveto={component.state.positionToMoveTo}/>
               <AppContext.Provider value={component.state}>
-                <AppSwitcher/>
+                <AppSwitcher usesSharedWorker={component.usesSharedWorker}/>
               </AppContext.Provider>
             </div>
           );
@@ -303,9 +310,10 @@ class AppSwitcher extends React.PureComponent
 {
   render ()
   {
+    const component = this;
     return  <Container>
               <MySystem>
-                <Navbar bg="light" expand="lg" role="banner" aria-label="Main menu bar" className="justify-content-between">
+                <Navbar bg={component.props.usesSharedWorker ? "light" : "bg-danger"} expand="lg" role="banner" aria-label="Main menu bar" className="justify-content-between">
                   <Navbar.Brand tabIndex="-1" href="#home">InPlace</Navbar.Brand>
                   <Nav>
                     <FileDropZone

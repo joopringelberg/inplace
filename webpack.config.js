@@ -15,7 +15,9 @@ const config = {
     alias: {
       "react": path.resolve(__dirname, "node_modules/react"),
       "@primer/octicons-react": path.resolve(__dirname, "node_modules/@primer/octicons-react"),
-      "react-bootstrap": path.resolve(__dirname, "node_modules/react-bootstrap")
+      "react-bootstrap": path.resolve(__dirname, "node_modules/react-bootstrap"),
+      "perspectives-core": path.resolve(__dirname, "node_modules/perspectives-core"),
+      "perspectives-pageworker": path.resolve(__dirname, "node_modules/perspectives-pageworker")
     }
   },
   module: {
@@ -49,6 +51,21 @@ const config = {
         use: [ 'style-loader', 'css-loader' ]
       }
     ]
+  },
+  externals: {
+    // These are Affjax dependencies when running on node.
+    "xhr2-cookies": {
+      commonjs: "xhr2-cookies",
+      commonjs2: "xhr2-cookies",
+      amd: "xhr2-cookies",
+      root: "xhr2-cookies"
+    },
+    "url": {
+      commonjs: "url",
+      commonjs2: "url",
+      amd: "url",
+      root: "url"
+    }
   }
 };
 

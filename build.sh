@@ -7,4 +7,9 @@ cp ./src/importModule.js ./docs/importModule.js
 cp ./src/index.html ./docs/index.html
 cp ./src/couchdbconfig.js ./docs/couchdbconfig.js
 cp ./src/file.png ./docs/file.png
+
+cp ./node_modules/perspectives-pageworker/dist/perspectives-pageworker.js ./docs/perspectives-pageworker.js
+cp ./node_modules/perspectives-sharedworker/dist/perspectives-sharedworker.js ./docs/perspectives-sharedworker.js
+cp ./node_modules/perspectives-serviceworker/dist/perspectives-serviceworker.js ./docs/perspectives-serviceworker.js
+
 webpack

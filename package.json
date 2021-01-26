@@ -22,6 +22,7 @@
     "perspectives-core": "git+https://github.com/joopringelberg/perspectives-core.git#v0.9.0",
     "perspectives-proxy": "git+https://github.com/joopringelberg/perspectives-proxy.git#v1.7.0",
     "perspectives-react": "https://github.com/joopringelberg/perspectives-react.git#v0.9.0",
+    "perspectives-pageworker": "git+https://github.com/joopringelberg/perspectives-pageworker1.git",
     "react": "^17.0.1",
     "react-bootstrap": "^1.4.0",
     "react-dom": "^17.0.1",
