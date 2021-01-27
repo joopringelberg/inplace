@@ -6,8 +6,8 @@ rm -R perspectives-proxy
 rm -R perspectives-react
 rm -R perspectives-core
 rm -R perspectives-pageworker
-rn -R perspectives-sharedworker
-rn -R perspectives-serviceworker
+rm -R perspectives-sharedworker
+rm -R perspectives-serviceworker
 
 ln -s ../../perspectives-proxy perspectives-proxy
 ln -s ../../perspectives-react perspectives-react

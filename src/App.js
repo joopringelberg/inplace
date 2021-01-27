@@ -20,7 +20,7 @@
 
 import React, { Component } from "react";
 import "./App.css";
-import { SharedWorkerChannelPromise, configurePDRproxy, PDRProxy } from 'perspectives-proxy';
+import { SharedWorkerChannelPromise, configurePDRproxy, PDRproxy } from 'perspectives-proxy';
 import PropTypes from "prop-types";
 
 import "./externals.js";
@@ -67,7 +67,7 @@ class App extends Component
     super(props);
     const component = this;
     this.state =
-      { notLoggedIn:  true
+      { loggedIn:  false
       , username: ""
       , password: ""
       , host: couchdbHost
@@ -77,6 +77,7 @@ class App extends Component
       , couchdbInstalled: false
       , usersConfigured: false
       , isFirstChannel: false
+      , hasContext: false
 
 
       // Card clipboard data:
@@ -136,7 +137,7 @@ class App extends Component
                         break;
                       // OK
                       case 2:
-                        component.setState({notLoggedIn: false});
+                        component.setState({loggedIn: true});
                         break;
                       }
                     });
@@ -160,6 +161,7 @@ class App extends Component
   componentDidMount ()
   {
     const component = this;
+    const urlParams = new URLSearchParams(window.location.search);
     // look up the base url of Couchdb and set couchdbInstalled to true if found.
     fetch( component.state.host + ":" + component.state.port ).then(function(response) {
       if (response.ok)
@@ -176,19 +178,29 @@ class App extends Component
             component.setState( {usersConfigured: true } );
           }
         });
-    // Find out if we're already logged in.
-    SharedWorkerChannelPromise.then( function (proxy)
-    {
-      proxy.isUserLoggedIn().then( function (userIsLoggedIn)
+    Promise.all([
+      SharedWorkerChannelPromise.then( proxy => proxy.isUserLoggedIn() ),
+      SharedWorkerChannelPromise.then( proxy => proxy.channelId),
+      urlParams.has('context') ?
+        PDRproxy
+          .then( proxy => proxy.matchContextName( urlParams.get('context'))
+          .then( contextIdArr => ({hasContext: true, contextId: contextIdArr[0] })))
+        : Promise.resolve({hasContext: false})
+      ]).then( function( results )
+      {
+        const setter = {isFirstChannel: results[1] == 1000000};
+        // Find out if we're already logged in.
+        if (results[0] && !component.state.loggedIn )
         {
-          if (userIsLoggedIn && component.state.notLoggedIn )
-          {
-            component.setState( {notLoggedIn: false} );
-          }
-        });
-    });
-    // Check if our channel is the first.
-    SharedWorkerChannelPromise.then( proxy => proxy.channelId.then( channelId => component.setState({ isFirstChannel: channelId == 1000000 })))
+          setter.loggedIn = true;
+        }
+        if (results[2].hasContext)
+        {
+          setter.contextId = results[2].contextId;
+          setter.hasContext = true;
+        }
+        component.setState( setter );
+      });
   }
 
   handleKeyDown(event)
@@ -207,7 +219,7 @@ class App extends Component
     const component = this;
     if (component.state.couchdbInstalled)
     {
-        if (component.state.notLoggedIn)
+        if (!component.state.loggedIn)
         {
           return (<Container>
               <Row>
@@ -266,7 +278,29 @@ class App extends Component
             <div onKeyDown={component.handleKeyDown}>
               <CardClipBoard card={component.state.selectedCard} positiontomoveto={component.state.positionToMoveTo}/>
               <AppContext.Provider value={component.state}>
-                <AppSwitcher usesSharedWorker={component.usesSharedWorker} isFirstChannel={component.state.isFirstChannel}/>
+                <Container>
+                  <MySystem>
+                    <Navbar bg={component.usesSharedWorker || !component.state.isFirstChannel ? "light" : "danger"} expand="lg" role="banner" aria-label="Main menu bar" className="justify-content-between">
+                      <Navbar.Brand tabIndex="-1" href="#home">InPlace</Navbar.Brand>
+                      <Nav>
+                        <FileDropZone
+                          tooltiptext="Drop an invitation file here or press enter/space"
+                          handlefile={ importTransaction }
+                          extension=".json"
+                          className="ml-3 mr-3">
+                          <DesktopDownloadIcon aria-label="Drop an invitation file here" size='medium'/>
+                        </FileDropZone>
+                        <RemoveRol>
+                          <Trash/>
+                        </RemoveRol>
+                        <ConnectedToAMQP/>
+                      </Nav>
+                    </Navbar>
+                    {
+                      component.state.hasContext ? <p>We have some context</p> : ApplicationSwitcher()
+                    }
+                  </MySystem>
+                </Container>
               </AppContext.Provider>
             </div>
           );
@@ -308,64 +342,38 @@ class App extends Component
   }
 }
 
-// AppSwitcher should not update: it renders just once.
-class AppSwitcher extends React.PureComponent
+function ApplicationSwitcher()
 {
-  render ()
-  {
-    const component = this;
-    return  <Container>
-              <MySystem>
-                <Navbar bg={component.props.usesSharedWorker || !component.props.isFirstChannel ? "light" : "danger"} expand="lg" role="banner" aria-label="Main menu bar" className="justify-content-between">
-                  <Navbar.Brand tabIndex="-1" href="#home">InPlace</Navbar.Brand>
-                  <Nav>
-                    <FileDropZone
-                      tooltiptext="Drop an invitation file here or press enter/space"
-                      handlefile={ importTransaction }
-                      extension=".json"
-                      className="ml-3 mr-3">
-                      <DesktopDownloadIcon aria-label="Drop an invitation file here" size='medium'/>
-                    </FileDropZone>
-                    <RemoveRol>
-                      <Trash/>
-                    </RemoveRol>
-                    <ConnectedToAMQP/>
-                  </Nav>
-                </Navbar>
-                <AppListTabContainer rol="IndexedContexts">
-                  <Row className="align-items-stretch">
-                    <Col lg={3} className="App-border-right">
-                      <Nav variant="pills" className="flex-column" aria-label="Apps" aria-orientation="vertical">
-                        <RoleInstanceIterator>
-                          <View viewname="allProperties">
-                            <PSView.Consumer>
-                              {roleinstance => <Nav.Item>
-                                  <Nav.Link eventKey={roleinstance.rolinstance}>{roleinstance.propval("Name")}</Nav.Link>
-                                </Nav.Item>}
-                            </PSView.Consumer>
-                          </View>
-                        </RoleInstanceIterator>
-                      </Nav>
-                    </Col>
-                    <Col lg={9}>
-                      <Tab.Content>
-                        <RoleInstanceIterator>
-                          <PSRol.Consumer>{ roleinstance =>
-                            <Tab.Pane eventKey={roleinstance.rolinstance}>
-                              <PSRol.Consumer>
-                                { psrol => <Screen rolinstance={psrol.rolinstance}/> }
-                              </PSRol.Consumer>
-                            </Tab.Pane>}
-                          </PSRol.Consumer>
-                        </RoleInstanceIterator>
-                      </Tab.Content>
-                    </Col>
-                  </Row>
-                </AppListTabContainer>
-              </MySystem>
-            </Container>;
-
-  }
+  return  <AppListTabContainer rol="IndexedContexts">
+            <Row className="align-items-stretch">
+              <Col lg={3} className="App-border-right">
+                <Nav variant="pills" className="flex-column" aria-label="Apps" aria-orientation="vertical">
+                  <RoleInstanceIterator>
+                    <View viewname="allProperties">
+                      <PSView.Consumer>
+                        {roleinstance => <Nav.Item>
+                            <Nav.Link eventKey={roleinstance.rolinstance}>{roleinstance.propval("Name")}</Nav.Link>
+                          </Nav.Item>}
+                      </PSView.Consumer>
+                    </View>
+                  </RoleInstanceIterator>
+                </Nav>
+              </Col>
+              <Col lg={9}>
+                <Tab.Content>
+                  <RoleInstanceIterator>
+                    <PSRol.Consumer>{ roleinstance =>
+                      <Tab.Pane eventKey={roleinstance.rolinstance}>
+                        <PSRol.Consumer>
+                          { psrol => <Screen rolinstance={psrol.rolinstance}/> }
+                        </PSRol.Consumer>
+                      </Tab.Pane>}
+                    </PSRol.Consumer>
+                  </RoleInstanceIterator>
+                </Tab.Content>
+              </Col>
+            </Row>
+          </AppListTabContainer>;
 }
 
 function Welcome(){
