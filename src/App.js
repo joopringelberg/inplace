@@ -38,7 +38,9 @@ import {
     MySystem,
     RoleInstanceIterator,
     FileDropZone,
-    ViewOnExternalRole
+    ViewOnExternalRole,
+    ContextInstance,
+    ExternalRole
   } from "perspectives-react";
 
 import Container from 'react-bootstrap/Container';
@@ -297,7 +299,7 @@ class App extends Component
                       </Nav>
                     </Navbar>
                     {
-                      component.state.hasContext ? <p>We have some context</p> : ApplicationSwitcher()
+                      component.state.hasContext ? RequestedContext(component.state.contextId) : ApplicationSwitcher()
                     }
                   </MySystem>
                 </Container>
@@ -340,6 +342,17 @@ class App extends Component
         </Card>);
     }
   }
+}
+
+function RequestedContext(contextId)
+{
+  return  <ContextInstance contextinstance={contextId}>
+            <ExternalRole>
+              <PSRol.Consumer>
+                { psrol => <Screen rolinstance={psrol.rolinstance}/> }
+              </PSRol.Consumer>
+            </ExternalRole>
+          </ContextInstance>;
 }
 
 function ApplicationSwitcher()
