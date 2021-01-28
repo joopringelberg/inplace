@@ -162,6 +162,16 @@ class App extends Component
 
   componentDidMount ()
   {
+    function parseContextString (s)
+    {
+      const matchResults = s.match(/web\+cw:(.*)/); // Array [ "web+cw:MySystem", "MySystem" ]
+      if (matchResults)
+      {
+        return matchResults[1];
+      }
+      else return s;
+    }
+
     const component = this;
     const urlParams = new URLSearchParams(window.location.search);
     // look up the base url of Couchdb and set couchdbInstalled to true if found.
@@ -180,29 +190,30 @@ class App extends Component
             component.setState( {usersConfigured: true } );
           }
         });
-    Promise.all([
-      SharedWorkerChannelPromise.then( proxy => proxy.isUserLoggedIn() ),
-      SharedWorkerChannelPromise.then( proxy => proxy.channelId),
-      urlParams.has('context') ?
-        PDRproxy
-          .then( proxy => proxy.matchContextName( urlParams.get('context'))
-          .then( contextIdArr => ({hasContext: true, contextId: contextIdArr[0] })))
-        : Promise.resolve({hasContext: false})
+    // Check login status first. If we combine it with context name matching, we'll see a login screen first
+    // even if we've logged in before, because we have to wait for the PDRProxy.
+    Promise.all(
+      [ SharedWorkerChannelPromise.then( proxy => proxy.channelId)
+      , SharedWorkerChannelPromise.then( proxy => proxy.isUserLoggedIn() )
       ]).then( function( results )
-      {
-        const setter = {isFirstChannel: results[1] == 1000000};
-        // Find out if we're already logged in.
-        if (results[0] && !component.state.loggedIn )
         {
-          setter.loggedIn = true;
-        }
-        if (results[2].hasContext)
+          const setter = { isFirstChannel: results[0] == 1000000 };
+          if (results[1] && !component.state.loggedIn )
+          {
+            setter.loggedIn = true;
+          }
+          component.setState( setter );
+        })
+      .catch(function(e)
         {
-          setter.contextId = results[2].contextId;
-          setter.hasContext = true;
-        }
-        component.setState( setter );
-      });
+          console.log( e );
+        });
+    if (urlParams.has('context'))
+    {
+      PDRproxy
+        .then( proxy => proxy.matchContextName( parseContextString( urlParams.get('context'))))
+        .then( contextIdArr => component.setState( {hasContext: true, contextId: contextIdArr[0] }));
+    }
   }
 
   handleKeyDown(event)
@@ -271,6 +282,12 @@ class App extends Component
                       </Card>)}
                   </Form.Group>
                 </Form>
+              </Row>
+              <Row>
+                <Button variant="primary" onClick={() => navigator.registerProtocolHandler("web+cw",
+                                                  "https://inplacelocal.works/?context=%s",
+                                                  "Context Web handler")
+                                                }>Register web+cw: protocol</Button>
               </Row>
           </Container>);
         }
