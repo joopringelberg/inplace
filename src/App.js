@@ -55,6 +55,7 @@ import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
+import ListGroup from 'react-bootstrap/ListGroup';
 
 import {TrashcanIcon, DesktopDownloadIcon, BroadcastIcon} from '@primer/octicons-react';
 
@@ -173,7 +174,7 @@ class App extends Component
     }
 
     const component = this;
-    const urlParams = new URLSearchParams(window.location.search);
+    const queryStringMatchResult = window.location.search.match(/\?(.*)/);
     // look up the base url of Couchdb and set couchdbInstalled to true if found.
     fetch( component.state.host + ":" + component.state.port ).then(function(response) {
       if (response.ok)
@@ -208,11 +209,11 @@ class App extends Component
         {
           console.log( e );
         });
-    if (urlParams.has('context'))
+    if ( queryStringMatchResult )
     {
       PDRproxy
-        .then( proxy => proxy.matchContextName( parseContextString( urlParams.get('context'))))
-        .then( contextIdArr => component.setState( {hasContext: true, contextId: contextIdArr[0] }));
+        .then( proxy => proxy.matchContextName( parseContextString( queryStringMatchResult[1] )))
+        .then( contextIdArr => component.setState( {hasContext: true, contextId: contextIdArr }));
     }
   }
 
@@ -361,15 +362,36 @@ class App extends Component
   }
 }
 
-function RequestedContext(contextId)
+function RequestedContext(serialisedMapping)
 {
-  return  <ContextInstance contextinstance={contextId}>
+  const contextIds = JSON.parse( serialisedMapping[0] );
+  if ( Object.keys( contextIds ).length > 1 )
+  {
+    return  <Card>
+              <Card.Body>
+                <Card.Title>There are multiple matches to your query</Card.Title>
+                <ListGroup variant="flush">{
+                  Object.keys( contextIds ).map(
+                  function(contextId)
+                  {
+                    const namePartMatch = contextId.match(/\$(.*)/);
+                    return <ListGroup.Item key={contextId}><a title={contextId} href={"/?context=" + contextIds[contextId]}>{namePartMatch[1]}</a></ListGroup.Item>;
+                  }
+                )
+              }</ListGroup>
+            </Card.Body>
+          </Card>;
+  }
+  else
+  {
+    return  <ContextInstance contextinstance={contextIds[ Object.keys( contextIds )[0] ]}>
             <ExternalRole>
               <PSRol.Consumer>
                 { psrol => <Screen rolinstance={psrol.rolinstance}/> }
               </PSRol.Consumer>
             </ExternalRole>
           </ContextInstance>;
+  }
 }
 
 function ApplicationSwitcher()
