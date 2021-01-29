@@ -43,7 +43,8 @@ import {
     ExternalRole,
     isQualifiedName,
     isExternalRole,
-    deconstructContext
+    deconstructContext,
+    externalRole
   } from "perspectives-react";
 
 import Container from 'react-bootstrap/Container';
@@ -65,6 +66,7 @@ import {TrashcanIcon, DesktopDownloadIcon, BroadcastIcon} from '@primer/octicons
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import {couchdbHost, couchdbPort} from "./couchdbconfig.js";
+import PerspectivesGlobals from "./perspectivesGlobals.js";
 
 class App extends Component
 {
@@ -116,7 +118,7 @@ class App extends Component
           {
             SharedWorkerChannelPromise.then( function (proxy)
               {
-                proxy.resetAccount(component.state.username, component.state.password, component.state.host, component.state.port,
+                proxy.resetAccount(component.state.username, component.state.password, component.state.host, component.state.port, PerspectivesGlobals.publicRepository,
                   function(success) // eslint-disable-line
                   {
                     if (!success)
@@ -131,7 +133,7 @@ class App extends Component
           {
             SharedWorkerChannelPromise.then( function (proxy)
               {
-                proxy.authenticate(component.state.username, component.state.password, component.state.host, component.state.port).then(
+                proxy.authenticate(component.state.username, component.state.password, component.state.host, component.state.port, PerspectivesGlobals.publicRepository).then(
                   function(n) // eslint-disable-line
                   {
                     switch (n) {
@@ -419,7 +421,7 @@ function RequestedContext(contextId, indexedContextNameMapping)
                   function(externalRoleId)
                   {
                     const namePartMatch = externalRoleId.match(/\$(.*)/);
-                    return <ListGroup.Item key={externalRoleId}><a title={externalRoleId} href={"/?" + indexedContextNameMapping[externalRoleId]}>{namePartMatch[1]}</a></ListGroup.Item>;
+                    return <ListGroup.Item key={externalRoleId}><a title={externalRoleId} href={"/?" + externalRole ( indexedContextNameMapping[externalRoleId] )}>{namePartMatch[1]}</a></ListGroup.Item>;
                   }
                 )
               }</ListGroup>
