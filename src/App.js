@@ -40,7 +40,10 @@ import {
     FileDropZone,
     ViewOnExternalRole,
     ContextInstance,
-    ExternalRole
+    ExternalRole,
+    isQualifiedName,
+    isExternalRole,
+    deconstructContext
   } from "perspectives-react";
 
 import Container from 'react-bootstrap/Container';
@@ -81,6 +84,8 @@ class App extends Component
       , usersConfigured: false
       , isFirstChannel: false
       , hasContext: false
+      , indexedContextNameMapping: undefined
+      , contextId: undefined
 
 
       // Card clipboard data:
@@ -165,6 +170,7 @@ class App extends Component
   {
     function parseContextString (s)
     {
+      // web+cw:MySystem
       const matchResults = s.match(/web\+cw:(.*)/); // Array [ "web+cw:MySystem", "MySystem" ]
       if (matchResults)
       {
@@ -207,13 +213,51 @@ class App extends Component
         })
       .catch(function(e)
         {
-          console.log( e );
+          // For debugging purposes.
+          console.warn( e );
         });
     if ( queryStringMatchResult )
     {
-      PDRproxy
-        .then( proxy => proxy.matchContextName( parseContextString( queryStringMatchResult[1] )))
-        .then( contextIdArr => component.setState( {hasContext: true, contextId: contextIdArr }));
+      // This can be
+      //  * a well-formed role identifier, assumed to be a context role;
+      //  * a well-formed external role identifier;
+      //  * an arbitrary approximation of an indexed name of a Context.
+      if ( isQualifiedName(queryStringMatchResult[1]) )
+      {
+        if ( isExternalRole(queryStringMatchResult[1]) )
+        {
+          component.setState( {hasContext:true, contextId: deconstructContext( queryStringMatchResult[1] )});
+        }
+        else
+        {
+          // Assume a context role. Now request the binding and set its context.
+          PDRproxy.then( proxy => proxy.getBinding( queryStringMatchResult[1],
+            function (bindingIds)
+              {
+                if (bindingIds.length > 0)
+                {
+                  if ( isExternalRole (bindingIds[0]))
+                  {
+                    component.setState( {hasContext: true, contextId: deconstructContext( bindingIds[0]) });
+                  }
+                }
+                // Otherwise, either not a context role after all, or no binding. Do not try to open a context.
+              }));
+        }
+      }
+      else
+      {
+        PDRproxy
+          .then( proxy => proxy.matchContextName( parseContextString( queryStringMatchResult[1] )))
+          .then( function (serialisedMapping)
+            {
+              // If we find no matches, we just return the ordinary full start screen (we might want to offer an explanation).
+              if ( serialisedMapping[0] != "{}" )
+              {
+                component.setState( {hasContext: true, indexedContextNameMapping: JSON.parse( serialisedMapping[0] ) });
+              }
+            });
+      }
     }
   }
 
@@ -317,7 +361,7 @@ class App extends Component
                       </Nav>
                     </Navbar>
                     {
-                      component.state.hasContext ? RequestedContext(component.state.contextId) : ApplicationSwitcher()
+                      component.state.hasContext ? RequestedContext(component.state.contextId, component.state.indexedContextNameMapping) : ApplicationSwitcher()
                     }
                   </MySystem>
                 </Container>
@@ -362,29 +406,39 @@ class App extends Component
   }
 }
 
-function RequestedContext(serialisedMapping)
+// indexedContextNameMapping = Object String, holding at least one key-value pair.
+function RequestedContext(contextId, indexedContextNameMapping)
 {
-  const contextIds = JSON.parse( serialisedMapping[0] );
-  if ( Object.keys( contextIds ).length > 1 )
+  if ( !contextId && Object.keys( indexedContextNameMapping ).length > 1 )
   {
     return  <Card>
               <Card.Body>
                 <Card.Title>There are multiple matches to your query</Card.Title>
                 <ListGroup variant="flush">{
-                  Object.keys( contextIds ).map(
-                  function(contextId)
+                  Object.keys( indexedContextNameMapping ).map(
+                  function(externalRoleId)
                   {
-                    const namePartMatch = contextId.match(/\$(.*)/);
-                    return <ListGroup.Item key={contextId}><a title={contextId} href={"/?context=" + contextIds[contextId]}>{namePartMatch[1]}</a></ListGroup.Item>;
+                    const namePartMatch = externalRoleId.match(/\$(.*)/);
+                    return <ListGroup.Item key={externalRoleId}><a title={externalRoleId} href={"/?" + indexedContextNameMapping[externalRoleId]}>{namePartMatch[1]}</a></ListGroup.Item>;
                   }
                 )
               }</ListGroup>
             </Card.Body>
           </Card>;
   }
+  else if ( contextId )
+  {
+    return  <ContextInstance contextinstance={contextId}>
+            <ExternalRole>
+              <PSRol.Consumer>
+                { psrol => <Screen rolinstance={psrol.rolinstance}/> }
+              </PSRol.Consumer>
+            </ExternalRole>
+          </ContextInstance>;
+  }
   else
   {
-    return  <ContextInstance contextinstance={contextIds[ Object.keys( contextIds )[0] ]}>
+    return  <ContextInstance contextinstance={indexedContextNameMapping[ Object.keys( indexedContextNameMapping )[0] ]}>
             <ExternalRole>
               <PSRol.Consumer>
                 { psrol => <Screen rolinstance={psrol.rolinstance}/> }
