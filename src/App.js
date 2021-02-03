@@ -26,6 +26,7 @@ import PropTypes from "prop-types";
 import "./externals.js";
 
 import {
+    PSContext,
     RoleInstances,
     PSRol,
     PSRoleInstances,
@@ -41,6 +42,7 @@ import {
     ViewOnExternalRole,
     ContextInstance,
     ExternalRole,
+    PerspectivesComponent,
     isQualifiedName,
     isExternalRole,
     deconstructContext,
@@ -60,6 +62,7 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import ListGroup from 'react-bootstrap/ListGroup';
+import Badge from 'react-bootstrap/Badge';
 
 import {TrashcanIcon, DesktopDownloadIcon, BroadcastIcon} from '@primer/octicons-react';
 
@@ -89,21 +92,6 @@ class App extends Component
       , indexedContextNameMapping: undefined
       , contextId: undefined
 
-
-      // Card clipboard data:
-      , selectedCard: undefined
-      , selectedRole: undefined
-      , roltype: undefined
-      , contexttype: undefined
-
-      , positionToMoveTo: undefined
-      , setSelectedCard: (selectedCard, selectedRole, roltype, contexttype) => this.setState(
-          { selectedCard
-          , selectedRole
-          , roltype
-          , contexttype
-          })
-      , setPositionToMoveTo: (pos) => this.setState({positionToMoveTo: pos})
       , setusername: function(usr)
         {
           component.setState({username: usr, authenticationFeedback: undefined});
@@ -154,8 +142,6 @@ class App extends Component
              });
          }
        }};
-    this.handleKeyDown = this.handleKeyDown.bind(this);
-    this.context_ = {setSelectedCard: this.state.setSelectedCard};
     this.usesSharedWorker = typeof SharedWorker != "undefined";
     if (this.usesSharedWorker)
     {
@@ -263,12 +249,16 @@ class App extends Component
     }
   }
 
-  handleKeyDown(event)
+  handleKeyDown(event, systemExternalRole)
   {
     switch(event.keyCode)
     {
       case 27: // Escape
-        this.setState({selectedCard: undefined, selectedRole: undefined});
+        // Empty clipboard.
+        PDRproxy.then( pproxy => pproxy.deleteProperty(
+          systemExternalRole,
+          "model:System$PerspectivesSystem$External$CardClipBoard",
+          "model:System$PerspectivesSystem$External") );
         event.preventDefault();
         break;
     }
@@ -341,34 +331,36 @@ class App extends Component
         else
         {
           return (
-            <div onKeyDown={component.handleKeyDown}>
-              <CardClipBoard card={component.state.selectedCard} positiontomoveto={component.state.positionToMoveTo}/>
-              <AppContext.Provider value={component.state}>
-                <Container>
-                  <MySystem>
-                    <Navbar bg={component.usesSharedWorker || !component.state.isFirstChannel ? "light" : "danger"} expand="lg" role="banner" aria-label="Main menu bar" className="justify-content-between">
-                      <Navbar.Brand tabIndex="-1" href="#home">InPlace</Navbar.Brand>
-                      <Nav>
-                        <FileDropZone
-                          tooltiptext="Drop an invitation file here or press enter/space"
-                          handlefile={ importTransaction }
-                          extension=".json"
-                          className="ml-3 mr-3">
-                          <DesktopDownloadIcon aria-label="Drop an invitation file here" size='medium'/>
-                        </FileDropZone>
-                        <RemoveRol>
-                          <Trash/>
-                        </RemoveRol>
-                        <ConnectedToAMQP/>
-                      </Nav>
-                    </Navbar>
-                    {
-                      component.state.hasContext ? RequestedContext(component.state.contextId, component.state.indexedContextNameMapping) : ApplicationSwitcher()
-                    }
-                  </MySystem>
-                </Container>
-              </AppContext.Provider>
-            </div>
+            <MySystem>
+              <PSContext.Consumer>{ mysystem =>
+                <AppContext.Provider value={{ systemExternalRole: externalRole(mysystem.contextinstance)}}>
+                  <Container>
+                    <div onKeyDown={event => component.handleKeyDown(event, externalRole(mysystem.contextinstance) )}>
+                      <Navbar bg={component.usesSharedWorker || !component.state.isFirstChannel ? "light" : "danger"} expand="lg" role="banner" aria-label="Main menu bar" className="justify-content-between">
+                        <Navbar.Brand tabIndex="-1" href="#home">InPlace</Navbar.Brand>
+                        <Nav>
+                          <CardClipBoard systemExternalRole={externalRole(mysystem.contextinstance)}/>
+                          <FileDropZone
+                            tooltiptext="Drop an invitation file here or press enter/space"
+                            handlefile={ importTransaction }
+                            extension=".json"
+                            className="ml-3 mr-3">
+                            <DesktopDownloadIcon aria-label="Drop an invitation file here" size='medium'/>
+                          </FileDropZone>
+                          <RemoveRol>
+                            <Trash/>
+                          </RemoveRol>
+                          <ConnectedToAMQP/>
+                        </Nav>
+                      </Navbar>
+                      {
+                        component.state.hasContext ? RequestedContext(component.state.contextId, component.state.indexedContextNameMapping) : ApplicationSwitcher()
+                      }
+                    </div>
+                  </Container>
+                </AppContext.Provider>
+              }</PSContext.Consumer>
+            </MySystem>
           );
         }
     }
@@ -452,6 +444,16 @@ function RequestedContext(contextId, indexedContextNameMapping)
 
 function ApplicationSwitcher()
 {
+  function handleClick(roleinstance, e)
+  {
+    if (e.shiftKey || e.ctrlKey || e.metaKey)
+    {
+      window.open("/?" + roleinstance);
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+  }
   return  <AppListTabContainer rol="IndexedContexts">
             <Row className="align-items-stretch">
               <Col lg={3} className="App-border-right">
@@ -460,7 +462,7 @@ function ApplicationSwitcher()
                     <View viewname="allProperties">
                       <PSView.Consumer>
                         {roleinstance => <Nav.Item>
-                            <Nav.Link eventKey={roleinstance.rolinstance}>{roleinstance.propval("Name")}</Nav.Link>
+                            <Nav.Link eventKey={roleinstance.rolinstance} onSelect={handleClick}>{roleinstance.propval("Name")}</Nav.Link>
                           </Nav.Item>}
                       </PSView.Consumer>
                     </View>
@@ -554,79 +556,53 @@ AppListTabContainer.propTypes = { "rol": PropTypes.string.isRequired };
 ////////////////////////////////////////////////////////////////////////////////
 // CARDCLIPBOARD
 ////////////////////////////////////////////////////////////////////////////////
-class CardClipBoard extends React.PureComponent
+class CardClipBoard extends PerspectivesComponent
 {
-  constructor (props)
+  componentDidMount()
   {
-    super(props);
-    this.container = React.createRef();
-  }
-  componentDidUpdate()
-  {
-    const container = this.container.current;
-    // The rectangle enclosing the card in coordinates of the viewport.
-    var cardRect, containerRect, clonedCard;
-    if (this.props.card && !this.props.positiontomoveto)
-    {
-      if (container.hasChildNodes())
-      {
-        container.removeChild( container.childNodes[0] );
-      }
-      cardRect = this.props.card.getBoundingClientRect();
-      containerRect = container.getBoundingClientRect();
-      clonedCard = this.props.card.cloneNode(true);
-      container.appendChild( clonedCard );
-      clonedCard.classList.add("clipboardCard");
-      clonedCard.style.position = "fixed";
-      clonedCard.style.left = cardRect.left + "px"; // hebben we dit nodig?
-      clonedCard.style.top = cardRect.top + "px"; // hebben we dit nodig?
-      clonedCard.style.width = cardRect.width + "px";
-      clonedCard.style.height = cardRect.height + "px";
-      clonedCard.style.transition = "transform 1s";
-      setTimeout(function () {
-        clonedCard.style.transform = 'translateX(' + (containerRect.left - cardRect.left) + 'px)';
-        clonedCard.style.transform += 'translateY(' + (containerRect.top - cardRect.top) + 'px)';
-      }, 10);
-    }
-    if ( this.props.card && this.props.positiontomoveto )
-    {
-      // The current position of the card.
-      cardRect = this.props.card.getBoundingClientRect();
-      containerRect = container.getBoundingClientRect();
-      clonedCard = container.childNodes[0];
-      if ( parseInt( this.props.positiontomoveto.x ) == -1 )
-      {
-        clonedCard.style.transform = 'translateX(' + (containerRect.left - cardRect.left) + 'px)';
-        clonedCard.style.transform += 'translateY(' + (containerRect.top - cardRect.top) + 'px)';
-      }
-      else
-      {
-        clonedCard.style.transform = 'translateX(' + (parseInt( this.props.positiontomoveto.x ) - cardRect.left) + 'px)';
-        clonedCard.style.transform += 'translateY(' + (parseInt( this.props.positiontomoveto.y ) - cardRect.top) + 'px)';
-      }
-    }
+    const component = this;
+    PDRproxy.then( pproxy =>
+      component.addUnsubscriber(
+        pproxy.getProperty(
+          component.props.systemExternalRole,
+          "model:System$PerspectivesSystem$External$CardClipBoard",
+          "model:System$PerspectivesSystem$External",
+          function (valArr)
+          {
+            let info;
+            if (valArr[0])
+            {
+              info = JSON.parse( valArr[0]);
+              if (info.cardTitle)
+              {
+                component.setState(info);
+              }
+              else
+              {
+                component.setState({cardTitle: undefined}); // WERKT DIT WEL?
+              }
+            }
+            else
+            {
+              component.setState({cardTitle: undefined}); // WERKT DIT WEL?
+            }
+          })));
   }
 
   render ()
   {
-    if (this.props.card)
+    if (this.state && this.state.cardTitle)
     {
-      return <div ref={this.container} className="CardClipBoardShown" style={{zIndex: 1000}}></div>;
+      return <Container><Badge variant="info">{this.state.cardTitle}</Badge></Container>;
     }
     else {
-      return <div className="CardClipBoardHidden"/>;
+      return null;
     }
 
   }
 }
 
-CardClipBoard.propTypes =
-  { card: PropTypes.object
-  , positionToMoveTo: PropTypes.shape(
-    { x: PropTypes.string.isRequired // i.e. "40px". Set to "-1px" in order to move the card back to the clipboard.
-    , y: PropTypes.string.isRequired
-    })
-  };
+CardClipBoard.propTypes = {systemExternalRole: PropTypes.string.isRequired};
 
 function Trash(props)
 {
@@ -637,29 +613,7 @@ function Trash(props)
 
   const eventDiv = React.createRef();
 
-  function handleKeyDown ( event, rolinstance, roltype, contexttype, setSelectedCard, setPositionToMoveTo )
-  {
-    const eventDivRect = eventDiv.current.getBoundingClientRect();
-    switch(event.keyCode){
-      case 13: // Enter
-      case 32: // space
-        // Animate the movement of the card to the dropzone.
-        setPositionToMoveTo( {x: eventDivRect.x + "px", y: eventDivRect.y + "px"} );
-        // Remove the role.
-        props.removerol( {contexttype, roltype, rolinstance} );
-        // Wait for the animation to end.
-        setTimeout( function()
-          {
-            setSelectedCard();
-            setPositionToMoveTo();
-          },
-          900);
-        event.preventDefault();
-        break;
-      }
-  }
-  return  <AppContext.Consumer>{ ({selectedRole, roltype, contexttype, setSelectedCard, setPositionToMoveTo}) =>
-            <OverlayTrigger
+  return  <OverlayTrigger
                     placement="left"
                     delay={{ show: 250, hide: 400 }}
                     overlay={renderTooltip}
@@ -672,13 +626,11 @@ function Trash(props)
                       aria-describedby="trash-tooltip"
                       tabIndex="0"
                       onDrop={ev => {props.removerol( JSON.parse( ev.dataTransfer.getData("PSRol") ) ); ev.target.classList.remove("border", "p-3", "border-primary");}}
-                      onKeyDown={ ev => handleKeyDown( ev, selectedRole, roltype, contexttype, setSelectedCard, setPositionToMoveTo )}
                       onDragEnter={ev => ev.target.classList.add("border", "border-primary") }
                       onDragLeave={ev => ev.target.classList.remove("border", "border-primary")}>
                       <TrashcanIcon alt="Thrashcan" aria-label="Drop a card here to remove it" size='medium'/>
                   </div>
-            </OverlayTrigger>}
-          </AppContext.Consumer>;
+            </OverlayTrigger>;
 }
 
 function ConnectedToAMQP()
