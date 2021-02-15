@@ -64,19 +64,22 @@ import Tooltip from 'react-bootstrap/Tooltip';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Badge from 'react-bootstrap/Badge';
 
-import {TrashcanIcon, DesktopDownloadIcon, BroadcastIcon} from '@primer/octicons-react';
+import {TrashcanIcon, DesktopDownloadIcon, BroadcastIcon, PencilIcon} from '@primer/octicons-react';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import {couchdbHost, couchdbPort} from "./couchdbconfig.js";
 import PerspectivesGlobals from "./perspectivesGlobals.js";
 
-class App extends Component
+export default class App extends Component
 {
   constructor(props)
   {
     super(props);
     const component = this;
+    // This stub is replaced by a function constructed in the addOpenContextOrRoleForm behaviour
+    // whenever the user starts dragging a role that supports that behaviour.
+    this.eventDispatcher = {eventDispatcher: function(){}};
     this.state =
       { loggedIn:  false
       , username: ""
@@ -91,6 +94,7 @@ class App extends Component
       , hasContext: false
       , indexedContextNameMapping: undefined
       , contextId: undefined
+      , formMode: false
 
       , setusername: function(usr)
         {
@@ -202,6 +206,7 @@ class App extends Component
       .catch(function(e)
         {
           // For debugging purposes.
+          // eslint-disable-next-line no-console
           console.warn( e );
         });
     if ( queryStringMatchResult )
@@ -333,13 +338,20 @@ class App extends Component
           return (
             <MySystem>
               <PSContext.Consumer>{ mysystem =>
-                <AppContext.Provider value={{ systemExternalRole: externalRole(mysystem.contextinstance)}}>
+                <AppContext.Provider value={
+                  { systemExternalRole: externalRole(mysystem.contextinstance)
+                  , systemUser: mysystem.myroletype
+                  , setEventDispatcher: function(f)
+                      {
+                        component.eventDispatcher.eventDispatcher = f;
+                      }}}>
                   <Container>
                     <div onKeyDown={event => component.handleKeyDown(event, externalRole(mysystem.contextinstance) )}>
                       <Navbar bg={component.usesSharedWorker || !component.state.isFirstChannel ? "light" : "danger"} expand="lg" role="banner" aria-label="Main menu bar" className="justify-content-between">
                         <Navbar.Brand tabIndex="-1" href="#home">InPlace</Navbar.Brand>
                         <Nav>
                           <CardClipBoard systemExternalRole={externalRole(mysystem.contextinstance)}/>
+                          <OpenRoleFormTool eventDispatcher={component.eventDispatcher}/>
                           <FileDropZone
                             tooltiptext="Drop an invitation file here or press enter/space"
                             handlefile={ importTransaction }
@@ -536,7 +548,8 @@ function AppListTabContainer (props)
       if (this.state.firstApp)
       {
         return  <Tab.Container id="apps" mountOnEnter={true} unmountOnExit={true} defaultActiveKey={this.state.firstApp}>
-                  {this.props.children}
+                  { // eslint-disable-next-line react/prop-types
+                    this.props.children}
                 </Tab.Container>;
       }
       else {
@@ -547,7 +560,9 @@ function AppListTabContainer (props)
   AppListTabContainer_.contextType = PSRoleInstances;
 
   return (<RoleInstances rol={props.rol}>
-      <AppListTabContainer_>{ props.children }</AppListTabContainer_>
+      <AppListTabContainer_>{
+         // eslint-disable-next-line react/prop-types
+        props.children }</AppListTabContainer_>
     </RoleInstances>);
 }
 
@@ -607,7 +622,9 @@ CardClipBoard.propTypes = {systemExternalRole: PropTypes.string.isRequired};
 function Trash(props)
 {
   const renderTooltip = (props) => (
-    <Tooltip id="trash-tooltip" {...props} show={props.show.toString()}>
+    <Tooltip id="trash-tooltip" {...props} show={
+       // eslint-disable-next-line react/prop-types
+      props.show.toString()}>
       Drop a card here to remove it
     </Tooltip> );
 
@@ -625,7 +642,9 @@ function Trash(props)
                       aria-dropeffect="execute"
                       aria-describedby="trash-tooltip"
                       tabIndex="0"
-                      onDrop={ev => {props.removerol( JSON.parse( ev.dataTransfer.getData("PSRol") ) ); ev.target.classList.remove("border", "p-3", "border-primary");}}
+                      onDrop={ev => {
+                         // eslint-disable-next-line react/prop-types
+                        props.removerol( JSON.parse( ev.dataTransfer.getData("PSRol") ) ); ev.target.classList.remove("border", "p-3", "border-primary");}}
                       onDragEnter={ev => ev.target.classList.add("border", "border-primary") }
                       onDragLeave={ev => ev.target.classList.remove("border", "border-primary")}>
                       <TrashcanIcon alt="Thrashcan" aria-label="Drop a card here to remove it" size='medium'/>
@@ -644,4 +663,43 @@ function ConnectedToAMQP()
           </ViewOnExternalRole>;
 }
 
-export default App;
+function OpenRoleFormTool(props)
+{
+  const renderTooltip = (props) => (
+    <Tooltip id="formmode-tooltip" {...props} show={
+       // eslint-disable-next-line react/prop-types
+      props.show.toString()}>
+      Drop a role here to edit its properties
+    </Tooltip> );
+
+  const eventDiv = React.createRef();
+
+  return  <OverlayTrigger
+                    placement="left"
+                    delay={{ show: 250, hide: 400 }}
+                    overlay={renderTooltip}
+                  >
+                  <div
+                      ref={eventDiv}
+                      onDragOver={ev => ev.preventDefault()}
+                      className="ml-3 mr-3"
+                      aria-dropeffect="execute"
+                      aria-describedby="formmode-tooltip"
+                      tabIndex="0"
+                      onDrop={ev => {
+                        // The function in eventDispatcher is put there by the addOpenContextOrRoleForm behaviour triggered
+                        // on the element the user started to drag. It causes a OpenRoleForm event to be thrown from that element.
+                        // eslint-disable-next-line react/prop-types
+                        props.eventDispatcher.eventDispatcher( JSON.parse( ev.dataTransfer.getData( "PSRol" ) ).rolinstance );
+                        ev.target.classList.remove("border", "p-3", "border-primary");
+                        }}
+                      onDragEnter={ev => ev.target.classList.add("border", "border-primary") }
+                      onDragLeave={ev => ev.target.classList.remove("border", "border-primary")}>
+                      <PencilIcon alt="OpenRoleFormTool" aria-label="Drop a role here to edit its properties" size="medium"/>
+                  </div>
+            </OverlayTrigger>;
+}
+
+OpenRoleFormTool.propTypes =
+  { eventDispatcher: PropTypes.object.isRequired
+  };
