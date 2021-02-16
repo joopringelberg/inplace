@@ -20,7 +20,7 @@
 
 import React, { Component } from "react";
 import "./App.css";
-import { SharedWorkerChannelPromise, configurePDRproxy, PDRproxy } from 'perspectives-proxy';
+import { SharedWorkerChannelPromise, configurePDRproxy, PDRproxy, FIREANDFORGET } from 'perspectives-proxy';
 import PropTypes from "prop-types";
 
 import "./externals.js";
@@ -64,7 +64,7 @@ import Tooltip from 'react-bootstrap/Tooltip';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Badge from 'react-bootstrap/Badge';
 
-import {TrashcanIcon, DesktopDownloadIcon, BroadcastIcon, PencilIcon} from '@primer/octicons-react';
+import {TrashcanIcon, DesktopDownloadIcon, BroadcastIcon, PencilIcon, LinkIcon} from '@primer/octicons-react';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -351,7 +351,8 @@ export default class App extends Component
                         <Navbar.Brand tabIndex="-1" href="#home">InPlace</Navbar.Brand>
                         <Nav>
                           <CardClipBoard systemExternalRole={externalRole(mysystem.contextinstance)}/>
-                          <OpenRoleFormTool eventDispatcher={component.eventDispatcher}/>
+                          <OpenRoleFormTool eventDispatcher={component.eventDispatcher} systemExternalRole={externalRole(mysystem.contextinstance)}/>
+                          <UnbindTool systemExternalRole={externalRole(mysystem.contextinstance)}/>
                           <FileDropZone
                             tooltiptext="Drop an invitation file here or press enter/space"
                             handlefile={ importTransaction }
@@ -577,31 +578,29 @@ class CardClipBoard extends PerspectivesComponent
   {
     const component = this;
     PDRproxy.then( pproxy =>
-      component.addUnsubscriber(
-        pproxy.getProperty(
-          component.props.systemExternalRole,
-          "model:System$PerspectivesSystem$External$CardClipBoard",
-          "model:System$PerspectivesSystem$External",
-          function (valArr)
+      pproxy.getProperty(
+        component.props.systemExternalRole,
+        "model:System$PerspectivesSystem$External$CardClipBoard",
+        "model:System$PerspectivesSystem$External",
+        function (valArr)
+        {
+          if (valArr[0])
           {
-            let info;
-            if (valArr[0])
+            const {roleData} = JSON.parse( valArr[0]);
+            if (roleData.cardTitle)
             {
-              info = JSON.parse( valArr[0]);
-              if (info.cardTitle)
-              {
-                component.setState(info);
-              }
-              else
-              {
-                component.setState({cardTitle: undefined}); // WERKT DIT WEL?
-              }
+              component.setState(roleData);
             }
             else
             {
               component.setState({cardTitle: undefined}); // WERKT DIT WEL?
             }
-          })));
+          }
+          else
+          {
+            component.setState({cardTitle: undefined}); // WERKT DIT WEL?
+          }
+        }));
   }
 
   render ()
@@ -630,6 +629,15 @@ function Trash(props)
 
   const eventDiv = React.createRef();
 
+  function handleDrop({roleData, addedBehaviour})
+  {
+    if (addedBehaviour.includes("removeRoleFromContext"))
+    {
+      // eslint-disable-next-line react/prop-types
+      props.removerol( roleData );
+    }
+  }
+
   return  <OverlayTrigger
                     placement="left"
                     delay={{ show: 250, hide: 400 }}
@@ -643,8 +651,9 @@ function Trash(props)
                       aria-describedby="trash-tooltip"
                       tabIndex="0"
                       onDrop={ev => {
-                         // eslint-disable-next-line react/prop-types
-                        props.removerol( JSON.parse( ev.dataTransfer.getData("PSRol") ) ); ev.target.classList.remove("border", "p-3", "border-primary");}}
+                        handleDrop( JSON.parse( ev.dataTransfer.getData("PSRol") ) );
+                        ev.target.classList.remove("border", "p-3", "border-primary");
+                      }}
                       onDragEnter={ev => ev.target.classList.add("border", "border-primary") }
                       onDragLeave={ev => ev.target.classList.remove("border", "border-primary")}>
                       <TrashcanIcon alt="Thrashcan" aria-label="Drop a card here to remove it" size='medium'/>
@@ -663,43 +672,166 @@ function ConnectedToAMQP()
           </ViewOnExternalRole>;
 }
 
-function OpenRoleFormTool(props)
+class OpenRoleFormTool extends PerspectivesComponent
 {
-  const renderTooltip = (props) => (
+  handleKeyDown(e)
+  {
+    const component = this;
+    switch (e.keyCode){
+      case 32: // space
+        // Read the clipboard
+        // Supply the result to the eventDispatcher.
+        PDRproxy.then( pproxy =>
+          pproxy.getProperty(
+            component.props.systemExternalRole,
+            "model:System$PerspectivesSystem$External$CardClipBoard",
+            "model:System$PerspectivesSystem$External",
+            function (valArr)
+            {
+              if (valArr[0])
+              {
+                const roleDataAndBehaviour = JSON.parse( valArr[0]);
+                if (roleDataAndBehaviour.addedBehaviour.includes("openContextOrRoleForm"))
+                {
+                  component.props.eventDispatcher.eventDispatcher( roleDataAndBehaviour );
+                }
+              }
+            },
+            FIREANDFORGET));
+
+        e.stopPropagation();
+        break;
+    }
+  }
+
+  render()
+  {
+    const component = this;
+    const renderTooltip = (props) => (
     <Tooltip id="formmode-tooltip" {...props} show={
        // eslint-disable-next-line react/prop-types
       props.show.toString()}>
       Drop a role here to edit its properties
     </Tooltip> );
 
-  const eventDiv = React.createRef();
+    const eventDiv = React.createRef();
 
-  return  <OverlayTrigger
-                    placement="left"
-                    delay={{ show: 250, hide: 400 }}
-                    overlay={renderTooltip}
-                  >
-                  <div
-                      ref={eventDiv}
-                      onDragOver={ev => ev.preventDefault()}
-                      className="ml-3 mr-3"
-                      aria-dropeffect="execute"
-                      aria-describedby="formmode-tooltip"
-                      tabIndex="0"
-                      onDrop={ev => {
-                        // The function in eventDispatcher is put there by the addOpenContextOrRoleForm behaviour triggered
-                        // on the element the user started to drag. It causes a OpenRoleForm event to be thrown from that element.
-                        // eslint-disable-next-line react/prop-types
-                        props.eventDispatcher.eventDispatcher( JSON.parse( ev.dataTransfer.getData( "PSRol" ) ).rolinstance );
-                        ev.target.classList.remove("border", "p-3", "border-primary");
-                        }}
-                      onDragEnter={ev => ev.target.classList.add("border", "border-primary") }
-                      onDragLeave={ev => ev.target.classList.remove("border", "border-primary")}>
-                      <PencilIcon alt="OpenRoleFormTool" aria-label="Drop a role here to edit its properties" size="medium"/>
-                  </div>
-            </OverlayTrigger>;
+
+    return  <OverlayTrigger
+                      placement="left"
+                      delay={{ show: 250, hide: 400 }}
+                      overlay={renderTooltip}
+                    >
+                    <div
+                        ref={eventDiv}
+                        onDragOver={ev => ev.preventDefault()}
+                        className="ml-3 mr-3"
+                        aria-dropeffect="execute"
+                        aria-describedby="formmode-tooltip"
+                        tabIndex="0"
+                        onKeyDown={ e => component.handleKeyDown(e) }
+                        onDrop={ev => {
+                          // The function in eventDispatcher is put there by the addOpenContextOrRoleForm behaviour triggered
+                          // on the element the user started to drag. It causes a OpenRoleForm event to be thrown from that element.
+                          // eslint-disable-next-line react/prop-types
+                          component.props.eventDispatcher.eventDispatcher( JSON.parse( ev.dataTransfer.getData( "PSRol" ) ) );
+                          ev.target.classList.remove("border", "p-3", "border-primary");
+                          }}
+                        onDragEnter={ev => ev.target.classList.add("border", "border-primary") }
+                        onDragLeave={ev => ev.target.classList.remove("border", "border-primary")}>
+                        <PencilIcon alt="OpenRoleFormTool" aria-label="Drop a role here to edit its properties" size="medium"/>
+                    </div>
+              </OverlayTrigger>;
+  }
 }
 
 OpenRoleFormTool.propTypes =
   { eventDispatcher: PropTypes.object.isRequired
+  , systemExternalRole: PropTypes.string.isRequired
+  };
+
+class UnbindTool extends PerspectivesComponent
+{
+  handle ({roleData, addedBehaviour, myroletype})
+  {
+    if (addedBehaviour.includes( "removeFiller" ))
+    {
+      PDRproxy.then( pproxy =>
+        pproxy.getBinding ( roleData.rolinstance, function( rolIdArr )
+         {
+           if ( rolIdArr[0] )
+            {
+              pproxy.removeBinding( roleData.rolinstance, rolIdArr[0], myroletype );
+            }
+         },
+         FIREANDFORGET));
+    }
+  }
+  handleKeyDown(e)
+  {
+    const component = this;
+    switch (e.keyCode){
+      case 32: // space
+        // Read the clipboard
+        // Use result to handle
+        PDRproxy.then( pproxy =>
+          pproxy.getProperty(
+            component.props.systemExternalRole,
+            "model:System$PerspectivesSystem$External$CardClipBoard",
+            "model:System$PerspectivesSystem$External",
+            function (valArr)
+            {
+              if (valArr[0])
+              {
+                component.handle( JSON.parse( valArr[0]) );
+              }
+            },
+            FIREANDFORGET));
+
+        e.stopPropagation();
+        break;
+    }
+  }
+
+  render()
+  {
+    const component = this;
+    const renderTooltip = (props) => (
+    <Tooltip id="unbindtool-tooltip" {...props} show={
+       // eslint-disable-next-line react/prop-types
+      props.show.toString()}>
+      Drop a role here to remove its filler
+    </Tooltip> );
+
+    const eventDiv = React.createRef();
+
+
+    return  <OverlayTrigger
+                      placement="left"
+                      delay={{ show: 250, hide: 400 }}
+                      overlay={renderTooltip}
+                    >
+                    <div
+                        ref={eventDiv}
+                        onDragOver={ev => ev.preventDefault()}
+                        className="ml-3 mr-3"
+                        aria-dropeffect="execute"
+                        aria-describedby="unbindtool-tooltip"
+                        tabIndex="0"
+                        onKeyDown={ e => component.handleKeyDown(e) }
+                        onDrop={ev => {
+                          // eslint-disable-next-line react/prop-types
+                          component.handle( JSON.parse( ev.dataTransfer.getData( "PSRol" ) ) );
+                          ev.target.classList.remove("border", "p-3", "border-primary");
+                          }}
+                        onDragEnter={ev => ev.target.classList.add("border", "border-primary") }
+                        onDragLeave={ev => ev.target.classList.remove("border", "border-primary")}>
+                        <LinkIcon alt="OpenRoleFormTool" aria-label="Drop a role here to remove its filler" size="medium"/>
+                    </div>
+              </OverlayTrigger>;
+  }
+}
+
+UnbindTool.propTypes =
+  { systemExternalRole: PropTypes.string.isRequired
   };
