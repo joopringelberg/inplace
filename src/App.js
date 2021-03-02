@@ -78,6 +78,9 @@ import Trash from "./trash.js";
 
 import CardClipBoard from "./cardclipboard.js";
 
+// TODO. ZODRA Perspectives.Persistence.API alles heeft overgenomen, kan dit eruit.
+import {couchdbHost, couchdbPort} from "./couchdbconfig.js";
+
 import {usersHaveBeenConfigured, addUser, authenticateUser, getUser, detectCouchdb} from "./usermanagement.js";
 
 export default class App extends Component
@@ -93,8 +96,8 @@ export default class App extends Component
       { loggedIn:  false
       , username: ""
       , password: ""
-      , host: ""
-      , port: ""
+      , host: couchdbHost
+      , port: couchdbPort
       , backend: undefined
       , authenticationFeedback: undefined
       , resetAccount: false
@@ -121,10 +124,12 @@ export default class App extends Component
         {
           if (component.state.resetAccount)
           {
-            // TODO!!
+            // TODO!! Als Perspectives.Persistence.API alles heeft overgenomen, kan de signatuur van deze functie
+            // gelijk gemaakt worden aan runPDR.
             SharedWorkerChannelPromise.then( function (proxy)
               {
-                proxy.resetAccount(component.state.username, component.state.password, component.state.host, component.state.port, PerspectivesGlobals.publicRepository,
+                // zelfde parameters en argumenten als runPDR
+                proxy.resetAccount(component.state.username, component.state.password, component.state.host, component.state.port, PerspectivesGlobals.publicRepository).then(
                   function(success) // eslint-disable-line
                   {
                     if (!success)
