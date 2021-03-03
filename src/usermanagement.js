@@ -89,16 +89,6 @@ export function authenticateUser( userName, pwd )
 //// DETECTCOUCHDB
 ///////////////////////////////////////////////////////////////////////////////
 // Returns a promise for a Boolean. False if the Couchdb endpoint does not exist, true otherwise.
-export function detectCouchdb_old(url)
-{
-  const db = new Pouchdb(url);
-  return db.info().then(function () {
-      return true;
-    }).catch(function () {
-      return false;
-    });
-}
-
 export function detectCouchdb(url)
 {
   const FETCH_TIMEOUT = 5000;
