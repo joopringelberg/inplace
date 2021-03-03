@@ -17,7 +17,8 @@ const config = {
       "@primer/octicons-react": path.resolve(__dirname, "node_modules/@primer/octicons-react"),
       "react-bootstrap": path.resolve(__dirname, "node_modules/react-bootstrap"),
       "perspectives-core": path.resolve(__dirname, "node_modules/perspectives-core"),
-      "perspectives-pageworker": path.resolve(__dirname, "node_modules/perspectives-pageworker")
+      "perspectives-pageworker": path.resolve(__dirname, "node_modules/perspectives-pageworker"),
+      "pouchdb-browser": path.resolve(__dirname, "node_modules/pouchdb-browser")
     }
   },
   module: {

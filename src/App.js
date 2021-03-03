@@ -159,7 +159,7 @@ export default class App extends Component
                             PerspectivesGlobals.publicRepository
                             // TODO. Handle errors in a better way.
                           )
-                          .then(() => component.setState({loggedIn: true}))
+                          .then(() => component.setState({loggedIn: true, couchdbUrl: user.couchdbUrl}))
                           .catch(e => alert( e ));
                         });
                     }
@@ -318,7 +318,11 @@ export default class App extends Component
                 component.setState({couchdbMissing: true, checkingOnCouchdb: false});
               }
             });
-          }
+        }
+        else
+        {
+          addUser( component.state.username, component.state.password, couchdbUrl );
+        }
       }
       component.setState({newAccountInfoValidated: true});
     }
@@ -334,7 +338,8 @@ export default class App extends Component
               , setEventDispatcher: function(f)
                   {
                     component.eventDispatcher.eventDispatcher = f;
-                  }}}>
+                  }
+              , couchdbUrl: component.state.couchdbUrl}}>
               <Container>
                 <div onKeyDown={event => component.handleKeyDown(event, externalRole(mysystem.contextinstance) )}>
                   <Navbar bg={component.usesSharedWorker || !component.state.isFirstChannel ? "light" : "danger"} expand="lg" role="banner" aria-label="Main menu bar" className="justify-content-between">
