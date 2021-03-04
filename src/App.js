@@ -96,10 +96,11 @@ export default class App extends Component
       { loggedIn:  false
       , username: ""
       , password: ""
+      , user: {}
       , host: couchdbHost
       , port: couchdbPort
       , backend: undefined
-      , authenticationFeedback: undefined
+      , wrongCredentials: false
       , resetAccount: false
       , couchdbMissing: false
       , checkingOnCouchdb: false
@@ -114,60 +115,10 @@ export default class App extends Component
 
       , setusername: function(usr)
         {
-          component.setState({username: usr, authenticationFeedback: undefined});
-        }
-      , setpassword: function(pwd)
-        {
-          component.setState({password: pwd, authenticationFeedback: undefined});
-        }
-      , authenticate: function()
-        {
-          if (component.state.resetAccount)
-          {
-            // TODO!! Als Perspectives.Persistence.API alles heeft overgenomen, kan de signatuur van deze functie
-            // gelijk gemaakt worden aan runPDR.
-            SharedWorkerChannelPromise.then( function (proxy)
-              {
-                // zelfde parameters en argumenten als runPDR
-                proxy.resetAccount(component.state.username, component.state.password, component.state.host, component.state.port, PerspectivesGlobals.publicRepository).then(
-                  function(success) // eslint-disable-line
-                  {
-                    if (!success)
-                    {
-                      alert("Unfortunately your account could not be reset and may be in an undefined state. You can reset by hand by opening Fauxton and removing all three databases whose name starts with your username.");
-                    }
-                    window.location.reload();
-                  });
-                });
-          }
-          else
-          {
-            authenticateUser(component.state.username, component.state.password).then(
-              function(iscorrect)
-              {
-                if (iscorrect)
-                {
-                  getUser( component.state.username ).then(
-                    function(user)
-                    {
-                      SharedWorkerChannelPromise.then( function (proxy)
-                        {
-                          proxy.runPDR(
-                            component.state.username,
-                            component.state.password,
-                            user,
-                            PerspectivesGlobals.publicRepository
-                            // TODO. Handle errors in a better way.
-                          )
-                          .then(() => component.setState({loggedIn: true, couchdbUrl: user.couchdbUrl}))
-                          .catch(e => alert( e ));
-                        });
-                    }
-                  );
-                  }
-              });
-          }
-       }};
+          getUser( usr )
+            .then( user => component.setState({username: usr, wrongCredentials: false, user, loginInfoValidated: false}))
+            .catch( () => component.setState({username: usr, wrongCredentials: false, loginInfoValidated: false}));
+        }};
     this.usesSharedWorker = typeof SharedWorker != "undefined";
     if (this.usesSharedWorker)
     {
@@ -183,7 +134,7 @@ export default class App extends Component
   componentDidMount ()
   {
     const component = this;
-    usersHaveBeenConfigured().then( b => component.setState({ usersConfigured: b, activeKey: "login" }) );
+    usersHaveBeenConfigured().then( b => component.setState({ usersConfigured: b, activeKey: b ? "login" : "setup" }) );
     // Check login status first. If we combine it with context name matching, we'll see a login screen first
     // even if we've logged in before, because we have to wait for the PDRProxy.
     Promise.all(
@@ -327,6 +278,65 @@ export default class App extends Component
       component.setState({newAccountInfoValidated: true});
     }
 
+    function authenticate(event)
+    {
+      const form = event.currentTarget;
+      event.preventDefault();
+      event.stopPropagation();
+      component.setState({loginInfoValidated: true});
+      if (form.checkValidity() )
+      {
+        if (component.state.resetAccount)
+        {
+          // TODO!! Als Perspectives.Persistence.API alles heeft overgenomen, kan de signatuur van deze functie
+          // gelijk gemaakt worden aan runPDR.
+          SharedWorkerChannelPromise.then( function (proxy)
+            {
+              // zelfde parameters en argumenten als runPDR
+              proxy.resetAccount(component.state.username, component.state.password, component.state.host, component.state.port, PerspectivesGlobals.publicRepository).then(
+                function(success) // eslint-disable-line
+                {
+                  if (!success)
+                  {
+                    alert("Unfortunately your account could not be reset and may be in an undefined state. You can reset by hand by opening Fauxton and removing all three databases whose name starts with your username.");
+                  }
+                  window.location.reload();
+                });
+              });
+        }
+        else
+        {
+          authenticateUser(component.state.username, component.state.password).then(
+            function(iscorrect)
+            {
+              if (iscorrect)
+              {
+                getUser( component.state.username ).then(
+                  function(user)
+                  {
+                    SharedWorkerChannelPromise.then( function (proxy)
+                      {
+                        proxy.runPDR(
+                          component.state.username,
+                          component.state.password,
+                          user,
+                          PerspectivesGlobals.publicRepository
+                          // TODO. Handle errors in a better way.
+                        )
+                        .then(() => component.setState({loggedIn: true, couchdbUrl: user.couchdbUrl}))
+                        .catch(e => alert( e ));
+                      });
+                  }
+                );
+              }
+              else
+              {
+                component.setState({wrongCredentials: true});
+              }
+            });
+        }
+      }
+    }
     if (component.state.loggedIn)
     {
       return (
@@ -377,56 +387,64 @@ export default class App extends Component
       return  <Container>
                 <Tabs activeKey={component.state.activeKey} onSelect={ (k) => component.setState({activeKey: k})}>
                   <Tab eventKey="login" title="Login">
-                    <Container>
-                      <Row>
+                    <Form noValidate validated={component.state.loginInfoValidated} onSubmit={authenticate} className="m-3">
+                      <Form.Row>
                         <header className="App-header">
                           <h3>Login</h3>
                         </header>
-                      </Row>
-                      <Row className="pb-3">
-                        {component.state.usersConfigured ? <p>Enter the username and password for an InPlace user on this computer. Alternatively, to create a new InPlace user, enter a valid combination of username and password of a Couchdb Server Admin.</p> : <Welcome/>}
-                      </Row>
-                      <Row>
-                        <Form>
-                          <Form.Group as={Row} controlId="username">
-                            <Col sm="4">
-                              <Form.Label>Login name:</Form.Label>
-                            </Col>
-                            <Col sm="8">
-                              <Form.Control
-                              placeholder="Username" aria-describedby="usernameDescription" aria-label="Username" onBlur={e => component.state.setusername(e.target.value)} autoFocus/>
-                            </Col>
-                            <p id="usernameDescription" aria-hidden="true" hidden>Enter your self-chosen username here</p>
-                          </Form.Group>
+                      </Form.Row>
+                      <Form.Row className="pb-3">
+                        <Col>
+                        {component.state.usersConfigured ? <Form.Text><span>Enter the username and password for an InPlace user on this computer. Alternatively, </span><Button size="sm" variant="outline-info" onClick={() => component.setState({activeKey:"setup"})}>create a new account.</Button></Form.Text> : <Welcome/>}
+                        </Col>
+                      </Form.Row>
+                      <Form.Group as={Row} controlId="username">
+                        <Col sm="4">
+                          <Form.Label>Login name:</Form.Label>
+                        </Col>
+                        <Col sm="4">
+                          <Form.Control
+                            placeholder="Username"
+                            aria-describedby="usernameDescription"
+                            aria-label="Username"
+                            onChange={e => component.state.setusername(e.target.value)}
+                            value={component.state.username}
+                            autoFocus
+                            required/>
+                          <Form.Control.Feedback type="invalid">Please enter a valid username.</Form.Control.Feedback>
+                        </Col>
+                      </Form.Group>
+                      {
+                        component.state.user.couchdbUrl ?
                           <Form.Group as={Row} controlId="password">
                             <Form.Label column sm="4">Password:</Form.Label>
-                            <Col sm="8">
-                              <Form.Control type="password" placeholder="Password" aria-label="Password" onBlur={e => component.state.setpassword(e.target.value)}/>
+                            <Col sm="4">
+                              <Form.Control
+                                type="password"
+                                placeholder="Password"
+                                aria-label="Password"
+                                onChange={e => component.setState({password: e.target.value, wrongCredentials: false, loginInfoValidated: false})}
+                                required
+                                />
+                              <Form.Control.Feedback type="invalid">Please enter the password belonging to the username.</Form.Control.Feedback>
+                              {
+                                component.state.wrongCredentials ? <Form.Text className="text-danger">This password is not correct.</Form.Text> : null
+                              }
                             </Col>
-                          </Form.Group>
-                          <Button variant="primary" onClick={() => component.state.authenticate()}>Login</Button>
-                          <Form.Group>
-                            <Col sm="6">
-                              <Form.Label>Check to reset account (removes all data!):</Form.Label>
-                            </Col>
-                            <Col sm="6">
-                            <InputGroup.Checkbox
-                              aria-label="Check to reset account"
-                              onChange={e => component.setState( {resetAccount: e.target.value == "on" } ) }/>
-                            </Col>
-                          </Form.Group>
-                          <Form.Group>
-                            <br/>
-                            {(component.state.authenticationFeedback) &&
-                              (<Card bg="danger" text="white" style={{ width: '18rem' }}>
-                                <Card.Body>
-                                  <Card.Title>{component.state.authenticationFeedback}</Card.Title>
-                                </Card.Body>
-                              </Card>)}
-                          </Form.Group>
-                        </Form>
-                      </Row>
-                    </Container>
+                          </Form.Group> : null
+                      }
+                      <Form.Group as={Row}>
+                        <Col sm="4">
+                          <Form.Label>Check to reset account (removes all data!):</Form.Label>
+                        </Col>
+                        <Col sm="1">
+                        <InputGroup.Checkbox
+                          aria-label="Check to reset account"
+                          onChange={e => component.setState( {resetAccount: e.target.value == "on" } ) }/>
+                        </Col>
+                      </Form.Group>
+                      <Button type="submit">Log in</Button>
+                    </Form>
                   </Tab>
                   <Tab eventKey="setup" title="Create account">
                     <Form noValidate validated={component.state.newAccountInfoValidated} onSubmit={handleSubmit} className="m-3">
