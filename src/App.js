@@ -101,6 +101,7 @@ export default class App extends Component
       , port: couchdbPort
       , backend: undefined
       , wrongCredentials: false
+      , unknownUserName: false
       , resetAccount: false
       , couchdbMissing: false
       , checkingOnCouchdb: false
@@ -116,8 +117,8 @@ export default class App extends Component
       , setusername: function(usr)
         {
           getUser( usr )
-            .then( user => component.setState({username: usr, wrongCredentials: false, user, loginInfoValidated: false}))
-            .catch( () => component.setState({username: usr, wrongCredentials: false, loginInfoValidated: false}));
+            .then( user => component.setState({username: usr, wrongCredentials: false, unknownUserName: false, user, loginInfoValidated: false}))
+            .catch( () => component.setState({username: usr, wrongCredentials: false, unknownUserName: false, loginInfoValidated: false}));
         }};
     this.usesSharedWorker = typeof SharedWorker != "undefined";
     if (this.usesSharedWorker)
@@ -307,31 +308,33 @@ export default class App extends Component
         else
         {
           authenticateUser(component.state.username, component.state.password).then(
-            function(iscorrect)
+            function(result)
             {
-              if (iscorrect)
-              {
-                getUser( component.state.username ).then(
-                  function(user)
-                  {
-                    SharedWorkerChannelPromise.then( function (proxy)
-                      {
-                        proxy.runPDR(
-                          component.state.username,
-                          component.state.password,
-                          user,
-                          PerspectivesGlobals.publicRepository
-                          // TODO. Handle errors in a better way.
-                        )
-                        .then(() => component.setState({loggedIn: true, couchdbUrl: user.couchdbUrl}))
-                        .catch(e => alert( e ));
-                      });
-                  }
-                );
-              }
-              else
-              {
-                component.setState({wrongCredentials: true});
+              switch (result) {
+                case "ok":
+                  getUser( component.state.username ).then(
+                    function(user)
+                    {
+                      SharedWorkerChannelPromise.then( function (proxy)
+                        {
+                          proxy.runPDR(
+                            component.state.username,
+                            component.state.password,
+                            user,
+                            PerspectivesGlobals.publicRepository
+                            // TODO. Handle errors in a better way.
+                          )
+                          .then(() => component.setState({loggedIn: true, couchdbUrl: user.couchdbUrl}))
+                          .catch(e => alert( e ));
+                        });
+                    });
+                  break;
+                case "wrongpassword":
+                  component.setState({wrongCredentials: true});
+                  break;
+                case "unknownuser":
+                  component.setState({unknownUserName: true});
+                  break;
               }
             });
         }
@@ -412,6 +415,9 @@ export default class App extends Component
                             autoFocus
                             required/>
                           <Form.Control.Feedback type="invalid">Please enter a valid username.</Form.Control.Feedback>
+                          {
+                            component.state.unknownUserName ? <Form.Text className="text-danger">No user is registered with this name.</Form.Text> : null
+                          }
                         </Col>
                       </Form.Group>
                       {
@@ -423,7 +429,7 @@ export default class App extends Component
                                 type="password"
                                 placeholder="Password"
                                 aria-label="Password"
-                                onChange={e => component.setState({password: e.target.value, wrongCredentials: false, loginInfoValidated: false})}
+                                onChange={e => component.setState({password: e.target.value, wrongCredentials: false, unknownUserName: false, loginInfoValidated: false})}
                                 required
                                 />
                               <Form.Control.Feedback type="invalid">Please enter the password belonging to the username.</Form.Control.Feedback>

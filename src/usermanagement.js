@@ -77,12 +77,15 @@ export function getUser( userName )
 ///////////////////////////////////////////////////////////////////////////////
 //// AUTHENTICATEUSER
 ///////////////////////////////////////////////////////////////////////////////
-// Returns a promise for a Boolean. False if the user does not exist, or if the password is incorrect.
+// Returns a promise with one of three values:
+//  - "ok" when username and password belong to each other.
+//  - "wrongpassword" when the password is not equal to that stored with the user.
+//  - "unknownuser" when no user could be found.
 export function authenticateUser( userName, pwd )
 {
   return localUsers.get( userName )
-    .then( ({password}) => pwd === password)
-    .catch( () => false);
+    .then( ({password}) => pwd === password ? "ok" : "wrongpassword")
+    .catch( () => "unknownuser");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
