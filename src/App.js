@@ -78,9 +78,6 @@ import Trash from "./trash.js";
 
 import CardClipBoard from "./cardclipboard.js";
 
-// TODO. ZODRA Perspectives.Persistence.API alles heeft overgenomen, kan dit eruit.
-import {couchdbHost, couchdbPort} from "./couchdbconfig.js";
-
 import {usersHaveBeenConfigured, addUser, authenticateUser, getUser, detectCouchdb} from "./usermanagement.js";
 
 export default class App extends Component
@@ -97,8 +94,8 @@ export default class App extends Component
       , username: ""
       , password: ""
       , user: {}
-      , host: couchdbHost
-      , port: couchdbPort
+      , host: undefined //couchdbHost
+      , port: undefined // couchdbPort
       , backend: undefined
       , wrongCredentials: false
       , unknownUserName: false
@@ -287,33 +284,37 @@ export default class App extends Component
       component.setState({loginInfoValidated: true});
       if (form.checkValidity() )
       {
-        if (component.state.resetAccount)
-        {
-          // TODO!! Als Perspectives.Persistence.API alles heeft overgenomen, kan de signatuur van deze functie
-          // gelijk gemaakt worden aan runPDR.
-          SharedWorkerChannelPromise.then( function (proxy)
-            {
-              // zelfde parameters en argumenten als runPDR
-              proxy.resetAccount(component.state.username, component.state.password, component.state.host, component.state.port, PerspectivesGlobals.publicRepository).then(
-                function(success) // eslint-disable-line
-                {
-                  if (!success)
+        authenticateUser(component.state.username, component.state.password).then(
+          function(result)
+          {
+            switch (result) {
+              case "ok":
+                getUser( component.state.username ).then(
+                  function(user)
                   {
-                    alert("Unfortunately your account could not be reset and may be in an undefined state. You can reset by hand by opening Fauxton and removing all three databases whose name starts with your username.");
-                  }
-                  window.location.reload();
-                });
-              });
-        }
-        else
-        {
-          authenticateUser(component.state.username, component.state.password).then(
-            function(result)
-            {
-              switch (result) {
-                case "ok":
-                  getUser( component.state.username ).then(
-                    function(user)
+                    if (component.state.resetAccount)
+                    {
+                      SharedWorkerChannelPromise.then( function (proxy)
+                        {
+                          // zelfde parameters en argumenten als runPDR
+                          proxy.resetAccount(
+                            component.state.username,
+                            component.state.password,
+                            user,
+                            PerspectivesGlobals.publicRepository
+                            )
+                            .then(
+                              function(success) // eslint-disable-line
+                              {
+                                if (!success)
+                                {
+                                  alert("Unfortunately your account could not be reset and may be in an undefined state. You can reset by hand by opening Fauxton and removing all three databases whose name starts with your username.");
+                                }
+                                window.location.reload();
+                              });
+                          });
+                    }
+                    else
                     {
                       SharedWorkerChannelPromise.then( function (proxy)
                         {
@@ -324,20 +325,25 @@ export default class App extends Component
                             PerspectivesGlobals.publicRepository
                             // TODO. Handle errors in a better way.
                           )
-                          .then(() => component.setState({loggedIn: true, couchdbUrl: user.couchdbUrl}))
+                          .then(() => component.setState(
+                            { loggedIn: true
+                            , couchdbUrl: user.couchdbUrl
+                            , host: getHost( user.couchdbUrl )
+                            , port: getPort( user.couchdbUrl )
+                            }))
                           .catch(e => alert( e ));
                         });
-                    });
-                  break;
-                case "wrongpassword":
-                  component.setState({wrongCredentials: true});
-                  break;
-                case "unknownuser":
-                  component.setState({unknownUserName: true});
-                  break;
-              }
-            });
-        }
+                    }
+                  });
+                break;
+              case "wrongpassword":
+                component.setState({wrongCredentials: true});
+                break;
+              case "unknownuser":
+                component.setState({unknownUserName: true});
+                break;
+            }
+          });
       }
     }
     if (component.state.loggedIn)
@@ -809,4 +815,21 @@ function ConnectedToAMQP()
             }
             </PSView.Consumer>
           </ViewOnExternalRole>;
+}
+
+function getHost(url)
+{
+  if (url)
+  {
+    return url.match(/(^http.*):/)[1];
+  }
+}
+
+// Returns a string of four integers or undefined.
+function getPort(url)
+{
+  if (url)
+  {
+    return url.match(/^http.*:(\d{4})/)[1];
+  }
 }
