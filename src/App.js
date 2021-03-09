@@ -299,7 +299,6 @@ export default class App extends Component
                           // zelfde parameters en argumenten als runPDR
                           proxy.resetAccount(
                             component.state.username,
-                            component.state.password,
                             user,
                             PerspectivesGlobals.publicRepository
                             )
@@ -320,7 +319,6 @@ export default class App extends Component
                         {
                           proxy.runPDR(
                             component.state.username,
-                            component.state.password,
                             user,
                             PerspectivesGlobals.publicRepository
                             // TODO. Handle errors in a better way.
