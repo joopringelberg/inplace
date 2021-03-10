@@ -46,7 +46,6 @@ export function usersHaveBeenConfigured()
 //   "rev": "1-A6157A5EA545C99B00FF904EEF05FD9F"
 // }
 // couchdbUrl may be undefined.
-// TODO. Overschrijf als aanwezig.
 export function addUser( userName, password, couchdbUrl )
 {
   // For now, we just copy the userName into systemIdentifier.

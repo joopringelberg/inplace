@@ -237,13 +237,15 @@ export default class App extends Component
   render ()
   {
     const component = this;
-    function handleSubmit(event)
+    function createAccount(event)
     {
       const form = event.currentTarget;
       let couchdbUrl;
       event.preventDefault();
       event.stopPropagation();
-      if (form.checkValidity() ) {
+      if (form.checkValidity() )
+      {
+        // Compute couchdbUrl, if applicable.
         if (component.state.host && component.state.port)
         {
           couchdbUrl = component.state.host + ":" + component.state.port + "/";
@@ -254,13 +256,15 @@ export default class App extends Component
         }
         if (couchdbUrl)
         {
+          // Check if Couchdb is up and running.
           component.setState({checkingOnCouchdb: true});
+
+          // The promise is always fulfilled.
           detectCouchdb(couchdbUrl).then( function(available)
             {
               if (available)
               {
                 component.setState({couchdbMissing: false, checkingOnCouchdb: false});
-                addUser( component.state.username, component.state.password, couchdbUrl );
               }
               else
               {
@@ -268,10 +272,32 @@ export default class App extends Component
               }
             });
         }
-        else
-        {
-          addUser( component.state.username, component.state.password, couchdbUrl );
-        }
+        addUser( component.state.username, component.state.password, couchdbUrl )
+          .then(() =>
+            // Now create the user in the PDR.
+            getUser( component.state.username ).then( user =>
+              SharedWorkerChannelPromise.then( function (proxy)
+                {
+                  proxy.createUser(
+                    component.state.username,
+                    user,
+                    PerspectivesGlobals.publicRepository
+                    // TODO. Handle errors in a better way.
+                  ).then(() =>
+                    proxy.runPDR(
+                      component.state.username,
+                      user,
+                      PerspectivesGlobals.publicRepository
+                      // TODO. Handle errors in a better way.
+                    )
+                  ).then(() => component.setState(
+                    { loggedIn: true
+                    , couchdbUrl: user.couchdbUrl
+                    , host: getHost( user.couchdbUrl )
+                    , port: getPort( user.couchdbUrl )
+                    }))
+                  .catch(e => alert( e ));
+                })));
       }
       component.setState({newAccountInfoValidated: true});
     }
@@ -457,7 +483,7 @@ export default class App extends Component
                     </Form>
                   </Tab>
                   <Tab eventKey="setup" title="Create account">
-                    <Form noValidate validated={component.state.newAccountInfoValidated} onSubmit={handleSubmit} className="m-3">
+                    <Form noValidate validated={component.state.newAccountInfoValidated} onSubmit={createAccount} className="m-3">
                       <Form.Row>
                         <header className="App-header">
                           <h3>Where do you want to store your data?</h3>
@@ -678,6 +704,7 @@ function RequestedContext(contextId, indexedContextNameMapping)
   }
 }
 
+// eslint-disable-next-line react/prop-types
 function OpenRoleForm( {roleid, viewname, cardprop} )
 {
   return  <ContextOfRole rolinstance={roleid}>
