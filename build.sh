@@ -13,3 +13,10 @@ cp ./node_modules/perspectives-sharedworker/dist/perspectives-sharedworker.js ./
 cp ./node_modules/perspectives-serviceworker/dist/perspectives-serviceworker.js ./docs/perspectives-serviceworker.js
 
 webpack --env $1
+
+if [ $1 == "https://inplace.works:5985/repository/" ] ; then
+    echo "Will copy the contents of ./docs to inplace.works:"
+    scp -r docs/* joop@inplace.works:/var/www/inplace.works
+else
+    echo "Development build"
+fi
