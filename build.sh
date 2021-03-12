@@ -5,18 +5,25 @@
 
 # Pass this script an argument that represents the url of the default repository to be used by Inplace.
 
-cp ./src/index.html ./docs/index.html
-cp ./src/file.png ./docs/file.png
+if [ $1 == "https://inplace.works:5985/repository/" ] ; then
+    OUTPUT="production"
+else
+    OUTPUT="development"
+fi
 
-cp ./node_modules/perspectives-pageworker/dist/perspectives-pageworker.js ./docs/perspectives-pageworker.js
-cp ./node_modules/perspectives-sharedworker/dist/perspectives-sharedworker.js ./docs/perspectives-sharedworker.js
-cp ./node_modules/perspectives-serviceworker/dist/perspectives-serviceworker.js ./docs/perspectives-serviceworker.js
+
+cp ./src/index.html ./$OUTPUT/index.html
+cp ./src/file.png ./$OUTPUT/file.png
+
+cp ./node_modules/perspectives-pageworker/dist/perspectives-pageworker.js ./$OUTPUT/perspectives-pageworker.js
+cp ./node_modules/perspectives-sharedworker/dist/perspectives-sharedworker.js ./$OUTPUT/perspectives-sharedworker.js
+cp ./node_modules/perspectives-serviceworker/dist/perspectives-serviceworker.js ./$OUTPUT/perspectives-serviceworker.js
 
 webpack --env $1
 
 if [ $1 == "https://inplace.works:5985/repository/" ] ; then
-    echo "Will copy the contents of ./docs to inplace.works:"
-    scp -r docs/* joop@inplace.works:/var/www/inplace.works
+    echo "Production build."
+    scp -r ./production/* joop@inplace.works:/var/www/inplace.works
 else
-    echo "Development build"
+    echo "Development build."
 fi

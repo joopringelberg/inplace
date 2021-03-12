@@ -6,13 +6,14 @@ const webpack = require('webpack'); //to access built-in plugins
 
 module.exports = function(env)
   {
+    const outputDir = env == "https://inplace.works:5985/repository/" ? "production" : "development";
     return {
       entry:
         { "index": path.join(__dirname, "src/index.js" )
       },
       output: {
           filename: '[name].js',
-          path: path.resolve(__dirname, 'docs')
+          path: path.resolve(__dirname, outputDir)
         },
       watch: false,
       mode: "development",

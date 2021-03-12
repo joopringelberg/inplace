@@ -7,8 +7,8 @@
   "scripts": {
     "watch": "webpack --watch",
     "symlinks": "./createPerspectivesLinks.sh",
-    "build": "./build.sh https://localhost:6984/repository/",
-    "publish": "./build.sh https://inplace.works:5985/repository/"
+    "development": "./build.sh https://localhost:6984/repository/",
+    "production": "./build.sh https://inplace.works:5985/repository/"
   },
   "author": "Joop Ringelberg <joop.ringelberg@gmail.com>",
   "repository": {

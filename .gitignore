@@ -7,4 +7,5 @@ dist
 temp
 test*.json
 release.sh
-/docs
+/development
+/production
