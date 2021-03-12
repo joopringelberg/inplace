@@ -39,7 +39,6 @@ import {
     MySystem,
     RoleInstanceIterator,
     FileDropZone,
-    ViewOnExternalRole,
     ContextInstance,
     ExternalRole,
     ContextOfRole,
@@ -64,7 +63,7 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Tabs from 'react-bootstrap/Tabs';
 
-import { DesktopDownloadIcon, BroadcastIcon } from '@primer/octicons-react';
+import { DesktopDownloadIcon} from '@primer/octicons-react';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -78,7 +77,9 @@ import Trash from "./trash.js";
 
 import CardClipBoard from "./cardclipboard.js";
 
-import {usersHaveBeenConfigured, addUser, authenticateUser, getUser, detectCouchdb} from "./usermanagement.js";
+import ConnectedToAMQP from "./ConnectedToAMQP.js";
+
+import {usersHaveBeenConfigured, addUser, authenticateUser, getUser, detectCouchdb, allUsers, removeUser} from "./usermanagement.js";
 
 export default class App extends Component
 {
@@ -623,6 +624,16 @@ export default class App extends Component
                       <Button type="submit">Create account</Button>
                     </Form>
                   </Tab>
+                  <Tab eventKey="remove" title="Remove accounts">
+                    <Form noValidate className="m-3">
+                      <Form.Row>
+                        <header className="App-header">
+                          <h3>Remove selected account</h3>
+                        </header>
+                      </Form.Row>
+                      <AllUsers/>
+                    </Form>
+                  </Tab>
                 </Tabs>
               </Container>;
     }
@@ -830,18 +841,6 @@ function AppListTabContainer (props)
 
 AppListTabContainer.propTypes = { "rol": PropTypes.string.isRequired };
 
-
-function ConnectedToAMQP()
-{
-  return  <ViewOnExternalRole viewname="allProperties">
-            <PSView.Consumer>
-            {
-              roleinstance => roleinstance.propval("ConnectedToAMQPBroker")[0] == "true" ? <BroadcastIcon alt="Connected" aria-label="InPlace can send and receive messages" size='medium'/> : <div/>
-            }
-            </PSView.Consumer>
-          </ViewOnExternalRole>;
-}
-
 function getHost(url)
 {
   if (url)
@@ -856,5 +855,63 @@ function getPort(url)
   if (url)
   {
     return url.match(/^http.*:(\d{4})/)[1];
+  }
+}
+
+class AllUsers extends React.Component
+{
+  componentDidUpdate(prevProps, prevState)
+  {
+    const component = this;
+    if (prevState)
+    {
+      if (component.state && (prevState.users.length != component.state.users.length))
+      {
+        allUsers().then( users => component.setState({users: users}));
+      }
+    }
+    else {
+      allUsers().then( users => component.setState({users: users}));
+    }
+  }
+
+  removeUser()
+  {
+    const component = this;
+    SharedWorkerChannelPromise
+      .then( proxy => removeUser( component.state.selectedUser)
+        .then( user => proxy.removeAccount(user.userName, user, PerspectivesGlobals.publicRepository))
+        .then( allUsers )
+        .then( users => component.setState({users: users})));
+  }
+
+  render()
+  {
+    const component = this;
+    if (component.state && component.state.users)
+    {
+      return  <Form.Group as={Row} controlId="allusers">
+                <Col sm="4">
+                  <Form.Label>Select a user account</Form.Label>
+                </Col>
+                <Col sm="8">
+                  <Form.Control
+                    as="select"
+                    multiple
+                    // value={component.state.selectedUser}
+                    onChange={ e => component.setState({selectedUser: e.target.value})}
+                    >
+                  {
+                    component.state.users.map( user => <option key={user}>{user}</option>)
+                  }
+                  </Form.Control>
+                  <Button className="mt-3" onClick={ () => component.removeUser() }>Remove this account</Button>
+                </Col>
+              </Form.Group>;
+    }
+    else
+    {
+      return null;
+    }
   }
 }
