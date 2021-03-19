@@ -1,19 +1,16 @@
 const path = require("path");
 const webpack = require('webpack'); //to access built-in plugins
 
-// TODO. This is working in "webpack-cli": "^3.3.12". Env turns out to be a string.
-// Upgrade to a more recent version to have object env.
-
 module.exports = function(env)
   {
-    const outputDir = env == "https://inplace.works:5985/repository/" ? "production" : "development";
+    const {repo, target} = env;
     return {
       entry:
         { "index": path.join(__dirname, "src/index.js" )
       },
       output: {
           filename: '[name].js',
-          path: path.resolve(__dirname, outputDir)
+          path: path.resolve(__dirname, target)
         },
       watch: false,
       mode: "development",
@@ -64,7 +61,7 @@ module.exports = function(env)
         new webpack.DefinePlugin(
           {
             //eslint-disable-next-line no-undef
-            REPOSITORYURL: JSON.stringify( env )
+            REPOSITORYURL: JSON.stringify( repo )
           }
         )
       ],

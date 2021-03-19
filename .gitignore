@@ -9,3 +9,4 @@ test*.json
 release.sh
 /development
 /production
+/test

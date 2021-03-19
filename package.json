@@ -7,8 +7,9 @@
   "scripts": {
     "watch": "webpack --watch",
     "symlinks": "./createPerspectivesLinks.sh",
-    "development": "./build.sh https://localhost:6984/repository/",
-    "production": "./build.sh https://inplace.works:5985/repository/"
+    "builddevelopment": "./build.sh -r https://localhost:6984/repository/ -t development",
+    "buildproduction": "./build.sh -r https://inplace.works:5985/repository/ -t production",
+    "buildtest": "./build.sh -r https://localhost:6984/testrepository/ -t test"
   },
   "author": "Joop Ringelberg <joop.ringelberg@gmail.com>",
   "repository": {
@@ -49,7 +50,7 @@
     "html-webpack-plugin": "^3.2.0",
     "ignore-loader": "^0.1.2",
     "style-loader": "^0.23.1",
-    "webpack": "^4.32.2",
-    "webpack-cli": "^3.3.12"
+    "webpack": "^5.26.3",
+    "webpack-cli": "^4.5.0"
   }
 }
