@@ -1,6 +1,6 @@
 {
   "name": "InPlace",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "A client for the browser.",
   "private": true,
   "homepage": "https://inplace.one",
@@ -9,7 +9,8 @@
     "symlinks": "./createPerspectivesLinks.sh",
     "builddevelopment": "./build.sh -r https://localhost:6984/repository/ -t development",
     "buildproduction": "./build.sh -r https://inplace.works:5985/repository/ -t production",
-    "buildtest": "./build.sh -r https://localhost:6984/testrepository/ -t test"
+    "buildtest": "./build.sh -r https://localhost:6984/testrepository/ -t test",
+    "buildremotetest": "./build.sh -r https://inplace.works:5985/testrepository/ -t remotetest"
   },
   "author": "Joop Ringelberg <joop.ringelberg@gmail.com>",
   "repository": {
@@ -24,11 +25,11 @@
     "@babel/polyfill": "^7.12.1",
     "@primer/octicons-react": "^11.0.0",
     "bootstrap": "^4.3.1",
-    "perspectives-core": "git+https://github.com/joopringelberg/perspectives-core.git#v0.11.0",
-    "perspectives-pageworker": "git+https://github.com/joopringelberg/perspectives-pageworker1.git#v0.2.0",
-    "perspectives-sharedworker": "git+https://github.com/joopringelberg/perspectives-sharedworker.git#v0.2.0",
-    "perspectives-proxy": "git+https://github.com/joopringelberg/perspectives-proxy.git#v1.9.0",
-    "perspectives-react": "https://github.com/joopringelberg/perspectives-react.git#v0.11.0",
+    "perspectives-core": "git+https://github.com/joopringelberg/perspectives-core.git#v0.12.0",
+    "perspectives-pageworker": "git+https://github.com/joopringelberg/perspectives-pageworker1.git#v0.3.0",
+    "perspectives-sharedworker": "git+https://github.com/joopringelberg/perspectives-sharedworker.git#v0.3.0",
+    "perspectives-proxy": "git+https://github.com/joopringelberg/perspectives-proxy.git#v1.10.0",
+    "perspectives-react": "https://github.com/joopringelberg/perspectives-react.git#v0.12.0",
     "pouchdb-browser": "^7.2.2",
     "prop-types": "^15.7.2",
     "react": "^17.0.1",
