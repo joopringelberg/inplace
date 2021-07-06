@@ -44,6 +44,7 @@ import {
     ContextOfRole,
     RoleInstance,
     RoleFormInView,
+    PerspectivesContainer,
     isQualifiedName,
     isExternalRole,
     deconstructContext,
@@ -698,7 +699,13 @@ function RequestedContext(contextId, indexedContextNameMapping)
     return  <ContextInstance contextinstance={contextId}>
             <ExternalRole>
               <PSRol.Consumer>
-                { psrol => <Screen rolinstance={psrol.rolinstance}/> }
+                { function (psrol)
+                  {
+                    history.pushState({ selectedContext: psrol.rolinstance }, "");
+                    // console.log("Pushing context state " + psrol.rolinstance);
+                    return <PerspectivesContainer><Screen rolinstance={psrol.rolinstance}/></PerspectivesContainer>;
+                  }
+                }
               </PSRol.Consumer>
             </ExternalRole>
           </ContextInstance>;
@@ -708,7 +715,13 @@ function RequestedContext(contextId, indexedContextNameMapping)
     return  <ContextInstance contextinstance={indexedContextNameMapping[ Object.keys( indexedContextNameMapping )[0] ]}>
             <ExternalRole>
               <PSRol.Consumer>
-                { psrol => <Screen rolinstance={psrol.rolinstance}/> }
+                { function (psrol)
+                  {
+                    history.pushState({ selectedContext: psrol.rolinstance }, "");
+                    // console.log("Pushing context state " + psrol.rolinstance);
+                    return <PerspectivesContainer><Screen rolinstance={psrol.rolinstance}/></PerspectivesContainer>;
+                  }
+                }
               </PSRol.Consumer>
             </ExternalRole>
           </ContextInstance>;
@@ -760,7 +773,12 @@ function ApplicationSwitcher()
                     <PSRol.Consumer>{ roleinstance =>
                       <Tab.Pane eventKey={roleinstance.rolinstance}>
                         <PSRol.Consumer>
-                          { psrol => <Screen rolinstance={psrol.rolinstance}/> }
+                          { function (psrol)
+                            {
+                              history.pushState({ selectedContext: psrol.rolinstance }, "");
+                              // console.log("Pushing context state " + psrol.rolinstance);
+                              return <PerspectivesContainer><Screen rolinstance={psrol.rolinstance}/></PerspectivesContainer>;
+                            } }
                         </PSRol.Consumer>
                       </Tab.Pane>}
                     </PSRol.Consumer>
