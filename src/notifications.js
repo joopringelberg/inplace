@@ -1,7 +1,5 @@
 import React from "react";
 import "./App.css";
-import { PDRproxy } from 'perspectives-proxy';
-import PropTypes from "prop-types";
 
 import "./externals.js";
 
@@ -24,44 +22,6 @@ export default class NotificationTool extends PerspectivesComponent
     this.state =
       { showNotifications: (Notification.permission === "granted")
       };
-  }
-
-  componentDidMount ()
-  {
-    const component = this;
-    PDRproxy.then( pproxy =>
-      pproxy.getRol (component.props.systemContextInstance,
-        "model:System$PerspectivesSystem$AllNotifications",
-        function(notifications)
-        {
-          const oldNotifications = component.notifications;
-          let newNotifications;
-          if ( oldNotifications.length === 0 && notifications.length > 1 )
-          {
-            newNotifications = [];
-          }
-          else
-          {
-            newNotifications = notifications.filter(x => !oldNotifications.includes(x));
-          }
-          component.notifications = notifications;
-          if (component.state.showNotifications)
-          {
-            newNotifications.forEach( function(notification)
-              {
-                pproxy.getProperty(
-                  notification,
-                  "model:System$ContextWithNotification$Notifications$Message",
-                  "model:System$ContextWithNotification$Notifications",
-                  function( messages )
-                  {
-                    // A minimal message.
-                    new Notification( messages[0] );
-                  }
-                );
-              });
-            }
-        }) );
   }
 
   handleKeyDown(e)
@@ -158,7 +118,3 @@ export default class NotificationTool extends PerspectivesComponent
               </OverlayTrigger>;
   }
 }
-
-NotificationTool.propTypes =
-  { systemContextInstance: PropTypes.string.isRequired
-  };

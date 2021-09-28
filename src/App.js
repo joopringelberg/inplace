@@ -45,12 +45,10 @@ import {
     RoleInstance,
     RoleFormInView,
     PerspectivesContainer,
-    RoleTable,
     isQualifiedName,
     isExternalRole,
     deconstructContext,
     externalRole,
-    addRemoveRoleFromContext
   } from "perspectives-react";
 
 import Container from 'react-bootstrap/Container';
@@ -395,7 +393,7 @@ export default class App extends Component
                     <Navbar.Brand tabIndex="-1" href="#home">InPlace</Navbar.Brand>
                     <Nav>
                       <CardClipBoard systemExternalRole={externalRole(mysystem.contextinstance)}/>
-                      <NotificationsTool systemContextInstance={ mysystem.contextinstance }/>
+                      <NotificationsTool/>
                       <OpenRoleFormTool eventDispatcher={component.eventDispatcher} systemExternalRole={externalRole(mysystem.contextinstance)}/>
                       <UnbindTool systemExternalRole={externalRole(mysystem.contextinstance)}/>
                       <FileDropZone
@@ -413,7 +411,7 @@ export default class App extends Component
                   </Navbar>
                   {
                     component.state.openroleform.roleid ? OpenRoleForm( component.state.openroleform ) :
-                      component.state.hasContext ? RequestedContext(component.state.contextId, component.state.indexedContextNameMapping) : ApplicationSwitcher()
+                      component.state.hasContext ? RequestedContext(component.state.contextId, component.state.indexedContextNameMapping, mysystem.contextinstance) : ApplicationSwitcher(mysystem.contextinstance)
                   }
                 </div>
               </Container>
@@ -680,7 +678,7 @@ export default class App extends Component
 }
 
 // indexedContextNameMapping = Object String, holding at least one key-value pair.
-function RequestedContext(contextId, indexedContextNameMapping)
+function RequestedContext(contextId, indexedContextNameMapping, mySystem)
 {
   if ( !contextId && Object.keys( indexedContextNameMapping ).length > 1 )
   {
@@ -708,7 +706,7 @@ function RequestedContext(contextId, indexedContextNameMapping)
                   {
                     history.pushState({ selectedContext: psrol.rolinstance }, "");
                     // console.log("Pushing context state " + psrol.rolinstance);
-                    return <PerspectivesContainer>
+                    return <PerspectivesContainer systemContextInstance={mySystem}>
                         <Screen rolinstance={psrol.rolinstance}/>
                       </PerspectivesContainer>;
                   }
@@ -726,7 +724,7 @@ function RequestedContext(contextId, indexedContextNameMapping)
                   {
                     history.pushState({ selectedContext: psrol.rolinstance }, "");
                     // console.log("Pushing context state " + psrol.rolinstance);
-                    return <PerspectivesContainer><Screen rolinstance={psrol.rolinstance}/></PerspectivesContainer>;
+                    return <PerspectivesContainer systemContextInstance={mySystem}><Screen rolinstance={psrol.rolinstance}/></PerspectivesContainer>;
                   }
                 }
               </PSRol.Consumer>
@@ -747,7 +745,7 @@ function OpenRoleForm( {roleid, viewname, cardprop} )
           </ContextOfRole>;
 }
 
-function ApplicationSwitcher()
+function ApplicationSwitcher(mySystem)
 {
   function handleClick(roleinstance, e)
   {
@@ -777,18 +775,14 @@ function ApplicationSwitcher()
               <Col lg={9}>
                 <Tab.Content>
                   <RoleInstanceIterator>
-                    <PSRol.Consumer>{ roleinstance =>
-                      <Tab.Pane eventKey={roleinstance.rolinstance}>
-                        <PSRol.Consumer>
-                          { function (psrol)
-                            {
-                              history.pushState({ selectedContext: psrol.rolinstance }, "");
-                              // console.log("Pushing context state " + psrol.rolinstance);
-                              return <PerspectivesContainer><Screen rolinstance={psrol.rolinstance}/></PerspectivesContainer>;
-                            } }
-                        </PSRol.Consumer>
-                      </Tab.Pane>}
-                    </PSRol.Consumer>
+                    <PSRol.Consumer>{ psrol =>
+                      {
+                        history.pushState({ selectedContext: psrol.rolinstance }, "");
+                        return  <Tab.Pane eventKey={psrol.rolinstance}>
+                                  <PerspectivesContainer systemContextInstance={mySystem}><Screen rolinstance={psrol.rolinstance}/></PerspectivesContainer>;
+                                </Tab.Pane>;
+                      }
+                    }</PSRol.Consumer>
                   </RoleInstanceIterator>
                 </Tab.Content>
               </Col>
