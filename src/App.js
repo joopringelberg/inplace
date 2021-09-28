@@ -45,10 +45,12 @@ import {
     RoleInstance,
     RoleFormInView,
     PerspectivesContainer,
+    RoleTable,
     isQualifiedName,
     isExternalRole,
     deconstructContext,
-    externalRole
+    externalRole,
+    addRemoveRoleFromContext
   } from "perspectives-react";
 
 import Container from 'react-bootstrap/Container';
@@ -73,6 +75,8 @@ import PerspectivesGlobals from "./perspectivesGlobals.js";
 import UnbindTool from "./unbindtool.js";
 
 import OpenRoleFormTool from "./openroleformtool.js";
+
+import NotificationsTool from "./notifications.js";
 
 import Trash from "./trash.js";
 
@@ -391,6 +395,7 @@ export default class App extends Component
                     <Navbar.Brand tabIndex="-1" href="#home">InPlace</Navbar.Brand>
                     <Nav>
                       <CardClipBoard systemExternalRole={externalRole(mysystem.contextinstance)}/>
+                      <NotificationsTool systemContextInstance={ mysystem.contextinstance }/>
                       <OpenRoleFormTool eventDispatcher={component.eventDispatcher} systemExternalRole={externalRole(mysystem.contextinstance)}/>
                       <UnbindTool systemExternalRole={externalRole(mysystem.contextinstance)}/>
                       <FileDropZone
@@ -703,7 +708,9 @@ function RequestedContext(contextId, indexedContextNameMapping)
                   {
                     history.pushState({ selectedContext: psrol.rolinstance }, "");
                     // console.log("Pushing context state " + psrol.rolinstance);
-                    return <PerspectivesContainer><Screen rolinstance={psrol.rolinstance}/></PerspectivesContainer>;
+                    return <PerspectivesContainer>
+                        <Screen rolinstance={psrol.rolinstance}/>
+                      </PerspectivesContainer>;
                   }
                 }
               </PSRol.Consumer>
