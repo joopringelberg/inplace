@@ -9,11 +9,11 @@ import
 
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
-import {BellIcon, BellSlashIcon} from '@primer/octicons-react';
+import {BellIcon, BellSlashIcon, FoldDownIcon, FoldUpIcon} from '@primer/octicons-react';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-export default class NotificationTool extends PerspectivesComponent
+export class AllowNotifications extends PerspectivesComponent
 {
   constructor(/*props*/)
   {
@@ -85,7 +85,7 @@ export default class NotificationTool extends PerspectivesComponent
   {
     const component = this;
     const renderTooltip = (props) => (
-    <Tooltip id="formmode-tooltip" {...props} show={
+    <Tooltip id="notificationstool-tooltip" {...props} show={
        // eslint-disable-next-line react/prop-types
       props.show.toString()}>
       Click to allow notifications, or select and press space.
@@ -102,17 +102,81 @@ export default class NotificationTool extends PerspectivesComponent
                     >
                     <div
                         ref={eventDiv}
-                        onDragOver={ev => ev.preventDefault()}
                         className="ml-3 mr-3"
-                        aria-describedby="formmode-tooltip"
+                        aria-describedby="notificationstool-tooltip"
                         tabIndex="0"
                         onKeyDown={ e => component.handleKeyDown(e) }
                         onClick={ () => component.allowNotifications()}
                     >
                     { component.state.showNotifications ?
-                        <BellIcon alt="NotificationTool" aria-label="Click to allow notifications, or select and press space." size="medium"/>
+                        <BellIcon alt="AllowNotifications" aria-label="Click to allow notifications, or select and press space." size="medium"/>
                         :
-                        <BellSlashIcon alt="NotificationTool" aria-label="Click to toggle notifications, or select and press space." size="medium"/>
+                        <BellSlashIcon alt="AllowNotifications" aria-label="Click to toggle notifications, or select and press space." size="medium"/>
+                    }
+                    </div>
+              </OverlayTrigger>;
+  }
+}
+
+export class ShowNotifications extends PerspectivesComponent
+{
+  constructor(/*props*/)
+  {
+    super();
+    this.state =
+      { showNotifications: false
+      };
+  }
+
+  handleKeyDown(e)
+  {
+    const component = this;
+    switch (e.keyCode){
+      case 32: // space
+        // Toggle notifications.
+        component.toggleShowPanel();
+        e.stopPropagation();
+        break;
+    }
+  }
+
+  toggleShowPanel()
+  {
+    const showpanel = !this.state.showNotifications;
+    this.setState({ showNotifications: showpanel });
+    this.props.propagate( showpanel );
+  }
+
+  render()
+  {
+    const component = this;
+    const renderTooltip = (props) => (
+    <Tooltip id="showNotifications-tooltip" {...props} show={
+       // eslint-disable-next-line react/prop-types
+      props.show.toString()}>
+      Click or select and press space to {this.state.showNotifications ? "hide" : "show"} the  Notifications panel.
+    </Tooltip> );
+
+    const eventDiv = React.createRef();
+
+
+    return  <OverlayTrigger
+                      placement="left"
+                      delay={{ show: 250, hide: 400 }}
+                      overlay={renderTooltip}
+                    >
+                    <div
+                        ref={eventDiv}
+                        className="ml-3 mr-3"
+                        aria-describedby="showNotifications-tooltip"
+                        tabIndex="0"
+                        onKeyDown={ e => component.handleKeyDown(e) }
+                        onClick={ () => component.toggleShowPanel()}
+                    >
+                    { component.state.showNotifications ?
+                        <FoldUpIcon alt="HideNotifications" aria-label="Click to show the notifications tool, or select and press space." size="medium"/>
+                        :
+                        <FoldDownIcon alt="ShowNotifications" aria-label="Click to hide notifications, or select and press space." size="medium"/>
                     }
                     </div>
               </OverlayTrigger>;

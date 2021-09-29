@@ -74,7 +74,7 @@ import UnbindTool from "./unbindtool.js";
 
 import OpenRoleFormTool from "./openroleformtool.js";
 
-import NotificationsTool from "./notifications.js";
+import {AllowNotifications, ShowNotifications} from "./notifications.js";
 
 import Trash from "./trash.js";
 
@@ -114,6 +114,7 @@ export default class App extends Component
       , openroleform: {}
       , formMode: false
       , activeKey: "login"
+      , showNotifications: false
 
       , setusername: function(usr)
         {
@@ -393,7 +394,8 @@ export default class App extends Component
                     <Navbar.Brand tabIndex="-1" href="#home">InPlace</Navbar.Brand>
                     <Nav>
                       <CardClipBoard systemExternalRole={externalRole(mysystem.contextinstance)}/>
-                      <NotificationsTool/>
+                      <ShowNotifications propagate={ value => component.setState({showNotifications: value})}/>
+                      <AllowNotifications/>
                       <OpenRoleFormTool eventDispatcher={component.eventDispatcher} systemExternalRole={externalRole(mysystem.contextinstance)}/>
                       <UnbindTool systemExternalRole={externalRole(mysystem.contextinstance)}/>
                       <FileDropZone
@@ -411,7 +413,7 @@ export default class App extends Component
                   </Navbar>
                   {
                     component.state.openroleform.roleid ? OpenRoleForm( component.state.openroleform ) :
-                      component.state.hasContext ? RequestedContext(component.state.contextId, component.state.indexedContextNameMapping, mysystem.contextinstance) : ApplicationSwitcher(mysystem.contextinstance)
+                      component.state.hasContext ? RequestedContext(component.state.contextId, component.state.indexedContextNameMapping, mysystem.contextinstance, component) : ApplicationSwitcher(mysystem.contextinstance, component)
                   }
                 </div>
               </Container>
@@ -678,7 +680,7 @@ export default class App extends Component
 }
 
 // indexedContextNameMapping = Object String, holding at least one key-value pair.
-function RequestedContext(contextId, indexedContextNameMapping, mySystem)
+function RequestedContext(contextId, indexedContextNameMapping, mySystem, component)
 {
   if ( !contextId && Object.keys( indexedContextNameMapping ).length > 1 )
   {
@@ -706,8 +708,8 @@ function RequestedContext(contextId, indexedContextNameMapping, mySystem)
                   {
                     history.pushState({ selectedContext: psrol.rolinstance }, "");
                     // console.log("Pushing context state " + psrol.rolinstance);
-                    return <PerspectivesContainer systemContextInstance={mySystem}>
-                        <Screen rolinstance={psrol.rolinstance}/>
+                    return <PerspectivesContainer systemcontextinstance={mySystem} shownotifications={component.state.showNotifications}>
+                        <Screen rolinstance={psrol.rolinstance} shownotifications={component.state.showNotifications}/>
                       </PerspectivesContainer>;
                   }
                 }
@@ -724,7 +726,9 @@ function RequestedContext(contextId, indexedContextNameMapping, mySystem)
                   {
                     history.pushState({ selectedContext: psrol.rolinstance }, "");
                     // console.log("Pushing context state " + psrol.rolinstance);
-                    return <PerspectivesContainer systemContextInstance={mySystem}><Screen rolinstance={psrol.rolinstance}/></PerspectivesContainer>;
+                    return <PerspectivesContainer systemcontextinstance={mySystem} shownotifications={component.state.showNotifications}>
+                      <Screen rolinstance={psrol.rolinstance}  shownotifications={component.state.showNotifications}/>
+                    </PerspectivesContainer>;
                   }
                 }
               </PSRol.Consumer>
@@ -745,7 +749,7 @@ function OpenRoleForm( {roleid, viewname, cardprop} )
           </ContextOfRole>;
 }
 
-function ApplicationSwitcher(mySystem)
+function ApplicationSwitcher(mySystem, component)
 {
   function handleClick(roleinstance, e)
   {
@@ -779,7 +783,9 @@ function ApplicationSwitcher(mySystem)
                       {
                         history.pushState({ selectedContext: psrol.rolinstance }, "");
                         return  <Tab.Pane eventKey={psrol.rolinstance}>
-                                  <PerspectivesContainer systemContextInstance={mySystem}><Screen rolinstance={psrol.rolinstance}/></PerspectivesContainer>;
+                                  <PerspectivesContainer systemcontextinstance={mySystem} shownotifications={component.state.showNotifications}>
+                                    <Screen rolinstance={psrol.rolinstance} shownotifications={component.state.showNotifications}/>
+                                  </PerspectivesContainer>;
                                 </Tab.Pane>;
                       }
                     }</PSRol.Consumer>

@@ -25,4 +25,8 @@ This client imports:
 * `perspectives-proxy`
 
 ### Test-using this program
-It should be noted that this program is in an alpha-stage. You will have to install Couchdb (version 3.1.0)! To run it, type in your browser: `https://github.com/joopringelberg/inplace`
+It should be noted that this program is in an alpha-stage!
+
+To run InPlace, you need install nothing. Just open in your browser: `https://inplace.works`
+
+However, since Perspectives supports you with an information infrastructure in co-operation with other people, you will need a place to store (your) data. There is no central repository! Currently you can choose from the IndexedDB database in your browser (recommended) or an installation of Couchdb on a computer you can access from the computer you use Perspectives on (it can be the same computer). This requires some installation work, however, involving both [Couchdb](https://couchdb.apache.org/) and [Apache](https://httpd.apache.org/). See the document [Configuring Couchdb for Inplace 8](Configuring%20Couchdb%20for%20Inplace%208.pdf).
