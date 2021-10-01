@@ -34,11 +34,8 @@ import {
     AppContext,
     View,
     Screen,
-    RemoveRol,
-    importTransaction,
     MySystem,
     RoleInstanceIterator,
-    FileDropZone,
     ContextInstance,
     ExternalRole,
     ContextOfRole,
@@ -57,24 +54,11 @@ import Col from 'react-bootstrap/Col';
 import Card from 'react-bootstrap/Card';
 import Tab from 'react-bootstrap/Tab';
 import Nav from 'react-bootstrap/Nav';
-import Navbar from 'react-bootstrap/Navbar';
 import ListGroup from 'react-bootstrap/ListGroup';
-
-import { DesktopDownloadIcon} from '@primer/octicons-react';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import UnbindTool from "./unbindtool.js";
-
-import OpenRoleFormTool from "./openroleformtool.js";
-
-import {AllowNotifications, ShowNotifications} from "./notifications.js";
-
-import Trash from "./trash.js";
-
-import CardClipBoard from "./cardclipboard.js";
-
-import ConnectedToAMQP from "./ConnectedToAMQP.js";
+import NavigationBar from "./navigationbar.js";
 
 import AccountManagement from "./AccountManagement.js";
 
@@ -85,6 +69,9 @@ export default class App extends Component
     super(props);
     // This stub is replaced by a function constructed in the addOpenContextOrRoleForm behaviour
     // whenever the user starts dragging a role that supports that behaviour.
+    // Notice that we use indirection here. The value of eventDispatcher is a location that holds the actual eventDispatcher.
+    // We pass the location around and have its contents modified by a function that is passed down in the react tree.
+    // In this way we can change the eventDispatcher.
     this.eventDispatcher = {eventDispatcher: function(){}};
     this.state =
       { loggedIn:  false
@@ -93,11 +80,10 @@ export default class App extends Component
       , indexedContextNameMapping: undefined
       , contextId: undefined
       , openroleform: {}
-      , formMode: false
-      , showNotifications: false
       , couchdbUrl: undefined
-
-};
+      // Only `showNotifications` is likely to change after logging in or opening a new context or role screen.
+      , showNotifications: false
+      };
     this.usesSharedWorker = typeof SharedWorker != "undefined";
     if (this.usesSharedWorker)
     {
@@ -232,30 +218,22 @@ export default class App extends Component
               , couchdbUrl: component.state.couchdbUrl}}>
               <Container>
                 <div onKeyDown={event => component.handleKeyDown(event, externalRole(mysystem.contextinstance) )}>
-                  <Navbar bg={component.usesSharedWorker || !component.state.isFirstChannel ? "light" : "danger"} expand="lg" role="banner" aria-label="Main menu bar" className="justify-content-between">
-                    <Navbar.Brand tabIndex="-1" href="#home">InPlace</Navbar.Brand>
-                    <Nav>
-                      <CardClipBoard systemExternalRole={externalRole(mysystem.contextinstance)}/>
-                      <ShowNotifications propagate={ value => component.setState({showNotifications: value})}/>
-                      <AllowNotifications/>
-                      <OpenRoleFormTool eventDispatcher={component.eventDispatcher} systemExternalRole={externalRole(mysystem.contextinstance)}/>
-                      <UnbindTool systemExternalRole={externalRole(mysystem.contextinstance)}/>
-                      <FileDropZone
-                        tooltiptext="Drop an invitation file here or press enter/space"
-                        handlefile={ importTransaction }
-                        extension=".json"
-                        className="ml-3 mr-3">
-                        <DesktopDownloadIcon aria-label="Drop an invitation file here" size='medium'/>
-                      </FileDropZone>
-                      <RemoveRol>
-                        <Trash/>
-                      </RemoveRol>
-                      <ConnectedToAMQP/>
-                    </Nav>
-                  </Navbar>
+                  <NavigationBar
+                    systemexternalrole={externalRole(mysystem.contextinstance)}
+                    setshownotifications={value => component.setState({showNotifications: value})}
+                    isbasepage={component.usesSharedWorker || !component.state.isFirstChannel}
+                    eventdispatcher={component.eventDispatcher}
+                    />
                   {
                     component.state.openroleform.roleid ? OpenRoleForm( component.state.openroleform ) :
-                      component.state.hasContext ? RequestedContext(component.state.contextId, component.state.indexedContextNameMapping, mysystem.contextinstance, component) : ApplicationSwitcher(mysystem.contextinstance, component)
+                      component.state.hasContext ?
+                        RequestedContext(
+                          component.state.contextId,
+                          component.state.indexedContextNameMapping,
+                          mysystem.contextinstance,
+                          component)
+                          // TODO. Display hier het overzicht van models in use.
+                      : ApplicationSwitcher(mysystem.contextinstance, component)
                   }
                 </div>
               </Container>
