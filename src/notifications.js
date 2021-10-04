@@ -1,19 +1,21 @@
-import React from "react";
+import React, { Component } from "react";
+import PropTypes from "prop-types";
+
 import "./App.css";
 
 import "./externals.js";
 
-import
-  { PerspectivesComponent,
-  } from "perspectives-react";
+import { PDRproxy, FIREANDFORGET } from 'perspectives-proxy';
 
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import Tooltip from 'react-bootstrap/Tooltip';
+import {Row, Col, OverlayTrigger, Tooltip, Collapse} from "react-bootstrap";
+
 import {BellIcon, BellSlashIcon, FoldDownIcon, FoldUpIcon} from '@primer/octicons-react';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-export class AllowNotifications extends PerspectivesComponent
+import {PerspectivesComponent, RoleTable, addRemoveRoleFromContext} from "perspectives-react";
+
+export class AllowNotifications extends Component
 {
   constructor(/*props*/)
   {
@@ -53,6 +55,7 @@ export class AllowNotifications extends PerspectivesComponent
     // Let's check if the browser supports notifications
     if (!('Notification' in window))
     {
+      // eslint-disable-next-line no-console
       console.log("This browser does not support notifications.");
     }
     else
@@ -118,7 +121,7 @@ export class AllowNotifications extends PerspectivesComponent
   }
 }
 
-export class ShowNotifications extends PerspectivesComponent
+export class ShowNotifications extends Component
 {
   constructor(/*props*/)
   {
@@ -182,3 +185,116 @@ export class ShowNotifications extends PerspectivesComponent
               </OverlayTrigger>;
   }
 }
+
+ShowNotifications.propTypes =
+  { propagate: PropTypes.func.isRequired };
+
+// Displays the notifications of a context in a RoleTable.
+// Because of the RoleTable, must be used in the subtree of a
+// PSContext provider.
+export class NotificationsDisplayer extends PerspectivesComponent
+{
+  constructor(props)
+  {
+    super(props);
+    this.notifications = [];
+
+  }
+  componentDidMount()
+  {
+    const component = this;
+
+    PDRproxy.then( pproxy =>
+      pproxy.getRol (component.props.systemcontextinstance,
+        "model:System$PerspectivesSystem$AllNotifications",
+        function(notifications)
+        {
+          const oldNotifications = component.notifications;
+          let newNotifications;
+          if ( oldNotifications.length === 0 && notifications.length > 1 )
+          {
+            newNotifications = [];
+          }
+          else
+          {
+            newNotifications = notifications.filter(x => !oldNotifications.includes(x));
+          }
+          component.notifications = notifications;
+          if (component.props.shownotifications)
+          {
+            newNotifications.forEach( function(notification)
+              {
+                pproxy.getProperty(
+                  notification,
+                  "model:System$ContextWithNotification$Notifications$Message",
+                  "model:System$ContextWithNotification$Notifications",
+                  function( messages )
+                  {
+                    // A minimal message.
+                    const n = new Notification(
+                      messages[0],
+                      { data: {roleId: notification}
+                      });
+                    n.onclick = function(e)
+                        {
+                          pproxy.getRolContext(
+                            notification,
+                            function (contextIdArray)
+                            {
+                              if (history.state && history.state.selectedContext != contextIdArray[0])
+                              {
+                                history.pushState({ selectedContext: contextIdArray[0] }, "");
+                                // console.log("Pushing context state " + e.detail);
+                                // This changes App state.
+                                component.props.navigateto(
+                                  { selectedContext: contextIdArray[0]
+                                  , selectedRoleInstance: undefined
+                                  , viewname: undefined
+                                  , cardprop: undefined
+                                  , backwardsNavigation: false });
+                              }
+                              e.stopPropagation();
+                            },
+                            FIREANDFORGET);
+                        };
+
+                  }
+                );
+              });
+            }
+        }) );
+  }
+
+  render()
+  {
+    const component = this;
+    return  <Collapse in={component.props.shownotifications}>
+              <div>
+                <Row>
+                  <Col>
+                    <RoleTable
+                      viewname="allProperties"
+                      cardcolumn="Message"
+                      roletype="model:System$ContextWithNotification$Notifications"
+                      //contexttocreate
+                      // createButton
+                      // roleRepresentation
+                      behaviours={[addRemoveRoleFromContext]}/>
+                  </Col>
+                </Row>
+              </div>
+            </Collapse>;
+  }
+}
+
+NotificationsDisplayer.propTypes =
+  { systemcontextinstance: PropTypes.string.isRequired
+  , shownotifications: PropTypes.bool.isRequired
+  // navigateto is just setState. Hence, this is an unsafe connection to
+  // the component that has NotificationsDisplayer in its render tree,
+  // because the props on the object provided to navigateto must fit
+  // the callers state!
+  // As this is just App, we know it is OK.
+  // However, NotificationsDisplayer cannot easily be reused!
+  , navigateto: PropTypes.func.isRequired
+  };

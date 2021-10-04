@@ -49,6 +49,8 @@ import CardClipBoard from "./cardclipboard.js";
 
 import ConnectedToAMQP from "./ConnectedToAMQP.js";
 
+import MoveToModelsOverview from "./moveToModelsOverview.js";
+
 
 export default class NavigationBar extends Component
 {
@@ -59,6 +61,7 @@ export default class NavigationBar extends Component
               <Navbar.Brand tabIndex="-1" href="#home">InPlace</Navbar.Brand>
               <Nav>
                 <CardClipBoard systemExternalRole={component.props.systemexternalrole}/>
+                <MoveToModelsOverview systemexternalrole={component.props.systemexternalrole}/>
                 <ShowNotifications propagate={component.props.setshownotifications}/>
                 <AllowNotifications/>
                 <OpenRoleFormTool eventDispatcher={component.props.eventdispatcher} systemExternalRole={component.props.systemexternalrole}/>
