@@ -21,46 +21,32 @@
 import React, { Component } from "react";
 import "./App.css";
 import { SharedWorkerChannelPromise, configurePDRproxy, PDRproxy } from 'perspectives-proxy';
-import PropTypes from "prop-types";
 
 import "./externals.js";
 
 import {
     PSContext,
-    RoleInstances,
-    PSRol,
-    PSRoleInstances,
-    PSView,
     AppContext,
     View,
     Screen,
     MySystem,
-    RoleInstanceIterator,
-    ContextInstance,
-    ExternalRole,
     ContextOfRole,
     RoleInstance,
     RoleFormInView,
-    PerspectivesContainer,
     isQualifiedName,
     isExternalRole,
-    deconstructContext,
     externalRole,
   } from "perspectives-react";
 
 import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import Card from 'react-bootstrap/Card';
-import Tab from 'react-bootstrap/Tab';
-import Nav from 'react-bootstrap/Nav';
-import ListGroup from 'react-bootstrap/ListGroup';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import NavigationBar from "./navigationbar.js";
 
 import AccountManagement from "./AccountManagement.js";
+
+import {NotificationsDisplayer} from "./notifications.js";
 
 export default class App extends Component
 {
@@ -78,13 +64,19 @@ export default class App extends Component
       , isFirstChannel: false
       , hasContext: false
       , indexedContextNameMapping: undefined
-      , contextId: undefined
-      , openroleform: {}
       , couchdbUrl: undefined
-      // Only `showNotifications` is likely to change after logging in or opening a new context or role screen.
+      // Props that are likely to change after logging in or opening:
       , showNotifications: false
+      , openroleform: {}
+      , contextId: undefined
+      , roleId: undefined
+      , viewname: undefined
+      , cardprop: undefined
+      , backwardsNavigation: undefined
       };
     this.usesSharedWorker = typeof SharedWorker != "undefined";
+    this.containerRef = React.createRef();
+
     if (this.usesSharedWorker)
     {
       configurePDRproxy("sharedWorkerChannel");
@@ -119,9 +111,58 @@ export default class App extends Component
           // eslint-disable-next-line no-console
           console.warn( e );
         });
-
+    window.onpopstate = function(e)
+      {
+        if (e.state && (e.state.selectedContext || e.state.selectedRoleInstance))
+        {
+          // console.log("Popping previous state, now on " + (e.state.selectedContext ? "context state " + e.state.selectedContext : "roleform state " + e.state.selectedRoleInstance));
+          // Restore the selectedContext or selectedRoleInstance, if any.
+          component.setState(
+            { contextId: e.state.selectedContext
+            , roleId: e.state.selectedRoleInstance
+            , viewname: e.state.viewname
+            , cardprop: e.state.cardprop
+            , backwardsNavigation: true} );
+          e.stopPropagation();
+        }
+      };
+    // Invariant: the selectedContext in history and the contextId in App state are equal and
+    // will be the external role of the context that is selected.
+    this.containerRef.current.addEventListener( "OpenContext",
+      function(e)
+      {
+        ensureExternalRole( e.detail )
+          .then(
+            function(erole)
+            {
+              history.pushState({ selectedContext: erole }, "");
+              // console.log("Pushing context state " + e.detail);
+              component.setState(
+                { contextId: erole
+                , roleId: undefined
+                , viewname: undefined
+                , cardprop: undefined
+                , backwardsNavigation: false });
+            })
+          .catch(() => null);
+        e.stopPropagation();
+      });
+    this.containerRef.current.addEventListener( "OpenRoleForm",
+      function(e)
+      {
+        const {rolinstance, viewname, cardprop} = e.detail;
+        // Save in the history object.
+        history.pushState({ selectedRoleInstance: rolinstance, viewname, cardprop }, "");
+        // console.log("Pushing roleform state " + rolinstance);
+        component.setState(
+            { contextId: undefined
+            , roleId: rolinstance
+            , viewname
+            , cardprop
+            , backwardsNavigation: false });
+        e.stopPropagation();
+      });
     this.handleQueryString();
-
   }
 
   handleQueryString()
@@ -148,26 +189,13 @@ export default class App extends Component
       }
       else if ( isQualifiedName(queryStringMatchResult[1]) )
       {
-        if ( isExternalRole(queryStringMatchResult[1]) )
-        {
-          component.setState( {hasContext:true, contextId: deconstructContext( queryStringMatchResult[1] )});
-        }
-        else
-        {
-          // Assume a context role. Now request the binding and set its context.
-          PDRproxy.then( proxy => proxy.getBinding( queryStringMatchResult[1],
-            function (bindingIds)
-              {
-                if (bindingIds.length > 0)
-                {
-                  if ( isExternalRole (bindingIds[0]))
-                  {
-                    component.setState( {hasContext: true, contextId: deconstructContext( bindingIds[0]) });
-                  }
-                }
-                // Otherwise, either not a context role after all, or no binding. Do not try to open a context.
-              }));
-        }
+        ensureExternalRole( queryStringMatchResult[1])
+          .then(
+            function(erole)
+            {
+              component.setState( {hasContext:true, contextId: erole});
+            })
+          .catch(() => null);
       }
       else
       {
@@ -200,9 +228,14 @@ export default class App extends Component
     }
   }
 
-  render ()
+  computeScreen ()
   {
     const component = this;
+    function propagate(setter)
+    {
+      component.setState( setter );
+    }
+
     if (component.state.loggedIn && component.state.couchdbUrl)
     {
       return (
@@ -224,17 +257,36 @@ export default class App extends Component
                     isbasepage={component.usesSharedWorker || !component.state.isFirstChannel}
                     eventdispatcher={component.eventDispatcher}
                     />
-                  {
-                    component.state.openroleform.roleid ? OpenRoleForm( component.state.openroleform ) :
-                      component.state.hasContext ?
-                        RequestedContext(
-                          component.state.contextId,
-                          component.state.indexedContextNameMapping,
-                          mysystem.contextinstance,
-                          component)
-                          // TODO. Display hier het overzicht van models in use.
-                      : ApplicationSwitcher(mysystem.contextinstance, component)
-                  }
+                    <Container>
+                    {
+                      component.state.roleId
+                      ?
+                      <RoleInstance roleinstance={component.state.roleId}>
+                        <View viewname={component.state.viewname}>
+                          <RoleFormInView cardprop={component.state.cardprop ? component.state.cardprop : null}/>
+                        </View>
+                      </RoleInstance>
+                      :
+                      (component.state.contextId
+                        ?
+                        <Screen rolinstance={component.state.contextId}/>
+                        :
+                        null
+                      )
+                    }</Container>
+                    {
+                      // TODO. Let op, ik accepteer ook contextrollen, wier binding een externe rol is.
+                      // Dan gaat NotificationsDisplayer dus fout voor AppChooser selecties.
+                      component.state.contextId ?
+                      <ContextOfRole rolinstance={component.state.contextId}>
+                        <NotificationsDisplayer
+                          systemcontextinstance={externalRole(mysystem.contextinstance)}
+                          shownotifications={component.state.showNotifications}
+                          navigateto={propagate}
+                          />
+                      </ContextOfRole>
+                      : null
+                    }
                 </div>
               </Container>
             </AppContext.Provider>
@@ -250,175 +302,40 @@ export default class App extends Component
              />;
     }
   }
+
+  render()
+  {
+    return <div ref={this.containerRef}>{ this.computeScreen() }</div>;
+  }
 }
 
-// indexedContextNameMapping = Object String, holding at least one key-value pair.
-function RequestedContext(contextId, indexedContextNameMapping, mySystem, component)
+// This function returns a promise for an erole, or fails.
+function ensureExternalRole(s)
 {
-  if ( !contextId && Object.keys( indexedContextNameMapping ).length > 1 )
+  if ( isExternalRole( s ) )
   {
-    return  <Card>
-              <Card.Body>
-                <Card.Title>There are multiple matches to your query</Card.Title>
-                <ListGroup variant="flush">{
-                  Object.keys( indexedContextNameMapping ).map(
-                  function(externalRoleId)
-                  {
-                    const namePartMatch = externalRoleId.match(/\$(.*)/);
-                    return <ListGroup.Item key={externalRoleId}><a title={externalRoleId} href={"/?" + externalRole ( indexedContextNameMapping[externalRoleId] )}>{namePartMatch[1]}</a></ListGroup.Item>;
-                  }
-                )
-              }</ListGroup>
-            </Card.Body>
-          </Card>;
-  }
-  else if ( contextId )
-  {
-    return  <ContextInstance contextinstance={contextId}>
-            <ExternalRole>
-              <PSRol.Consumer>
-                { function (psrol)
-                  {
-                    history.pushState({ selectedContext: psrol.rolinstance }, "");
-                    // console.log("Pushing context state " + psrol.rolinstance);
-                    return <PerspectivesContainer systemcontextinstance={mySystem} shownotifications={component.state.showNotifications}>
-                        <Screen rolinstance={psrol.rolinstance} shownotifications={component.state.showNotifications}/>
-                      </PerspectivesContainer>;
-                  }
-                }
-              </PSRol.Consumer>
-            </ExternalRole>
-          </ContextInstance>;
+    return Promise.resolve( s );
   }
   else
   {
-    return  <ContextInstance contextinstance={indexedContextNameMapping[ Object.keys( indexedContextNameMapping )[0] ]}>
-            <ExternalRole>
-              <PSRol.Consumer>
-                { function (psrol)
+    // Assume a context role. Now request the binding and set its context.
+    return PDRproxy.then( proxy =>
+      new Promise( function( resolve, reject )
+        {
+          proxy.getBinding( s,
+            function (bindingIds)
+              {
+                if (bindingIds.length > 0)
+                {
+                  if ( isExternalRole (bindingIds[0]))
                   {
-                    history.pushState({ selectedContext: psrol.rolinstance }, "");
-                    // console.log("Pushing context state " + psrol.rolinstance);
-                    return <PerspectivesContainer systemcontextinstance={mySystem} shownotifications={component.state.showNotifications}>
-                      <Screen rolinstance={psrol.rolinstance}  shownotifications={component.state.showNotifications}/>
-                    </PerspectivesContainer>;
+                    resolve( bindingIds[0] );
                   }
                 }
-              </PSRol.Consumer>
-            </ExternalRole>
-          </ContextInstance>;
+                // Otherwise, either not a context role after all, or no binding. Fail.
+                return reject( new Error( "Not a context role!"));
+              });
+        }));
   }
+
 }
-
-// eslint-disable-next-line react/prop-types
-function OpenRoleForm( {roleid, viewname, cardprop} )
-{
-  return  <ContextOfRole rolinstance={roleid}>
-            <RoleInstance roleinstance={roleid}>
-              <View viewname={viewname}>
-              <RoleFormInView cardprop={cardprop}/>
-              </View>
-            </RoleInstance>
-          </ContextOfRole>;
-}
-
-function ApplicationSwitcher(mySystem, component)
-{
-  function handleClick(roleinstance, e)
-  {
-    if (e.shiftKey || e.ctrlKey || e.metaKey)
-    {
-      window.open("/?" + roleinstance);
-      e.preventDefault();
-      e.stopPropagation();
-    }
-
-  }
-  return  <AppListTabContainer rol="IndexedContexts">
-            <Row className="align-items-stretch">
-              <Col lg={3} className="App-border-right">
-                <Nav variant="pills" className="flex-column" aria-label="Apps" aria-orientation="vertical">
-                  <RoleInstanceIterator>
-                    <View viewname="allProperties">
-                      <PSView.Consumer>
-                        {roleinstance => <Nav.Item>
-                            <Nav.Link eventKey={roleinstance.rolinstance} onSelect={handleClick}>{roleinstance.propval("Name")}</Nav.Link>
-                          </Nav.Item>}
-                      </PSView.Consumer>
-                    </View>
-                  </RoleInstanceIterator>
-                </Nav>
-              </Col>
-              <Col lg={9}>
-                <Tab.Content>
-                  <RoleInstanceIterator>
-                    <PSRol.Consumer>{ psrol =>
-                      {
-                        history.pushState({ selectedContext: psrol.rolinstance }, "");
-                        return  <Tab.Pane eventKey={psrol.rolinstance}>
-                                  <PerspectivesContainer systemcontextinstance={mySystem} shownotifications={component.state.showNotifications}>
-                                    <Screen rolinstance={psrol.rolinstance} shownotifications={component.state.showNotifications}/>
-                                  </PerspectivesContainer>;
-                                </Tab.Pane>;
-                      }
-                    }</PSRol.Consumer>
-                  </RoleInstanceIterator>
-                </Tab.Content>
-              </Col>
-            </Row>
-          </AppListTabContainer>;
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-// APPLISTTABCONTAINER
-////////////////////////////////////////////////////////////////////////////////
-function AppListTabContainer (props)
-{
-  class AppListTabContainer_ extends React.PureComponent
-  {
-    constructor(props)
-    {
-      super(props);
-      this.state={};
-    }
-    componentDidMount()
-    {
-      if (this.context.instances[0])
-      {
-        this.setState({ firstApp: this.context.instances[0] });
-      }
-    }
-
-    componentDidUpdate()
-    {
-      if (this.context.instances[0])
-      {
-        this.setState({ firstApp: this.context.instances[0] });
-      }
-    }
-
-    render ()
-    {
-      if (this.state.firstApp)
-      {
-        return  <Tab.Container id="apps" mountOnEnter={true} unmountOnExit={true} defaultActiveKey={this.state.firstApp}>
-                  { // eslint-disable-next-line react/prop-types
-                    this.props.children}
-                </Tab.Container>;
-      }
-      else {
-        return <div/>;
-      }
-    }
-  }
-  AppListTabContainer_.contextType = PSRoleInstances;
-
-  return (<RoleInstances rol={props.rol}>
-      <AppListTabContainer_>{
-         // eslint-disable-next-line react/prop-types
-        props.children }</AppListTabContainer_>
-    </RoleInstances>);
-}
-
-AppListTabContainer.propTypes = { "rol": PropTypes.string.isRequired };
