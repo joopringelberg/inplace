@@ -68,7 +68,7 @@ export default class App extends Component
       // Props that are likely to change after logging in or opening:
       , showNotifications: false
       , openroleform: {}
-      , contextId: undefined
+      , externalRoleId: undefined
       , roleId: undefined
       , viewname: undefined
       , cardprop: undefined
@@ -118,7 +118,7 @@ export default class App extends Component
           // console.log("Popping previous state, now on " + (e.state.selectedContext ? "context state " + e.state.selectedContext : "roleform state " + e.state.selectedRoleInstance));
           // Restore the selectedContext or selectedRoleInstance, if any.
           component.setState(
-            { contextId: e.state.selectedContext
+            { externalRoleId: e.state.selectedContext
             , roleId: e.state.selectedRoleInstance
             , viewname: e.state.viewname
             , cardprop: e.state.cardprop
@@ -126,7 +126,7 @@ export default class App extends Component
           e.stopPropagation();
         }
       };
-    // Invariant: the selectedContext in history and the contextId in App state are equal and
+    // Invariant: the selectedContext in history and the externalRoleId in App state are equal and
     // will be the external role of the context that is selected.
     this.containerRef.current.addEventListener( "OpenContext",
       function(e)
@@ -138,7 +138,7 @@ export default class App extends Component
               history.pushState({ selectedContext: erole }, "");
               // console.log("Pushing context state " + e.detail);
               component.setState(
-                { contextId: erole
+                { externalRoleId: erole
                 , roleId: undefined
                 , viewname: undefined
                 , cardprop: undefined
@@ -155,7 +155,7 @@ export default class App extends Component
         history.pushState({ selectedRoleInstance: rolinstance, viewname, cardprop }, "");
         // console.log("Pushing roleform state " + rolinstance);
         component.setState(
-            { contextId: undefined
+            { externalRoleId: undefined
             , roleId: rolinstance
             , viewname
             , cardprop
@@ -193,7 +193,7 @@ export default class App extends Component
           .then(
             function(erole)
             {
-              component.setState( {hasContext:true, contextId: erole});
+              component.setState( {hasContext:true, externalRoleId: erole});
             })
           .catch(() => null);
       }
@@ -243,6 +243,7 @@ export default class App extends Component
           <PSContext.Consumer>{ mysystem =>
             <AppContext.Provider value={
               { systemExternalRole: externalRole(mysystem.contextinstance)
+              , externalRoleId: component.state.externalRoleId
               , systemUser: mysystem.myroletype
               , setEventDispatcher: function(f)
                   {
@@ -267,9 +268,9 @@ export default class App extends Component
                         </View>
                       </RoleInstance>
                       :
-                      (component.state.contextId
+                      (component.state.externalRoleId
                         ?
-                        <Screen rolinstance={component.state.contextId}/>
+                        <Screen rolinstance={component.state.externalRoleId}/>
                         :
                         null
                       )
@@ -277,8 +278,8 @@ export default class App extends Component
                     {
                       // TODO. Let op, ik accepteer ook contextrollen, wier binding een externe rol is.
                       // Dan gaat NotificationsDisplayer dus fout voor AppChooser selecties.
-                      component.state.contextId ?
-                      <ContextOfRole rolinstance={component.state.contextId}>
+                      component.state.externalRoleId ?
+                      <ContextOfRole rolinstance={component.state.externalRoleId}>
                         <NotificationsDisplayer
                           systemcontextinstance={externalRole(mysystem.contextinstance)}
                           shownotifications={component.state.showNotifications}

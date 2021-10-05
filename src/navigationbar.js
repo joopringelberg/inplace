@@ -51,6 +51,7 @@ import ConnectedToAMQP from "./ConnectedToAMQP.js";
 
 import MoveToModelsOverview from "./moveToModelsOverview.js";
 
+import MyRoleTypes from "./myRoletypes.js";
 
 export default class NavigationBar extends Component
 {
@@ -61,6 +62,7 @@ export default class NavigationBar extends Component
               <Navbar.Brand tabIndex="-1" href="#home">InPlace</Navbar.Brand>
               <Nav>
                 <CardClipBoard systemExternalRole={component.props.systemexternalrole}/>
+                <MyRoleTypes/>
                 <MoveToModelsOverview systemexternalrole={component.props.systemexternalrole}/>
                 <ShowNotifications propagate={component.props.setshownotifications}/>
                 <AllowNotifications/>
