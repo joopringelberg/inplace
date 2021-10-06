@@ -20,7 +20,6 @@
 
 import React, { Component } from "react";
 import { PDRproxy } from 'perspectives-proxy';
-import DropdownButton from 'react-bootstrap/DropdownButton';
 import Dropdown from 'react-bootstrap/Dropdown';
 import Tooltip from 'react-bootstrap/Tooltip';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
