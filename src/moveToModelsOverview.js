@@ -6,7 +6,7 @@ import "./externals.js";
 
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
-import {PeopleIcon} from '@primer/octicons-react';
+import {HomeIcon} from '@primer/octicons-react';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -58,7 +58,7 @@ export default class MoveToModelsOverview extends Component
                   onKeyDown={ e => component.handleKeyDown(e) }
                   onClick={ () => component.navigate() }
                   >
-                  <PeopleIcon alt="Choose a role" aria-label="What role do you want, and where?" size="medium"/>
+                  <HomeIcon alt="Choose a role" aria-label="What role do you want, and where?" size="medium"/>
               </div>
             </OverlayTrigger>;
   }

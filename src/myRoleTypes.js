@@ -25,7 +25,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import Tooltip from 'react-bootstrap/Tooltip';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import {deconstructLocalName, AppContext} from "perspectives-react";
-
+import {PeopleIcon} from '@primer/octicons-react';
 
 export default class MyRoleTypes extends Component
 {
@@ -80,39 +80,67 @@ export default class MyRoleTypes extends Component
   render()
   {
     const component = this;
-    return  <DropdownButton
+    return  <Dropdown
               id="dropdown-myroletypes"
               title="My roles"
-              disabled={!component.context.externalRoleId}
+              focusFirstItemOnShow={false}
               variant="secondary"
               size="sm"
               onSelect={(eventKey, event) => component.handleSelect(eventKey, event)}>
-              <Dropdown.Item
-                eventKey="refresh"
-              >{
-                  component.state.myRoleTypes.length > 0 ? "Refresh" : "Fetch"
-                }</Dropdown.Item>
-              <Dropdown.Header>Role types</Dropdown.Header>
-              {
-                component.state.myRoleTypes.map(
-                  function(rt)
+              <Dropdown.Toggle as={CustomToggle} id="MyRoleTypes_Toggle" disabled={!component.context.externalRoleId}>
+                <PeopleIcon alt="Your roles in this context" aria-label="Your roles in this context" size="medium"/>
+              </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  <Dropdown.Item
+                    active={component.state.myRoleTypes.length == 0}
+                    eventKey="refresh"
+                  >{
+                      component.state.myRoleTypes.length > 0 ? "Refresh" : "Fetch"
+                    }</Dropdown.Item>
+                  <Dropdown.Header>Role types</Dropdown.Header>
                   {
-                    return  <OverlayTrigger
-                              key={rt}
-                              placement="auto"
-                              overlay={
-                                <Tooltip id={`tooltip-${rt}`}>{rt}</Tooltip>
-                              }
-                            >
-                              <Dropdown.Item eventKey={rt}>{
-                                deconstructLocalName( rt )
-                              }</Dropdown.Item>
-                            </OverlayTrigger>;
+                    component.state.myRoleTypes.map(
+                      function(rt)
+                      {
+                        return  <OverlayTrigger
+                                  key={rt}
+                                  placement="auto"
+                                  overlay={
+                                    <Tooltip id={`tooltip-${rt}`}>{rt}</Tooltip>
+                                  }
+                                >
+                                  <Dropdown.Item
+                                    eventKey={rt}
+                                    active={rt == component.context.myRoleType}
+                                  >{
+                                    deconstructLocalName( rt )
+                                  }</Dropdown.Item>
+                                </OverlayTrigger>;
+                      }
+                    )
                   }
-                )
-              }
-            </DropdownButton>;
+                </Dropdown.Menu>
+            </Dropdown>;
   }
 }
 
 MyRoleTypes.contextType = AppContext;
+
+// eslint-disable-next-line react/display-name, react/prop-types
+const CustomToggle = React.forwardRef(({ children, onClick, disabled }, ref) => (
+  <a
+    href=""
+    ref={ref}
+    className={disabled ? "disabledIconStyle" : "iconStyle"}
+    onClick={(e) => {
+      e.preventDefault();
+      if (!disabled)
+      {
+        onClick(e);
+      }
+    }}
+  >
+    {children}
+    &#x25bc;
+  </a>
+));

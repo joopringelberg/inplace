@@ -48,3 +48,11 @@
   -o-transition: transform 1s;
   transition: transform 1s;
 }
+
+.iconStyle {
+  color: rgb(33, 37, 41);
+}
+
+.disabledIconStyle{
+  color: grey;
+}
