@@ -68,8 +68,9 @@ export default class App extends Component
       // Props that are likely to change after logging in or opening:
       , showNotifications: false
       , openroleform: {}
-      , externalRoleId: undefined
-      , roleId: undefined
+      , externalRoleId: undefined     // The external role instance of the context that is currently on display (if any).
+      , myRoleType: undefined         // The type of user role the user plays in the context of the externalRoleId (if any).
+      , roleId: undefined             // The role that is currently on display (if any).
       , viewname: undefined
       , cardprop: undefined
       , backwardsNavigation: undefined
@@ -95,13 +96,18 @@ export default class App extends Component
     // even if we've logged in before, because we have to wait for the PDRProxy.
     Promise.all(
       [ SharedWorkerChannelPromise.then( proxy => proxy.channelId)
-      , SharedWorkerChannelPromise.then( proxy => proxy.isUserLoggedIn() )
+      , SharedWorkerChannelPromise.then( proxy => proxy.isUserLoggedIn())
+      , PDRproxy.then( proxy => proxy.getCouchdbUrl() )
       ]).then( function( results )
         {
           const setter = { isFirstChannel: results[0] == 1000000 };
           if (results[1] && !component.state.loggedIn )
           {
             setter.loggedIn = true;
+          }
+          if (results[2] && !component.state.couchdbUrl )
+          {
+            setter.couchdbUrl = results[2];
           }
           component.setState( setter );
         })
@@ -244,6 +250,7 @@ export default class App extends Component
             <AppContext.Provider value={
               { systemExternalRole: externalRole(mysystem.contextinstance)
               , externalRoleId: component.state.externalRoleId
+              , myRoleType: component.state.myRoleType
               , systemUser: mysystem.myroletype
               , setEventDispatcher: function(f)
                   {
@@ -270,7 +277,9 @@ export default class App extends Component
                       :
                       (component.state.externalRoleId
                         ?
-                        <Screen rolinstance={component.state.externalRoleId}/>
+                        <Screen
+                          rolinstance={component.state.externalRoleId}
+                          setMyRoleType={ myRoleType => component.setState({myRoleType: myRoleType})}/>
                         :
                         null
                       )
