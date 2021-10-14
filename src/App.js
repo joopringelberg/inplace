@@ -285,9 +285,7 @@ export default class App extends Component
                       )
                     }</Container>
                     {
-                      // TODO. Let op, ik accepteer ook contextrollen, wier binding een externe rol is.
-                      // Dan gaat NotificationsDisplayer dus fout voor AppChooser selecties.
-                      component.state.externalRoleId ?
+                      component.state.externalRoleId && component.state.showNotifications ?
                       <ContextOfRole rolinstance={component.state.externalRoleId}>
                         <NotificationsDisplayer
                           systemcontextinstance={externalRole(mysystem.contextinstance)}
