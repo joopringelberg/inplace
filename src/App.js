@@ -288,7 +288,7 @@ export default class App extends Component
                       component.state.externalRoleId && component.state.showNotifications ?
                       <ContextOfRole rolinstance={component.state.externalRoleId}>
                         <NotificationsDisplayer
-                          systemcontextinstance={externalRole(mysystem.contextinstance)}
+                          systemcontextinstance={mysystem.contextinstance}
                           shownotifications={component.state.showNotifications}
                           navigateto={propagate}
                           />
