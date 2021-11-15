@@ -189,6 +189,25 @@ export default class AccountManagement extends Component
                             });
                         });
                   }
+                  else if (component.props.recompilebasicmodels)
+                  {
+                    SharedWorkerChannelPromise.then( function (proxy)
+                      {
+                        proxy.recompileBasicModels(
+                          user,
+                          PerspectivesGlobals.publicRepository
+                          )
+                          .then(
+                            function(success) // eslint-disable-line
+                            {
+                              if (!success)
+                              {
+                                alert("Unfortunately the basic models could not be compiled.");
+                              }
+                              window.location.reload();
+                            });
+                        });
+                  }
                   else
                   {
                     SharedWorkerChannelPromise.then( function (proxy)
@@ -454,6 +473,7 @@ export default class AccountManagement extends Component
 AccountManagement.propTypes =
   { setloggedin: PropTypes.func.isRequired
   , setcouchdburl: PropTypes.func.isRequired
+  , recompilebasicmodels: PropTypes.bool
   };
 
 //////////////////////////////////////////////////////////////////////////////

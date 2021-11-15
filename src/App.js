@@ -74,6 +74,7 @@ export default class App extends Component
       , viewname: undefined
       , cardprop: undefined
       , backwardsNavigation: undefined
+      , recompileBasicModels: false
       };
     this.usesSharedWorker = typeof SharedWorker != "undefined";
     this.containerRef = React.createRef();
@@ -193,6 +194,10 @@ export default class App extends Component
           , cardprop: params.get("cardprop")
           }} );
       }
+      else if ( params.get("recompilebasicmodels") )
+      {
+        component.setState( { recompileBasicModels: true });
+      }
       else if ( isQualifiedName(queryStringMatchResult[1]) )
       {
         ensureExternalRole( queryStringMatchResult[1])
@@ -305,6 +310,7 @@ export default class App extends Component
     else
     {
       return <AccountManagement
+              recompilebasicmodels={ component.state.recompileBasicModels }
               setloggedin={() => component.setState({loggedIn: true})}
               setcouchdburl={url => component.setState({couchdbUrl: url})}
              />;
