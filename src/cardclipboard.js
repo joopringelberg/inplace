@@ -39,6 +39,11 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 ////////////////////////////////////////////////////////////////////////////////
 export default class CardClipBoard extends PerspectivesComponent
 {
+  constructor()
+  {
+    super();
+    this.writeRoleIdentification = this.writeRoleIdentification.bind(this);
+  }
   componentDidMount()
   {
     const component = this;
@@ -68,11 +73,31 @@ export default class CardClipBoard extends PerspectivesComponent
         }));
   }
 
+  writeRoleIdentification()
+  {
+    const type = "text/plain",
+      component = this;
+    var blob = new Blob([component.state.rolinstance], { type });
+    // eslint-disable-next-line no-undef
+    var data = [new ClipboardItem({ [type]: blob })];
+
+    navigator.clipboard.write(data).then(
+        function () {
+        /* success */
+        },
+        function () {
+        /* failure */
+        alert("Programming alert: Could not write to clipboard!");
+        }
+    );
+  }
+
   render ()
   {
+    const component = this;
     if (this.state && this.state.cardTitle)
     {
-      return <Container><Badge variant="info">{this.state.cardTitle}</Badge></Container>;
+      return <Container onClick={component.writeRoleIdentification}><Badge variant="info">{this.state.cardTitle}</Badge></Container>;
     }
     else {
       return null;
