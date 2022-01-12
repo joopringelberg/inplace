@@ -28,6 +28,7 @@ import {
     RemoveRol,
     importTransaction,
     FileDropZone,
+    deconstructContext
   } from "perspectives-react";
 
 import Nav from 'react-bootstrap/Nav';
@@ -53,15 +54,19 @@ import MoveToModelsOverview from "./moveToModelsOverview.js";
 
 import MyRoleTypes from "./myRoletypes.js";
 
+import ContextActions from "./contextActions.js";
+
 export default class NavigationBar extends Component
 {
   render()
   {
     const component = this;
+    const contextId = component.props.externalroleid ? deconstructContext ( component.props.externalroleid ) : null;
     return  <Navbar bg={component.props.isbasepage ? "light" : "danger"} expand="lg" role="banner" aria-label="Main menu bar" className="justify-content-between">
               <Navbar.Brand tabIndex="-1" href="#home">InPlace</Navbar.Brand>
               <Nav>
                 <CardClipBoard systemExternalRole={component.props.systemexternalrole}/>
+                <ContextActions contextid={contextId} myroletype={component.props.myroletype}/>
                 <MyRoleTypes/>
                 <MoveToModelsOverview systemexternalrole={component.props.systemexternalrole}/>
                 <ShowNotifications propagate={component.props.setshownotifications}/>
@@ -89,4 +94,6 @@ NavigationBar.propTypes =
   , setshownotifications: PropTypes.func.isRequired
   , isbasepage: PropTypes.bool.isRequired
   , eventdispatcher: PropTypes.objectOf(PropTypes.PropTypes.func).isRequired
+  , myroletype: PropTypes.string
+  , externalroleid: PropTypes.string
   };

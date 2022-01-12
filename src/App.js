@@ -120,6 +120,10 @@ export default class App extends Component
         });
     window.onpopstate = function(e)
       {
+        if (e.state && e.state.title)
+        {
+          document.title = e.state.title;
+        }
         if (e.state && (e.state.selectedContext || e.state.selectedRoleInstance))
         {
           // console.log("Popping previous state, now on " + (e.state.selectedContext ? "context state " + e.state.selectedContext : "roleform state " + e.state.selectedRoleInstance));
@@ -142,14 +146,21 @@ export default class App extends Component
           .then(
             function(erole)
             {
-              history.pushState({ selectedContext: erole }, "");
+              PDRproxy.then( function( pproxy )
+                {
+                  pproxy.getRoleName( erole, function (nameArr)
+                    {
+                      document.title = nameArr[0];
+                      history.pushState({ selectedContext: erole, title: nameArr[0] }, "");
+                    });
+                });
               // console.log("Pushing context state " + e.detail);
               component.setState(
                 { externalRoleId: erole
                 , roleId: undefined
                 , viewname: undefined
                 , cardprop: undefined
-                , backwardsNavigation: false });
+                , backwardsNavigation: false});
             })
           .catch(() => null);
         e.stopPropagation();
@@ -158,8 +169,17 @@ export default class App extends Component
       function(e)
       {
         const {rolinstance, viewname, cardprop} = e.detail;
-        // Save in the history object.
-        history.pushState({ selectedRoleInstance: rolinstance, viewname, cardprop }, "");
+        PDRproxy.then( function( pproxy )
+          {
+            pproxy.getRoleName( rolinstance,
+              function (nameArr)
+                {
+                  document.title = nameArr[0];
+                  history.pushState({ selectedContext: rolinstance, title: nameArr[0] }, "");
+                }
+            );
+          });
+
         // console.log("Pushing roleform state " + rolinstance);
         component.setState(
             { externalRoleId: undefined
@@ -269,6 +289,8 @@ export default class App extends Component
                     setshownotifications={value => component.setState({showNotifications: value})}
                     isbasepage={component.usesSharedWorker || !component.state.isFirstChannel}
                     eventdispatcher={component.eventDispatcher}
+                    myroletype={component.state.myRoleType}
+                    externalroleid={component.state.externalRoleId}
                     />
                     <Container>
                     {
