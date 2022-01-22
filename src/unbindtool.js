@@ -26,7 +26,8 @@ import PropTypes from "prop-types";
 import "./externals.js";
 
 import
-  { PerspectivesComponent,
+  { PerspectivesComponent
+  , Alert
   } from "perspectives-react";
 
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
@@ -37,8 +38,15 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default class UnbindTool extends PerspectivesComponent
 {
+  constructor()
+  {
+    super();
+    this.state = {showAlert: false};
+  }
+
   handle ({roleData, addedBehaviour, myroletype})
   {
+    const component = this;
     if (addedBehaviour.includes( "removeFiller" ))
     {
       PDRproxy.then( pproxy =>
@@ -50,6 +58,10 @@ export default class UnbindTool extends PerspectivesComponent
             }
          },
          FIREANDFORGET));
+    }
+    else
+    {
+      component.setState({ showAlert: true});
     }
   }
   handleKeyDown(e)
@@ -91,7 +103,8 @@ export default class UnbindTool extends PerspectivesComponent
     const eventDiv = React.createRef();
 
 
-    return  <OverlayTrigger
+    return  <>
+              <OverlayTrigger
                       placement="left"
                       delay={{ show: 250, hide: 400 }}
                       overlay={renderTooltip}
@@ -113,7 +126,14 @@ export default class UnbindTool extends PerspectivesComponent
                         onDragLeave={ev => ev.target.classList.remove("border", "border-primary")}>
                         <LinkIcon alt="OpenRoleFormTool" aria-label="Drop a role here to remove its filler" size="medium"/>
                     </div>
-              </OverlayTrigger>;
+                </OverlayTrigger>
+                <Alert
+                  title="Operation cancelled"
+                  message="You are not allowed to remove the filler of this role."
+                  close={() => component.setState({showAlert: false})}
+                  show={component.state.showAlert}
+                />
+              </>;
   }
 }
 
