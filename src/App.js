@@ -27,12 +27,10 @@ import "./externals.js";
 import {
     PSContext,
     AppContext,
-    View,
     Screen,
     MySystem,
     ContextOfRole,
-    RoleInstance,
-    RoleFormInView,
+    PerspectiveForm,
     isQualifiedName,
     isExternalRole,
     externalRole,
@@ -296,11 +294,9 @@ export default class App extends Component
                     {
                       component.state.roleId
                       ?
-                      <RoleInstance roleinstance={component.state.roleId}>
-                        <View viewname={component.state.viewname}>
-                          <RoleFormInView cardprop={component.state.cardprop ? component.state.cardprop : null}/>
-                        </View>
-                      </RoleInstance>
+                      <PerspectiveForm
+                        roleinstance={component.state.roleId}
+                      />
                       :
                       (component.state.externalRoleId
                         ?

@@ -95,7 +95,7 @@ export default class OpenRoleFormTool extends PerspectivesComponent
                         onKeyDown={ e => component.handleKeyDown(e) }
                         onDrop={ev => {
                           // The function in eventDispatcher is put there by the addOpenContextOrRoleForm behaviour triggered
-                          // on the element the user started to drag. It causes a OpenRoleForm event to be thrown from that element.
+                          // on the element the user started to drag. It causes an OpenRoleForm event to be thrown from that element.
                           // eslint-disable-next-line react/prop-types
                           component.props.eventDispatcher.eventDispatcher( JSON.parse( ev.dataTransfer.getData( "PSRol" ) ) );
                           ev.target.classList.remove("border", "p-3", "border-primary");
