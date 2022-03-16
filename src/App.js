@@ -69,6 +69,7 @@ export default class App extends Component
       , externalRoleId: undefined     // The external role instance of the context that is currently on display (if any).
       , myRoleType: undefined         // The type of user role the user plays in the context of the externalRoleId (if any).
       , roleId: undefined             // The role that is currently on display (if any).
+      , systemUser: undefined         // The user identifier (his GUID).
       , viewname: undefined
       , cardprop: undefined
       , backwardsNavigation: undefined
@@ -97,6 +98,18 @@ export default class App extends Component
       [ SharedWorkerChannelPromise.then( proxy => proxy.channelId)
       , SharedWorkerChannelPromise.then( proxy => proxy.isUserLoggedIn())
       , PDRproxy.then( proxy => proxy.getCouchdbUrl() )
+      , PDRproxy.then( function(proxy)
+        {
+          return new Promise(function (resolver)
+            {
+              proxy.getUserIdentifier(
+                  function(sysId)
+                  {
+                    resolver( sysId[0] );
+                  }
+                );
+            });
+        } )
       ]).then( function( results )
         {
           const setter = { isFirstChannel: results[0] == 1000000 };
@@ -107,6 +120,10 @@ export default class App extends Component
           if (results[2] && !component.state.couchdbUrl )
           {
             setter.couchdbUrl = results[2];
+          }
+          if (results[3])
+          {
+            setter.systemUser = results[3];
           }
           component.setState( setter );
         })
@@ -274,7 +291,7 @@ export default class App extends Component
               { systemExternalRole: externalRole(mysystem.contextinstance)
               , externalRoleId: component.state.externalRoleId
               , myRoleType: component.state.myRoleType
-              , systemUser: mysystem.myroletype
+              , systemUser: component.state.systemUser
               , setEventDispatcher: function(f)
                   {
                     component.eventDispatcher.eventDispatcher = f;
@@ -301,7 +318,7 @@ export default class App extends Component
                       (component.state.externalRoleId
                         ?
                         <Screen
-                          rolinstance={component.state.externalRoleId}
+                          externalroleinstance={component.state.externalRoleId}
                           setMyRoleType={ myRoleType => component.setState({myRoleType: myRoleType})}/>
                         :
                         null
