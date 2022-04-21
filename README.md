@@ -1,28 +1,33 @@
 InPlace
 ======================
 
-This client runs in the browser. It can load a single model (or App). It relies on a ServiceWorker that runs the PDR.
+This client runs in the browser. It is a general container that allows you to load a model to add new perspectives on various contexts. It relies on a SharedWorker that runs the PDR.
 
 ### Develop this client
-Webpack packs the source files and outputs them to the `docs` directory, so they can be picked up over the open internet on the url `joopringelberg.github.io/inplace`
-1. `npm run watch` before changing code, otherwise changes will not be reflected in the interface!
+`package.json` has several run targets. The following are very useful:
+
+* `builddevelopment`: build sources for local use. Requires a Couchdb installation listening on port 6984.
+* `buildproduction`: build sources for production. Currently publishes to https://inplace.works. Actually pushes code to that server.
+* `buildmodels_dev`: build the page `models.html`. This is a page showing the source of several public models, on the local development server.
+* `buildmodels_prod`: as above, but for https://inplace.works/models.html. **NOTE**: this command will not by itself push the page to the server; you'll have to commit it through git. Running builddevelopment will take care of that (after building inplace and models.html it copies the content of the development directory to the remote server).
+
+#### Building for production: models
+When building for production, one should update the models in the repository on https://inplace.works. Synchronize them from the development repository.
 
 ### Symlinks for easy updates
-`package.json` contains a run target `symlinks` that will replace the subdirectories
+`package.json` contains a run target `symlinks` (it runs the script `createPerspectivessLinks.sh`) that will replace the subdirectories
 * perspectives-react
 * perspectives-core
 * perspectives-proxy
+* perspectives-pageworker
+* perspectives-sharedworker
+* perspectives-highlightjs
 
 with symlinks to the same-named projects in ~Code. Run this script after calling `npm install`. A change in the `dist` directories of these projects is then immediately picked up by webpack (when watching, of course).
 
-### About deployment
-This module depends on Webpack. There is one run target:
-*  **watch**: Webpack will watch source files, transpile ES6 and JSX and bundle everything under `index.js`.
 
 ### Dependencies
-This client imports:
-* `perspectives-react`
-* `perspectives-proxy`
+See `package.json`.
 
 ### Test-using this program
 It should be noted that this program is in an alpha-stage!

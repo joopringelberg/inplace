@@ -19,8 +19,12 @@ done
 
 echo "Building for $target"
 
+# INPLACE
 cp ./src/index.html ./$target/index.html
 cp ./src/file.png ./$target/file.png
+
+# MODELS
+cp ./src/models.html ./$target/models.html
 
 cp ./node_modules/perspectives-pageworker/dist/perspectives-pageworker.js ./$target/perspectives-pageworker.js
 cp ./node_modules/perspectives-sharedworker/dist/perspectives-sharedworker.js ./$target/perspectives-sharedworker.js
