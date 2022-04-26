@@ -29,6 +29,9 @@ with symlinks to the same-named projects in ~Code. Run this script after calling
 ### Dependencies
 See `package.json`.
 
+## Dependency management
+See [Publishing a new version](https://github.com/joopringelberg/perspectives-core/blob/master/technical%20readme.md#publishing-a-new-version) in the Perspectives Core (PDR) project.
+
 ### Test-using this program
 It should be noted that this program is in an alpha-stage!
 
