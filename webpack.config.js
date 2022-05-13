@@ -19,6 +19,7 @@ module.exports = function(env)
       resolve: {
         alias: {
           "react": path.resolve(__dirname, "node_modules/react"),
+          "react-dom": path.resolve(__dirname, "node_modules/react-dom"),
           "@primer/octicons-react": path.resolve(__dirname, "node_modules/@primer/octicons-react"),
           "react-bootstrap": path.resolve(__dirname, "node_modules/react-bootstrap"),
           "perspectives-core": path.resolve(__dirname, "node_modules/perspectives-core"),
