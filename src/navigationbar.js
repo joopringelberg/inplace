@@ -52,6 +52,8 @@ import ConnectedToAMQP from "./ConnectedToAMQP.js";
 
 import MoveToModelsOverview from "./moveToModelsOverview.js";
 
+import CloseContext from "./closecontext.js";
+
 import MyRoleTypes from "./myRoletypes.js";
 
 import ContextActions from "./contextActions.js";
@@ -69,6 +71,7 @@ export default class NavigationBar extends Component
                 <ContextActions contextid={contextId} myroletype={component.props.myroletype}/>
                 <MyRoleTypes/>
                 <MoveToModelsOverview systemexternalrole={component.props.systemexternalrole}/>
+                <CloseContext clearexternalroleid={component.props.clearexternalroleid} hascontext={!!contextId}/>
                 <ShowNotifications propagate={component.props.setshownotifications}/>
                 <AllowNotifications/>
                 <OpenRoleFormTool eventDispatcher={component.props.eventdispatcher} systemExternalRole={component.props.systemexternalrole}/>
@@ -96,4 +99,5 @@ NavigationBar.propTypes =
   , eventdispatcher: PropTypes.objectOf(PropTypes.PropTypes.func).isRequired
   , myroletype: PropTypes.string
   , externalroleid: PropTypes.string
+  , clearexternalroleid: PropTypes.func.isRequired
   };

@@ -51,6 +51,7 @@ export default class App extends Component
   constructor(props)
   {
     super(props);
+    const component = this;
     // This stub is replaced by a function constructed in the addOpenContextOrRoleForm behaviour
     // whenever the user starts dragging a role that supports that behaviour.
     // Notice that we use indirection here. The value of eventDispatcher is a location that holds the actual eventDispatcher.
@@ -77,6 +78,10 @@ export default class App extends Component
       };
     this.usesSharedWorker = typeof SharedWorker != "undefined";
     this.containerRef = React.createRef();
+    this.clearExternalRoleId = function()
+      {
+        component.setState({ externalRoleId: undefined});
+      }
 
     if (this.usesSharedWorker)
     {
@@ -306,6 +311,7 @@ export default class App extends Component
                     eventdispatcher={component.eventDispatcher}
                     myroletype={component.state.myRoleType}
                     externalroleid={component.state.externalRoleId}
+                    clearexternalroleid={component.clearExternalRoleId}
                     />
                     <Container>
                     {
@@ -319,7 +325,8 @@ export default class App extends Component
                         ?
                         <Screen
                           externalroleinstance={component.state.externalRoleId}
-                          setMyRoleType={ myRoleType => component.setState({myRoleType: myRoleType})}/>
+                          setMyRoleType={ myRoleType => component.setState({myRoleType: myRoleType})}
+                        />
                         :
                         null
                       )

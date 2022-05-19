@@ -7,7 +7,7 @@ rm -R perspectives-react
 rm -R perspectives-core
 rm -R perspectives-pageworker
 rm -R perspectives-sharedworker
-# rm -R perspectives-serviceworker
+rm -R perspectives-serviceworker
 rm -R perspectives-highlightjs
 
 ln -s ../../perspectives-proxy perspectives-proxy
