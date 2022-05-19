@@ -156,6 +156,15 @@ export default class App extends Component
             , backwardsNavigation: true} );
           e.stopPropagation();
         }
+        else if (e.state)
+        {
+          component.setState(
+            { externalRoleId: undefined
+            , viewname: undefined
+            , cardprop: undefined
+            , backwardsNavigation: true}
+          );
+        }
       };
     // Invariant: the selectedContext in history and the externalRoleId in App state are equal and
     // will be the external role of the context that is selected.
@@ -195,7 +204,7 @@ export default class App extends Component
               function (nameArr)
                 {
                   document.title = nameArr[0];
-                  history.pushState({ selectedContext: rolinstance, title: nameArr[0] }, "");
+                  history.pushState({ selectedRoleInstance: rolinstance, title: nameArr[0] }, "");
                 }
             );
           });
