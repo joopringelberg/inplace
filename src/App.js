@@ -20,7 +20,7 @@
 
 import React, { Component } from "react";
 import "./App.css";
-import { SharedWorkerChannelPromise, configurePDRproxy, PDRproxy } from 'perspectives-proxy';
+import { SharedWorkerChannelPromise, configurePDRproxy, PDRproxy, FIREANDFORGET } from 'perspectives-proxy';
 
 import "./externals.js";
 
@@ -179,9 +179,11 @@ export default class App extends Component
                 {
                   pproxy.getRoleName( erole, function (nameArr)
                     {
+                      const x = e;
                       document.title = nameArr[0];
                       history.pushState({ selectedContext: erole, title: nameArr[0] }, "");
-                    });
+                    },
+                    FIREANDFORGET);
                 });
               // console.log("Pushing context state " + e.detail);
               component.setState(
@@ -383,7 +385,7 @@ function ensureExternalRole(s)
   }
   else
   {
-    // Assume a context role. Now request the binding and set its context.
+    // Assume a context role. Now request the binding and get its context.
     return PDRproxy.then( proxy =>
       new Promise( function( resolve, reject )
         {
@@ -399,7 +401,9 @@ function ensureExternalRole(s)
                 }
                 // Otherwise, either not a context role after all, or no binding. Fail.
                 return reject( new Error( "Not a context role!"));
-              });
+              },
+              FIREANDFORGET
+              );
         }));
   }
 
