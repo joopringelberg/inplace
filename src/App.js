@@ -179,7 +179,6 @@ export default class App extends Component
                 {
                   pproxy.getRoleName( erole, function (nameArr)
                     {
-                      const x = e;
                       document.title = nameArr[0];
                       history.pushState({ selectedContext: erole, title: nameArr[0] }, "");
                     },
