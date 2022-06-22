@@ -31,7 +31,7 @@ export default class MyRoleTypes extends Component
   constructor()
   {
     super();
-    this.state = {myRoleTypes: [], externalRoleId: undefined};
+    this.state = {myRoleTypes: []};
   }
 
   getAllMyRoleTypes()
@@ -40,13 +40,23 @@ export default class MyRoleTypes extends Component
     PDRproxy.then(
       function( pproxy )
       {
-        pproxy.getAllMyRoleTypes( component.context.externalRoleId,
+        pproxy.getAllMyRoleTypes( component.roleInstance(),
           function(myRoleTypes)
           {
-            component.setState({myRoleTypes: myRoleTypes, externalRoleId: component.context.externalRoleId});
+            component.setState({myRoleTypes: myRoleTypes, roleId: component.roleInstance()});
           });
       }
     );
+  }
+
+  // Either the external role of the context (ContextForm), or the role itself (RoleForm).
+  // May return undefined.
+  roleInstance()
+  {
+    if (this.context)
+    {
+      return this.context.externalRoleId || this.context.roleId
+    }
   }
 
   handleSelect( userRoleType/*, event*/ )
@@ -61,18 +71,21 @@ export default class MyRoleTypes extends Component
       PDRproxy.then(
         function (pproxy)
         {
-          pproxy.setPreferredUserRoleType(component.context.externalRoleId, userRoleType);
+          pproxy.setPreferredUserRoleType(component.roleInstance(), userRoleType);
         }
       );
     }
   }
 
+  // Reset the user role types when we've got another role.
   componentDidUpdate(prevProps, prevState)
   {
     const component = this;
-    if (prevState.externalRoleId && component.context.externalRoleId !== prevState.externalRoleId)
+    if (component.context.externalRoleId !== prevState.roleId 
+        && component.context.roleId !== prevState.roleId
+        )
     {
-      component.setState({myRoleTypes: [], externalRoleId: undefined});
+      component.setState({myRoleTypes: [], roleId: component.roleInstance()});
     }
   }
 
@@ -86,7 +99,7 @@ export default class MyRoleTypes extends Component
               variant="secondary"
               size="sm"
               onSelect={(eventKey, event) => component.handleSelect(eventKey, event)}>
-              <Dropdown.Toggle as={CustomToggle} id="MyRoleTypes_Toggle" disabled={!component.context.externalRoleId}>
+              <Dropdown.Toggle as={CustomToggle} id="MyRoleTypes_Toggle" disabled={!component.roleInstance()}>
                 <PeopleIcon alt="Your roles in this context" aria-label="Your roles in this context" size="medium"/>
               </Dropdown.Toggle>
                 <Dropdown.Menu>
