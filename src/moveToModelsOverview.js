@@ -61,7 +61,7 @@ export default class MoveToModelsOverview extends Component
     <Tooltip id="moveToModelsOverview-tooltip" {...props} show={
        // eslint-disable-next-line react/prop-types
       props.show.toString()}>
-      What role do you want, and where?
+      Home - the system context
       Click (or select and press space).
     </Tooltip> );
 
@@ -78,7 +78,7 @@ export default class MoveToModelsOverview extends Component
                   onKeyDown={ e => component.handleKeyDown(e) }
                   onClick={ () => component.navigate() }
                   >
-                  <HomeIcon alt="Choose a role" aria-label="What role do you want, and where?" size="medium"/>
+                  <HomeIcon alt="Choose a role" aria-label="Home - the system context" size="medium"/>
               </div>
             </OverlayTrigger>;
   }

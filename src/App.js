@@ -124,7 +124,7 @@ export default class App extends Component
           }
           if (results[2] && !component.state.couchdbUrl )
           {
-            setter.couchdbUrl = results[2];
+            setter.couchdbUrl = results[2][0];
           }
           if (results[3])
           {
@@ -297,7 +297,7 @@ export default class App extends Component
       component.setState( setter );
     }
 
-    if (component.state.loggedIn && component.state.couchdbUrl)
+    if (component.state.loggedIn && (component.state.couchdbUrl || component.state.couchdbUrl == ""))
     {
       return (
         <MySystem>
@@ -305,6 +305,7 @@ export default class App extends Component
             <AppContext.Provider value={
               { systemExternalRole: externalRole(mysystem.contextinstance)
               , externalRoleId: component.state.externalRoleId
+              , roleId: component.state.roleId
               , myRoleType: component.state.myRoleType
               , systemUser: component.state.systemUser
               , setEventDispatcher: function(f)
