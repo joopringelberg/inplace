@@ -283,7 +283,7 @@ export default class App extends Component
         PDRproxy.then( pproxy => pproxy.deleteProperty(
           systemExternalRole,
           "model:System$PerspectivesSystem$External$CardClipBoard",
-          "model:System$PerspectivesSystem$External") );
+          "model:System$PerspectivesSystem$User") );
         event.preventDefault();
         break;
     }

@@ -54,7 +54,7 @@ export default class UnbindTool extends PerspectivesComponent
          {
            if ( rolIdArr[0] )
             {
-              pproxy.removeBinding( roleData.rolinstance, rolIdArr[0], myroletype );
+              pproxy.removeBinding( roleData.rolinstance, myroletype );
             }
          },
          FIREANDFORGET));
