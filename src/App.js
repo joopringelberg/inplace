@@ -80,7 +80,19 @@ export default class App extends Component
     this.containerRef = React.createRef();
     this.clearExternalRoleId = function()
       {
-        component.setState({ externalRoleId: undefined});
+        PDRproxy.then( function( pproxy )
+        {
+          if ( component.state.externalRoleId )
+          {
+            pproxy.getRoleName( component.state.externalRoleId, function (nameArr)
+              {
+                document.title = "Closed " + nameArr[0];
+                history.pushState({ title: "Closed " + nameArr[0] }, "");
+                component.setState({ externalRoleId: undefined});
+              },
+              FIREANDFORGET);
+          }
+        });
       }
 
     if (this.usesSharedWorker)
@@ -97,6 +109,11 @@ export default class App extends Component
   componentDidMount ()
   {
     const component = this;
+    const beforeUnloadListener = (event) => {
+      event.preventDefault();
+      return event.returnValue = "Are you sure you want to exit?";
+    };
+
     // Check login status first. If we combine it with context name matching, we'll see a login screen first
     // even if we've logged in before, because we have to wait for the PDRProxy.
     Promise.all(
@@ -155,15 +172,23 @@ export default class App extends Component
             , cardprop: e.state.cardprop
             , backwardsNavigation: true} );
           e.stopPropagation();
+          removeEventListener("beforeunload", beforeUnloadListener, {capture: true});
         }
-        else if (e.state)
+        else
         {
+          // In this situation, the next backwards navigation exits InPlace.
+          // We need a modal dialog that returns a boolean result reflecting the users choice:
+          //  true: yes, I want to leave InPlace;
+          //  false: no, I don't want to leave InPlace.
+          // If true, accept navigation.
+          // If false, abort navigation.
           component.setState(
             { externalRoleId: undefined
             , viewname: undefined
             , cardprop: undefined
             , backwardsNavigation: true}
           );
+          addEventListener("beforeunload", beforeUnloadListener, {capture: true});
         }
       };
     // Invariant: the selectedContext in history and the externalRoleId in App state are equal and
