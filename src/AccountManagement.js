@@ -69,7 +69,7 @@ export default class AccountManagement extends Component
       , host: undefined //couchdbHost
       , checkingOnCouchdb: false
       , couchdbMissing: false
-      , password: ""
+      , password: undefined
       , resetAccount: false
 
     };
@@ -305,7 +305,7 @@ export default class AccountManagement extends Component
                       </Col>
                       <Col sm="1">
                       <InputGroup.Checkbox
-                        aria-label="Check to reset account"
+                        aria-label="Check to reset account (removes all data!)"
                         onChange={e => component.setState( {resetAccount: e.target.value == "on" } ) }/>
                       </Col>
                     </Form.Group>
@@ -316,12 +316,13 @@ export default class AccountManagement extends Component
                   <Form noValidate validated={component.state.newAccountInfoValidated} onSubmit={e => component.createAccount(e)} className="m-3">
                     <Form.Row>
                       <header className="App-header">
-                        <h3>Where do you want to store your data?</h3>
+                        <h3>Storing data</h3>
                       </header>
                     </Form.Row>
                     <Form.Row className="pb-3">
                       <div className="mb-3">
-                        <Form.Group>
+                        <Form.Group id="StorageLocation">
+                          <Form.Label htmlFor="StorageLocation">Where do you want to store your data?</Form.Label>
                           <Form.Check
                             name="backend"
                             type="radio"
@@ -332,8 +333,6 @@ export default class AccountManagement extends Component
                             checked={component.state.backend == "indexeddb"}
                             required
                             />
-                        </Form.Group>
-                        <Form.Group>
                         <Form.Check
                           name="backend"
                           type="radio"
@@ -348,9 +347,7 @@ export default class AccountManagement extends Component
                             You must install Couchdb locally for this to work and register yourself as administrator with it.
                             Enter those credentials in the Username and Password fields below.
                           </Form.Text> : null}
-                        </Form.Group>
-                        <Form.Group>
-                          <Form.Check
+                        <Form.Check
                             name="backend"
                             type="radio"
                             id="remotecouchdb"
