@@ -64,30 +64,38 @@ export default class NavigationBar extends Component
   {
     const component = this;
     const contextId = component.props.externalroleid ? deconstructContext ( component.props.externalroleid ) : null;
-    return  <Navbar bg={component.props.isbasepage ? "light" : "danger"} expand="lg" role="banner" aria-label="Main menu bar" className="justify-content-between">
+    return  <Navbar 
+              bg={component.props.isbasepage ? "light" : "danger"} 
+              expand="sm" 
+              role="banner" 
+              aria-label="Main menu bar" 
+              className="justify-content-between">
               <Navbar.Brand tabIndex="-1" href="#home">InPlace</Navbar.Brand>
-              <Nav>
-                <CardClipBoard systemExternalRole={component.props.systemexternalrole}/>
-                <ContextActions contextid={contextId} myroletype={component.props.myroletype}/>
-                <MyRoleTypes/>
-                <MoveToModelsOverview systemexternalrole={component.props.systemexternalrole}/>
-                <CloseContext clearexternalroleid={component.props.clearexternalroleid} hascontext={!!contextId}/>
-                <ShowNotifications propagate={component.props.setshownotifications}/>
-                <AllowNotifications/>
-                <OpenRoleFormTool eventDispatcher={component.props.eventdispatcher} systemExternalRole={component.props.systemexternalrole}/>
-                <UnbindTool systemExternalRole={component.props.systemexternalrole}/>
-                <FileDropZone
-                  tooltiptext="Drop an invitation file here or press enter/space"
-                  handlefile={ importTransaction }
-                  extension=".json"
-                  className="ml-3 mr-3">
-                  <DesktopDownloadIcon aria-label="Drop an invitation file here" size='medium'/>
-                </FileDropZone>
-                <RemoveRol>
-                  <Trash/>
-                </RemoveRol>
-                <ConnectedToAMQP/>
-              </Nav>
+              <Navbar.Toggle aria-controls="basic-navbar-nav" />
+              <Navbar.Collapse id="basic-navbar-nav">
+                <Nav>
+                  <CardClipBoard systemExternalRole={component.props.systemexternalrole}/>
+                  <ContextActions contextid={contextId} myroletype={component.props.myroletype}/>
+                  <MyRoleTypes/>
+                  <MoveToModelsOverview systemexternalrole={component.props.systemexternalrole}/>
+                  <CloseContext clearexternalroleid={component.props.clearexternalroleid} hascontext={!!contextId}/>
+                  <ShowNotifications propagate={component.props.setshownotifications}/>
+                  <AllowNotifications/>
+                  <OpenRoleFormTool eventDispatcher={component.props.eventdispatcher} systemExternalRole={component.props.systemexternalrole}/>
+                  <UnbindTool systemExternalRole={component.props.systemexternalrole}/>
+                  <FileDropZone
+                    tooltiptext="Drop an invitation file here or press enter/space"
+                    handlefile={ importTransaction }
+                    extension=".json"
+                    className="ml-3 mr-3">
+                    <DesktopDownloadIcon aria-label="Drop an invitation file here" size='medium'/>
+                  </FileDropZone>
+                  <RemoveRol>
+                    <Trash/>
+                  </RemoveRol>
+                  <ConnectedToAMQP/>
+                </Nav>
+              </Navbar.Collapse>
             </Navbar>;
   }
 }
