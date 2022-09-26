@@ -35,6 +35,11 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import {PerspectivesComponent, RoleTable, addRemoveRoleFromContext} from "perspectives-react";
 
+export function notificationsAvailable ()
+{
+  return ("Notification" in window);
+}
+
 export class AllowNotifications extends Component
 {
   constructor(/*props*/)

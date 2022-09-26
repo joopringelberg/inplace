@@ -42,7 +42,7 @@ import UnbindTool from "./unbindtool.js";
 
 import OpenRoleFormTool from "./openroleformtool.js";
 
-import {AllowNotifications, ShowNotifications} from "./notifications.js";
+import {AllowNotifications, ShowNotifications, notificationsAvailable} from "./notifications.js";
 
 import Trash from "./trash.js";
 
@@ -66,7 +66,8 @@ export default class NavigationBar extends Component
     const contextId = component.props.externalroleid ? deconstructContext ( component.props.externalroleid ) : null;
     return  <Navbar 
               bg={component.props.isbasepage ? "light" : "danger"} 
-              expand="sm" 
+              expand="md" 
+              collapseOnSelect={true}
               role="banner" 
               aria-label="Main menu bar" 
               className="justify-content-between">
@@ -79,8 +80,15 @@ export default class NavigationBar extends Component
                   <MyRoleTypes/>
                   <MoveToModelsOverview systemexternalrole={component.props.systemexternalrole}/>
                   <CloseContext clearexternalroleid={component.props.clearexternalroleid} hascontext={!!contextId}/>
-                  <ShowNotifications propagate={component.props.setshownotifications}/>
-                  <AllowNotifications/>
+                  {
+                    notificationsAvailable() ? 
+                      <>
+                        <ShowNotifications propagate={component.props.setshownotifications}/>
+                        <AllowNotifications/>
+                      </>
+                      :
+                      null
+                  }
                   <OpenRoleFormTool eventDispatcher={component.props.eventdispatcher} systemExternalRole={component.props.systemexternalrole}/>
                   <UnbindTool systemExternalRole={component.props.systemexternalrole}/>
                   <FileDropZone
