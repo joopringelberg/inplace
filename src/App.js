@@ -343,7 +343,7 @@ export default class App extends Component
                   <NavigationBar
                     systemexternalrole={externalRole(mysystem.contextinstance)}
                     setshownotifications={value => component.setState({showNotifications: value})}
-                    isbasepage={component.usesSharedWorker || !component.state.isFirstChannel}
+                    isbasepage={!component.usesSharedWorker || !component.state.isFirstChannel}
                     eventdispatcher={component.eventDispatcher}
                     myroletype={component.state.myRoleType}
                     externalroleid={component.state.externalRoleId}
