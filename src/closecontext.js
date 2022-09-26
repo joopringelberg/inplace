@@ -52,6 +52,7 @@ export default class CloseContext extends Component
   {
     const component = this;
     component.props.clearexternalroleid();
+    component.props.collapsenavbar();
   }
 
   render()
@@ -93,4 +94,5 @@ export default class CloseContext extends Component
 CloseContext.propTypes =
   { clearexternalroleid: PropTypes.func.isRequired
   , hascontext: PropTypes.bool.isRequired
+  , collapsenavbar: PropTypes.func.isRequired
   };

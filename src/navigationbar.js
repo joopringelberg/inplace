@@ -60,46 +60,61 @@ import ContextActions from "./contextActions.js";
 
 export default class NavigationBar extends Component
 {
+  constructor(props)
+  {
+    super(props);
+    this.state = {expanded:false};
+  }
   render()
   {
+    function toggleNavbar ()
+    {
+      component.setState({expanded: !component.state.expanded});
+    }
+    function collapseNavbar()
+    {
+      component.setState({expanded: false});
+    }
     const component = this;
     const contextId = component.props.externalroleid ? deconstructContext ( component.props.externalroleid ) : null;
     return  <Navbar 
               bg={component.props.isbasepage ? "light" : "danger"} 
               expand="md" 
-              collapseOnSelect={true}
+              collapseOnSelect
               role="banner" 
               aria-label="Main menu bar" 
-              className="justify-content-between">
+              className="justify-content-between"
+              expanded={component.state.expanded}>
               <Navbar.Brand tabIndex="-1" href="#home">InPlace</Navbar.Brand>
-              <Navbar.Toggle aria-controls="basic-navbar-nav" />
-              <Navbar.Collapse id="basic-navbar-nav">
+              <Navbar.Toggle aria-controls="perspectives-toolbar" onClick={toggleNavbar}/>
+              <Navbar.Collapse id="perspectives-toolbar">
                 <Nav>
                   <CardClipBoard systemExternalRole={component.props.systemexternalrole}/>
                   <ContextActions contextid={contextId} myroletype={component.props.myroletype}/>
                   <MyRoleTypes/>
-                  <MoveToModelsOverview systemexternalrole={component.props.systemexternalrole}/>
-                  <CloseContext clearexternalroleid={component.props.clearexternalroleid} hascontext={!!contextId}/>
+                  <MoveToModelsOverview systemexternalrole={component.props.systemexternalrole} collapsenavbar={collapseNavbar}/>
+                  <CloseContext clearexternalroleid={component.props.clearexternalroleid} hascontext={!!contextId} collapsenavbar={collapseNavbar}/>
                   {
                     notificationsAvailable() ? 
                       <>
-                        <ShowNotifications propagate={component.props.setshownotifications}/>
-                        <AllowNotifications/>
+                        <ShowNotifications propagate={component.props.setshownotifications} collapsenavbar={collapseNavbar}/>
+                        <AllowNotifications collapsenavbar={collapseNavbar}s/>
                       </>
                       :
                       null
                   }
-                  <OpenRoleFormTool eventDispatcher={component.props.eventdispatcher} systemExternalRole={component.props.systemexternalrole}/>
-                  <UnbindTool systemExternalRole={component.props.systemexternalrole}/>
+                  <OpenRoleFormTool eventDispatcher={component.props.eventdispatcher} systemExternalRole={component.props.systemexternalrole} collapsenavbar={collapseNavbar}/>
+                  <UnbindTool systemExternalRole={component.props.systemexternalrole} collapsenavbar={collapseNavbar}/>
                   <FileDropZone
                     tooltiptext="Drop an invitation file here or press enter/space"
                     handlefile={ importTransaction }
                     extension=".json"
-                    className="ml-3 mr-3">
+                    className="ml-3 mr-3"
+                    collapsenavbar={collapseNavbar}>
                     <DesktopDownloadIcon aria-label="Drop an invitation file here" size='medium'/>
                   </FileDropZone>
                   <RemoveRol>
-                    <Trash/>
+                    <Trash collapsenavbar={collapseNavbar}/>
                   </RemoveRol>
                   <ConnectedToAMQP/>
                 </Nav>

@@ -46,6 +46,7 @@ export default function Trash(props)
     {
       // eslint-disable-next-line react/prop-types
       props.removerol( roleData );
+      this.props.collapsenavbar();
     }
   }
 
@@ -71,3 +72,7 @@ export default function Trash(props)
                   </div>
             </OverlayTrigger>;
 }
+
+Trash.propTypes = 
+  { collapsenavbar: PropTypes.func.isRequired
+  }

@@ -55,6 +55,7 @@ export default class UnbindTool extends PerspectivesComponent
            if ( rolIdArr[0] )
             {
               pproxy.removeBinding( roleData.rolinstance, myroletype );
+              component.props.collapsenavbar();
             }
          },
          FIREANDFORGET));
@@ -139,4 +140,5 @@ export default class UnbindTool extends PerspectivesComponent
 
 UnbindTool.propTypes =
   { systemExternalRole: PropTypes.string.isRequired
+  , collapsenavbar: PropTypes.func.isRequired
   };

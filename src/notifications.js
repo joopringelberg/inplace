@@ -106,6 +106,7 @@ export class AllowNotifications extends Component
         });
       }
     }
+    this.props.collapsenavbar();
   }
 
 
@@ -146,6 +147,9 @@ export class AllowNotifications extends Component
   }
 }
 
+AllowNotifications.propTypes = 
+  { collapsenavbar: PropTypes.func.isRequired };
+
 export class ShowNotifications extends Component
 {
   constructor(/*props*/)
@@ -173,6 +177,7 @@ export class ShowNotifications extends Component
     const showpanel = !this.state.showNotifications;
     this.setState({ showNotifications: showpanel });
     this.props.propagate( showpanel );
+    this.props.collapsenavbar();
   }
 
   render()
@@ -212,7 +217,9 @@ export class ShowNotifications extends Component
 }
 
 ShowNotifications.propTypes =
-  { propagate: PropTypes.func.isRequired };
+  { propagate: PropTypes.func.isRequired
+  , collapsenavbar: PropTypes.func.isRequired 
+  };
 
 // Displays the notifications of a context in a RoleTable.
 // Because of the RoleTable, must be used in the subtree of a

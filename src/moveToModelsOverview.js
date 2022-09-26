@@ -29,6 +29,7 @@ import Tooltip from 'react-bootstrap/Tooltip';
 import {HomeIcon} from '@primer/octicons-react';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { Nav } from "react-bootstrap";
 
 export default class MoveToModelsOverview extends Component
 {
@@ -52,6 +53,7 @@ export default class MoveToModelsOverview extends Component
   {
     const component = this;
     component.ref.current.dispatchEvent( new CustomEvent('OpenContext', { detail: component.props.systemexternalrole, bubbles: true }) );
+    component.props.collapsenavbar();
   }
 
   render()
@@ -70,7 +72,7 @@ export default class MoveToModelsOverview extends Component
                     delay={{ show: 250, hide: 400 }}
                     overlay={renderTooltip}
                   >
-              <div
+              <Nav.Item
                   ref={component.ref}
                   className="ml-3 mr-3"
                   aria-describedby="moveToModelsOverview-tooltip"
@@ -79,11 +81,12 @@ export default class MoveToModelsOverview extends Component
                   onClick={ () => component.navigate() }
                   >
                   <HomeIcon alt="Choose a role" aria-label="Home - the system context" size="medium"/>
-              </div>
+              </Nav.Item>
             </OverlayTrigger>;
   }
 }
 
 MoveToModelsOverview.propTypes =
   { systemexternalrole: PropTypes.string.isRequired
+  , collapsenavbar: PropTypes.func.isRequired
   };

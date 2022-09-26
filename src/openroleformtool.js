@@ -99,6 +99,7 @@ export default class OpenRoleFormTool extends PerspectivesComponent
                           // eslint-disable-next-line react/prop-types
                           component.props.eventDispatcher.eventDispatcher( JSON.parse( ev.dataTransfer.getData( "PSRol" ) ) );
                           ev.target.classList.remove("border", "p-3", "border-primary");
+                          component.props.collapsenavbar();
                           }}
                         onDragEnter={ev => ev.target.classList.add("border", "border-primary") }
                         onDragLeave={ev => ev.target.classList.remove("border", "border-primary")}>
@@ -111,4 +112,5 @@ export default class OpenRoleFormTool extends PerspectivesComponent
 OpenRoleFormTool.propTypes =
   { eventDispatcher: PropTypes.object.isRequired
   , systemExternalRole: PropTypes.string.isRequired
+  , collapsenavbar: PropTypes.func.isRequired
   };
