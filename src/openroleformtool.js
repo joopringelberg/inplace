@@ -27,6 +27,7 @@ import "./externals.js";
 
 import
   { PerspectivesComponent,
+    ModelDependencies
   } from "perspectives-react";
 
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
@@ -47,8 +48,8 @@ export default class OpenRoleFormTool extends PerspectivesComponent
         PDRproxy.then( pproxy =>
           pproxy.getProperty(
             component.props.systemExternalRole,
-            "model:System$PerspectivesSystem$External$CardClipBoard",
-            "model:System$PerspectivesSystem$External",
+            ModelDependencies.cardClipBoard,
+            ModelDependencies.systemExternal,
             function (valArr)
             {
               if (valArr[0])

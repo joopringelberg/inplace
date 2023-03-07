@@ -33,7 +33,7 @@ import {BellIcon, BellSlashIcon, FoldDownIcon, FoldUpIcon} from '@primer/octicon
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import {PerspectivesComponent, RoleTable, addRemoveRoleFromContext} from "perspectives-react";
+import {PerspectivesComponent, RoleTable, addRemoveRoleFromContext, ModelDependencies} from "perspectives-react";
 
 export function notificationsAvailable ()
 {
@@ -238,7 +238,7 @@ export class NotificationsDisplayer extends PerspectivesComponent
 
     PDRproxy.then( pproxy =>
       pproxy.getRol (component.props.systemcontextinstance,
-        "model:System$PerspectivesSystem$AllNotifications",
+        ModelDependencies.allNotifications,
         function(notifications)
         {
           const oldNotifications = component.notifications;
@@ -258,8 +258,8 @@ export class NotificationsDisplayer extends PerspectivesComponent
               {
                 pproxy.getProperty(
                   notification,
-                  "model:System$ContextWithNotification$Notifications$Message",
-                  "model:System$ContextWithNotification$Notifications",
+                  ModelDependencies.notificationMessage,
+                  ModelDependencies.notifications,
                   function( messages )
                   {
                     // A minimal message.
@@ -307,7 +307,7 @@ export class NotificationsDisplayer extends PerspectivesComponent
                     <RoleTable
                       viewname="allProperties"
                       cardcolumn="Message"
-                      roletype="model:System$ContextWithNotification$Notifications"
+                      roletype={ModelDependencies.notifications}
                       //contexttocreate
                       // createButton
                       // roleRepresentation

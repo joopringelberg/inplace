@@ -34,6 +34,7 @@ import {
     isQualifiedName,
     isExternalRole,
     externalRole,
+    ModelDependencies
   } from "perspectives-react";
 
 import Container from 'react-bootstrap/Container';
@@ -307,8 +308,8 @@ export default class App extends Component
         // Empty clipboard.
         PDRproxy.then( pproxy => pproxy.deleteProperty(
           systemExternalRole,
-          "model:System$PerspectivesSystem$External$CardClipBoard",
-          "model:System$PerspectivesSystem$User") );
+          ModelDependencies.cardClipboard,
+          ModelDependencies.sysUser) );
         event.preventDefault();
         break;
     }

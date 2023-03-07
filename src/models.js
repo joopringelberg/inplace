@@ -44,8 +44,6 @@ import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
 import Col from 'react-bootstrap/Col';
 
-const arcSource = "-- Copyright Joop Ringelberg and Cor Baars 2019, 2020, 2021\ndomain SimpleChat\n  use sys for model:System\n\n  case Model\n    aspect sys:Model\n    external\n      aspect sys:Model$External\n";
-
 // REPOSITORYURL will be substituted by Webpack. It's value is set in package.json.
 const repositoryUrl = REPOSITORYURL;
 
