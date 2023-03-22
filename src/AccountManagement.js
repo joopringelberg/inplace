@@ -216,7 +216,6 @@ export default class AccountManagement extends Component
                           component.state.username,
                           user,
                           PerspectivesGlobals.publicRepository
-                          // TODO. Handle errors in a better way.
                         )
                         .then(() => {
                           component.setState(
@@ -226,9 +225,9 @@ export default class AccountManagement extends Component
                             });
                           component.props.setloggedin();
                           component.props.setcouchdburl(user.couchdbUrl);
-                          }
-                      )
-                        .catch(e => alert( e ));
+                          })
+                          // TODO. Handle errors in a better way.
+                          .catch(e => alert( e ));
                       });
                   }
                 });

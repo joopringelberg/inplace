@@ -31,10 +31,13 @@ import {
     MySystem,
     ContextOfRole,
     PerspectiveForm,
-    isQualifiedName,
+    isSchemedResourceIdentifier,
     isExternalRole,
     externalRole,
-    ModelDependencies
+    ModelDependencies,
+    EndUserNotifier,
+    initUserMessaging,
+    UserMessagingPromise
   } from "perspectives-react";
 
 import Container from 'react-bootstrap/Container';
@@ -46,6 +49,8 @@ import NavigationBar from "./navigationbar.js";
 import AccountManagement from "./AccountManagement.js";
 
 import {NotificationsDisplayer} from "./notifications.js";
+
+import {SelectContext} from "./selectContext.js";
 
 export default class App extends Component
 {
@@ -76,7 +81,21 @@ export default class App extends Component
       , cardprop: undefined
       , backwardsNavigation: undefined
       , recompileBasicModels: false
+      , endUserMessage: {}
       };
+    initUserMessaging(
+      function ( message )
+        {
+          const p = new Promise(function(resolve)
+            { 
+              message.acknowledge = resolve
+            });
+          component.setState( {endUserMessage: message});
+          return p.then( function()
+          {
+            component.setState( { endUserMessage: {}} );
+          })
+        });
     this.usesSharedWorker = typeof SharedWorker != "undefined";
     this.containerRef = React.createRef();
     this.clearExternalRoleId = function()
@@ -218,7 +237,7 @@ export default class App extends Component
                 , cardprop: undefined
                 , backwardsNavigation: false});
             })
-          .catch(() => null);
+          .catch(e => UserMessagingPromise.then( um => um.addMessageForEndUser({title: "Opening a context", "message": "Cannot open a context for " + e.detail, error: e.toString()})));
         e.stopPropagation();
       });
     this.containerRef.current.addEventListener( "OpenRoleForm",
@@ -252,7 +271,7 @@ export default class App extends Component
   {
     const component = this;
     // Select the part after the question mark, if any.
-    const queryStringMatchResult = window.location.search.match(/\?(.*)/);
+    const queryStringMatchResult = window.location.href.match(/\?(.*)/);
     const params = new URLSearchParams(document.location.search.substring(1));
 
     if ( queryStringMatchResult )
@@ -274,7 +293,7 @@ export default class App extends Component
       {
         component.setState( { recompileBasicModels: true });
       }
-      else if ( isQualifiedName(queryStringMatchResult[1]) )
+      else if ( isSchemedResourceIdentifier(queryStringMatchResult[1]) )
       {
         ensureExternalRole( queryStringMatchResult[1])
           .then(
@@ -282,7 +301,7 @@ export default class App extends Component
             {
               component.setState( {hasContext:true, externalRoleId: erole});
             })
-          .catch(() => null);
+          .catch(e => UserMessagingPromise.then( um => um.addMessageForEndUser({title: "Opening a context", "message": "Cannot open a context for " + queryStringMatchResult[1], error: e.toString()})));
       }
       else
       {
@@ -290,10 +309,18 @@ export default class App extends Component
           .then( proxy => proxy.matchContextName( queryStringMatchResult[1] ))
           .then( function (serialisedMapping)
             {
-              // If we find no matches, we just return the ordinary full start screen (we might want to offer an explanation).
-              if ( serialisedMapping[0] != "{}" )
+              const theMap = JSON.parse( serialisedMapping[0] );
+              if ( Object.keys( theMap ).length == 0 )
               {
-                component.setState( {hasContext: true, indexedContextNameMapping: JSON.parse( serialisedMapping[0] ) });
+                UserMessagingPromise.then( um => um.addMessageForEndUser({title: "Matching request", "message": "Cannot find a match for " + queryStringMatchResult[1]}));
+              }
+              else if ( Object.keys( theMap ).length == 1 )
+              {
+                component.setState( {hasContext:true, externalRoleId: externalRole( Object.values(theMap)[0])});
+              }
+              else
+              {
+                component.setState( {hasContext: true, indexedContextNameMapping: theMap });
               }
             });
       }
@@ -365,7 +392,11 @@ export default class App extends Component
                           setMyRoleType={ myRoleType => component.setState({myRoleType: myRoleType})}
                         />
                         :
-                        null
+                        (component.state.indexedContextNameMapping 
+                          ? 
+                          <SelectContext indexedContextNameMapping={component.state.indexedContextNameMapping}/>
+                          :
+                          null)
                       )
                     }</Container>
                     {
@@ -379,6 +410,7 @@ export default class App extends Component
                       </ContextOfRole>
                       : null
                     }
+                    <EndUserNotifier message={component.state.endUserMessage}/>
                 </div>
               </Container>
             </AppContext.Provider>
@@ -426,10 +458,13 @@ function ensureExternalRole(s)
                   }
                 }
                 // Otherwise, either not a context role after all, or no binding. Fail.
-                return reject( new Error( "Not a context role!"));
+                return reject( new Error( s ));
               },
-              FIREANDFORGET
-              );
+            FIREANDFORGET,
+            function (e)
+            {
+              return reject(e);
+            });
         }));
   }
 

@@ -20,14 +20,15 @@
 
 import React from "react";
 import "./App.css";
-import { PDRproxy } from 'perspectives-proxy';
+import { PDRproxy, CONTINUOUS } from 'perspectives-proxy';
 import PropTypes from "prop-types";
 
 import "./externals.js";
 
 import {
     PerspectivesComponent,
-    ModelDependencies
+    ModelDependencies,
+    UserMessagingPromise
   } from "perspectives-react";
 
 import Container from 'react-bootstrap/Container';
@@ -71,6 +72,11 @@ export default class CardClipBoard extends PerspectivesComponent
           {
             component.setState({cardTitle: undefined}); // WERKT DIT WEL?
           }
+        },
+        CONTINUOUS,
+        function(e)
+        {
+          UserMessagingPromise.then( um => um.addMessageForEndUser({title: "Clipbboard error", "message": "Cannot read the card clipboard.", error: e.toString()}));
         }));
   }
 
