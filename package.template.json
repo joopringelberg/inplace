@@ -28,6 +28,7 @@
     "@primer/octicons-react": "^11.0.0",
     "bootstrap": "^4.3.1",
     "highlight.js": "^11.5.1",
+    "i18next": "^22.4.13",
     "perspectives-core": "git+https://github.com/joopringelberg/perspectives-core.git#PERSPECTIVESCORE",
     "perspectives-highlightjs": "github:joopringelberg/perspectives-highlightjs#PERSPECTIVESHIGHLIGHTJS",
     "perspectives-pageworker": "git+https://github.com/joopringelberg/perspectives-pageworker1.git#PAGEWORKER",
@@ -47,15 +48,15 @@
     "@babel/preset-react": "^7.0.0",
     "babel-core": "^6.26.3",
     "babel-eslint": "^10.1.0",
-    "babel-loader": "^8.0.6",
-    "clean-webpack-plugin": "^3.0.0",
-    "css-loader": "^2.1.1",
+    "babel-loader": "^9.1.2",
+    "clean-webpack-plugin": "^4.0.0",
+    "css-loader": "^6.7.3",
     "eslint": "^8.12.0",
     "eslint-plugin-react": "^7.13.0",
-    "html-webpack-plugin": "^3.2.0",
+    "html-webpack-plugin": "^5.5.0",
     "ignore-loader": "^0.1.2",
-    "style-loader": "^0.23.1",
+    "style-loader": "^4.4.2",
     "webpack": "^5.26.3",
-    "webpack-cli": "^4.5.0"
+    "webpack-cli": "^5.0.1"
   }
 }
