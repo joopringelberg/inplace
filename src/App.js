@@ -47,12 +47,14 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import NavigationBar from "./navigationbar.js";
 
 import AccountManagement from "./AccountManagement.js";
-
+ 
 import {NotificationsDisplayer} from "./notifications.js";
 
 import {SelectContext} from "./selectContext.js";
 
-import {i18next} from "./i18next.js";
+import i18next from "i18next";
+
+import {initI18next} from "./i18next.js";
 
 export default class App extends Component
 {
@@ -60,6 +62,7 @@ export default class App extends Component
   {
     super(props);
     const component = this;
+    initI18next("en");
     // This stub is replaced by a function constructed in the addOpenContextOrRoleForm behaviour
     // whenever the user starts dragging a role that supports that behaviour.
     // Notice that we use indirection here. The value of eventDispatcher is a location that holds the actual eventDispatcher.
@@ -241,8 +244,8 @@ export default class App extends Component
             })
           .catch(e => UserMessagingPromise.then( um => 
             um.addMessageForEndUser(
-              { title: i18next.t("app_opencontext_title") 
-              , message: i18next.t("app_opencontext_message", {context: e.detail})
+              { title: i18next.t("app_opencontext_title", { ns: 'inplace' }) 
+              , message: i18next.t("app_opencontext_message", {context: e.detail, ns: 'inplace'})
               , error: e.toString()
             })));
         e.stopPropagation();
@@ -310,8 +313,8 @@ export default class App extends Component
             })
           .catch(e => UserMessagingPromise.then( um => 
             um.addMessageForEndUser(
-              { title: i18next.t("app_opencontext_title") 
-              , message: i18next.t("app_opencontext_message", {context: queryStringMatchResult[1]})
+              { title: i18next.t("app_opencontext_title", { ns: 'inplace' }) 
+              , message: i18next.t("app_opencontext_message", {context: queryStringMatchResult[1], ns: 'inplace'})
               , error: e.toString()
             })));
       }
