@@ -1,5 +1,6 @@
 const path = require("path");
 const webpack = require('webpack'); //to access built-in plugins
+const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = function(env)
   {
@@ -65,7 +66,13 @@ module.exports = function(env)
             //eslint-disable-next-line no-undef
             REPOSITORYURL: JSON.stringify( repo )
           }
-        )
+        ),
+        new CopyPlugin({
+          patterns: [
+            { context: path.resolve(__dirname, "node_modules/perspectives-react/dist")
+            , from: "src_lang_*", to: path.resolve(__dirname, target) },
+          ],
+        })
       ],
       externals: {
         // These are Affjax dependencies when running on node.

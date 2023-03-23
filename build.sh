@@ -30,10 +30,6 @@ cp ./node_modules/perspectives-pageworker/dist/perspectives-pageworker.js ./$tar
 cp ./node_modules/perspectives-sharedworker/dist/perspectives-sharedworker.js ./$target/perspectives-sharedworker.js
 cp ./node_modules/perspectives-serviceworker/dist/perspectives-serviceworker.js ./$target/perspectives-serviceworker.js
 
-# LOCALES
-# Notice that this copies the main bundle too, which is not necessary.
-cp -R ./node_modules/perspectives-react/dist/ ./$target/
-
 webpack --env target=$target repo=$repo
 
 if [ $target == "production" ] ; then

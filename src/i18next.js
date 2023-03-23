@@ -8,7 +8,8 @@ export async function initI18next (LANG_KEY)
 {
   // Load namespace `inplace` in the required language
   const inplaceTranslations = await import(`./lang/${LANG_KEY}/inplace.json`);
-  // const preactTranslations = await import(`./lang/${LANG_KEY}/preact.json`);
+  // The chunks split off by Webpack for perspectives-react do not automatically end up in 
+  // the output directory for inplace. We copy them using the copy-webpack-plugin.
   const preactTranslations = getPreact(LANG_KEY)
   const resources = {};
   resources[LANG_KEY] = 
