@@ -29,7 +29,6 @@
     "bootstrap": "^4.3.1",
     "highlight.js": "^11.5.1",
     "i18next": "^22.4.13",
-    "i18next-http-backend": "^2.2.0",
     "perspectives-core": "git+https://github.com/joopringelberg/perspectives-core.git#v0.21.0",
     "perspectives-highlightjs": "github:joopringelberg/perspectives-highlightjs#v1.3.0",
     "perspectives-pageworker": "git+https://github.com/joopringelberg/perspectives-pageworker1.git#v0.11.0",
