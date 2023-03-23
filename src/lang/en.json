@@ -1,0 +1,4 @@
+{
+  "app_opencontext_title": "Opening a context",
+  "app_opencontext_message": "Cannot open a context for {{- context}}"
+}

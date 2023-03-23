@@ -52,6 +52,8 @@ import {NotificationsDisplayer} from "./notifications.js";
 
 import {SelectContext} from "./selectContext.js";
 
+import {i18next} from "./i18next.js";
+
 export default class App extends Component
 {
   constructor(props)
@@ -237,7 +239,12 @@ export default class App extends Component
                 , cardprop: undefined
                 , backwardsNavigation: false});
             })
-          .catch(e => UserMessagingPromise.then( um => um.addMessageForEndUser({title: "Opening a context", "message": "Cannot open a context for " + e.detail, error: e.toString()})));
+          .catch(e => UserMessagingPromise.then( um => 
+            um.addMessageForEndUser(
+              { title: i18next.t("app_opencontext_title") 
+              , message: i18next.t("app_opencontext_message", {context: e.detail})
+              , error: e.toString()
+            })));
         e.stopPropagation();
       });
     this.containerRef.current.addEventListener( "OpenRoleForm",
@@ -301,7 +308,12 @@ export default class App extends Component
             {
               component.setState( {hasContext:true, externalRoleId: erole});
             })
-          .catch(e => UserMessagingPromise.then( um => um.addMessageForEndUser({title: "Opening a context", "message": "Cannot open a context for " + queryStringMatchResult[1], error: e.toString()})));
+          .catch(e => UserMessagingPromise.then( um => 
+            um.addMessageForEndUser(
+              { title: i18next.t("app_opencontext_title") 
+              , message: i18next.t("app_opencontext_message", {context: queryStringMatchResult[1]})
+              , error: e.toString()
+            })));
       }
       else
       {
