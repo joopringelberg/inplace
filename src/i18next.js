@@ -10,7 +10,7 @@ export async function initI18next (LANG_KEY)
   const inplaceTranslations = await import(`./lang/${LANG_KEY}/inplace.json`);
   // The chunks split off by Webpack for perspectives-react do not automatically end up in 
   // the output directory for inplace. We copy them using the copy-webpack-plugin.
-  const preactTranslations = getPreact(LANG_KEY)
+  const preactTranslations = await getPreact(LANG_KEY)
   const resources = {};
   resources[LANG_KEY] = 
     { inplace: inplaceTranslations

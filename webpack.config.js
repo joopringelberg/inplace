@@ -25,7 +25,8 @@ module.exports = function(env)
           "react-bootstrap": path.resolve(__dirname, "node_modules/react-bootstrap"),
           "perspectives-core": path.resolve(__dirname, "node_modules/perspectives-core"),
           "perspectives-pageworker": path.resolve(__dirname, "node_modules/perspectives-pageworker"),
-          "pouchdb-browser": path.resolve(__dirname, "node_modules/pouchdb-browser")
+          "pouchdb-browser": path.resolve(__dirname, "node_modules/pouchdb-browser"),
+          "i18next": path.resolve(__dirname, "node_modules/i18next")
         }
       },
       module: {
