@@ -1,4 +1,6 @@
 {
   "app_opencontext_title": "Opening a context",
-  "app_opencontext_message": "Cannot open a context for {{- context}}"
+  "app_opencontext_message": "Cannot open a context for {{- context}}",
+  "app_contextactions_title": "Context actions unavailable",
+  "app_contextactions_message": "Could not retrieve context actions for {{- context}}"
 }

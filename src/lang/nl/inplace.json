@@ -1,4 +1,6 @@
 {
   "app_opencontext_title": "Een context openen",
-  "app_opencontext_message": "Kan deze context niet openen: {{- context}}."
+  "app_opencontext_message": "Kan deze context niet openen: {{- context}}.",
+  "app_contextactions_title": "Context acties niet beschikbaar",
+  "app_contextactions_message": "De context acties voor {{- context}} konden niet worden opgehaald."
 }

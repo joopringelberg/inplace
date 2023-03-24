@@ -22,9 +22,10 @@ import React from "react";
 import PropTypes from "prop-types";
 
 import { PDRproxy } from 'perspectives-proxy';
-import {PerspectivesComponent, ActionDropDown} from "perspectives-react";
+import {PerspectivesComponent, ActionDropDown, UserMessagingPromise} from "perspectives-react";
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
+import i18next from "i18next";
 
 export default class ContextActions extends PerspectivesComponent
 {
@@ -49,11 +50,15 @@ export default class ContextActions extends PerspectivesComponent
           {
             pproxy.getContextActions(
               component.props.myroletype,
-              component.props.contextid,
-              function(actions)
-              {
-                component.setState({actions, myRoleType: component.props.myroletype});
-              });
+              component.props.contextid)
+                .then( actions => 
+                  component.setState({actions, myRoleType: component.props.myroletype}))
+                .catch(e => UserMessagingPromise.then( um => 
+                  um.addMessageForEndUser(
+                    { title: i18next.t("app_contextactions_title", { ns: 'inplace' }) 
+                    , message: i18next.t("app_contextactions_message", {context: component.props.contextid, ns: 'inplace'})
+                    , error: e.toString()
+                  })));
           }
         }
       );
