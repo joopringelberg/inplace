@@ -4,5 +4,6 @@
   "app_contextactions_title": "Context actions unavailable",
   "app_contextactions_message": "Could not retrieve context actions for {{- context}}",
   "app_myroletypes_title": "Your role types",
-  "app_myroletypes_message": "Could not retrieve the role types you have in {{- context}}"
-}
+  "app_myroletypes_message": "Could not retrieve the role types you have in {{- context}}",
+  "notifications_title": "Notification context",
+  "notifications_message": "Could not navigate to the context for this notification."}

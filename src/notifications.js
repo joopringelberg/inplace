@@ -25,7 +25,7 @@ import "./App.css";
 
 import "./externals.js";
 
-import { PDRproxy, FIREANDFORGET } from 'perspectives-proxy';
+import { PDRproxy } from 'perspectives-proxy';
 
 import {Row, Col, OverlayTrigger, Tooltip, Collapse} from "react-bootstrap";
 
@@ -33,7 +33,9 @@ import {BellIcon, BellSlashIcon, FoldDownIcon, FoldUpIcon} from '@primer/octicon
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import {PerspectivesComponent, RoleTable, addRemoveRoleFromContext, ModelDependencies} from "perspectives-react";
+import {PerspectivesComponent, RoleTable, addRemoveRoleFromContext, ModelDependencies, UserMessagingPromise} from "perspectives-react";
+
+import i18next from "i18next";
 
 export function notificationsAvailable ()
 {
@@ -268,9 +270,9 @@ export class NotificationsDisplayer extends PerspectivesComponent
                       { data: {roleId: notification}
                       });
                     n.onclick = function(e)
-                        {
-                          pproxy.getRolContext(
-                            notification,
+                      {
+                        pproxy.getRolContext( notification )
+                          .then(
                             function (contextIdArray)
                             {
                               if (history.state && history.state.selectedContext != contextIdArray[0])
@@ -286,10 +288,14 @@ export class NotificationsDisplayer extends PerspectivesComponent
                                   , backwardsNavigation: false });
                               }
                               e.stopPropagation();
-                            },
-                            FIREANDFORGET);
-                        };
-
+                            })
+                          .catch(e => UserMessagingPromise.then( um => 
+                            um.addMessageForEndUser(
+                              { title: i18next.t("notifications_title", { ns: 'inplace' }) 
+                              , message: i18next.t("notifications_message", {ns: 'inplace'})
+                              , error: e.toString()
+                            })));            
+                      };
                   }
                 );
               });
