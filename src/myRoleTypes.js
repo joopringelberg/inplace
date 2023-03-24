@@ -23,8 +23,9 @@ import { PDRproxy } from 'perspectives-proxy';
 import Dropdown from 'react-bootstrap/Dropdown';
 import Tooltip from 'react-bootstrap/Tooltip';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import {deconstructLocalName, AppContext} from "perspectives-react";
+import {deconstructLocalName, AppContext, UserMessagingPromise} from "perspectives-react";
 import {PeopleIcon} from '@primer/octicons-react';
+import i18next from "i18next";
 
 export default class MyRoleTypes extends Component
 {
@@ -40,11 +41,14 @@ export default class MyRoleTypes extends Component
     PDRproxy.then(
       function( pproxy )
       {
-        pproxy.getAllMyRoleTypes( component.roleInstance(),
-          function(myRoleTypes)
-          {
-            component.setState({myRoleTypes: myRoleTypes, roleId: component.roleInstance()});
-          });
+        pproxy.getAllMyRoleTypes( component.roleInstance())
+          .then( myRoleTypes => component.setState({myRoleTypes: myRoleTypes, roleId: component.roleInstance()}))
+          .catch(e => UserMessagingPromise.then( um => 
+            um.addMessageForEndUser(
+              { title: i18next.t("app_myroletypes_title", { ns: 'inplace' }) 
+              , message: i18next.t("app_myroletypes_message", {context: component.props.contextid, ns: 'inplace'})
+              , error: e.toString()
+            })));
       }
     );
   }
