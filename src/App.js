@@ -348,10 +348,18 @@ export default class App extends Component
     {
       case 27: // Escape
         // Empty clipboard.
-        PDRproxy.then( pproxy => pproxy.deleteProperty(
-          systemExternalRole,
-          ModelDependencies.cardClipboard,
-          ModelDependencies.sysUser) );
+        PDRproxy
+          .then( pproxy => pproxy.deleteProperty(
+            systemExternalRole,
+            ModelDependencies.cardClipBoard,
+            ModelDependencies.sysUser) )
+          .catch(e => UserMessagingPromise.then( um => 
+            um.addMessageForEndUser(
+              { title: i18next.t("clipboardEmpty_title", { ns: 'preact' }) 
+              , message: i18next.t("clipboardEmpty_message", {ns: 'preact'})
+              , error: e.toString()
+            })));
+
         event.preventDefault();
         break;
     }

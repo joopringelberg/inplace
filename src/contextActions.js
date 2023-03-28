@@ -74,8 +74,14 @@ export default class ContextActions extends PerspectivesComponent
           pproxy.contextAction(
             component.props.contextid
             , component.props.myroletype  // authoringRole
-            , actionName);
-      });
+            , actionName)
+          .catch(e => UserMessagingPromise.then( um => 
+            um.addMessageForEndUser(
+              { title: i18next.t("action_title", { ns: 'preact' }) 
+              , message: i18next.t("action_message", {ns: 'preact', action: actionName})
+              , error: e.toString()
+              })));  
+        });
   }
 
   render()
