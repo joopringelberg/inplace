@@ -7,4 +7,6 @@
   , "app_myroletypes_message": "Kon de roltypen die je in deze context ({{- context}}) speelt niet ophalen."
   , "notifications_title": "Notificatie context"
   , "notifications_message": "Kan niet naar de context van deze notificatie navigeren."
+  , "unbindtool_title": "Verwijder vuller"
+  , "unbindtool_message": "Je hebt geen toestemming om de vuller van deze rol te verwijderen."
 }

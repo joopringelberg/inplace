@@ -29,6 +29,7 @@ import
   { PerspectivesComponent
   , Alert
   , ModelDependencies
+  , UserMessagingPromise
   } from "perspectives-react";
 
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
@@ -36,6 +37,7 @@ import Tooltip from 'react-bootstrap/Tooltip';
 import {LinkIcon} from '@primer/octicons-react';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
+import i18next from "i18next";
 
 export default class UnbindTool extends PerspectivesComponent
 {
@@ -55,15 +57,27 @@ export default class UnbindTool extends PerspectivesComponent
          {
            if ( rolIdArr[0] )
             {
-              pproxy.removeBinding( roleData.rolinstance, myroletype );
-              component.props.collapsenavbar();
+              pproxy
+                .removeBinding( roleData.rolinstance, myroletype )
+                .catch(e => UserMessagingPromise.then( um => 
+                  um.addMessageForEndUser(
+                    { title: i18next.t("unfill_title", { ns: 'preact' }) 
+                    , message: i18next.t("unfill_message", { ns: 'preact' })
+                    , error: e.toString()
+                    })));              
+          component.props.collapsenavbar();
             }
          },
          FIREANDFORGET));
     }
     else
     {
-      component.setState({ showAlert: true});
+      UserMessagingPromise.then( um => 
+        um.addMessageForEndUser(
+          { title: i18next.t("unbindtool_title", { ns: 'inplace' }) 
+          , message: i18next.t("unbindtool_message", { ns: 'inplace' })
+          , error: ""
+          }))
     }
   }
   handleKeyDown(e)

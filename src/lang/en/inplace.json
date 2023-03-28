@@ -7,4 +7,6 @@
   , "app_myroletypes_message": "Could not retrieve the role types you have in {{- context}}"
   , "notifications_title": "Notification context"
   , "notifications_message": "Could not navigate to the context for this notification."
+  , "unbindtool_title": "Remove filler"
+  , "unbindtool_message": "You are not allowed to remove the filler of this role."
 }
