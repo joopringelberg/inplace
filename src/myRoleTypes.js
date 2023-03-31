@@ -72,12 +72,14 @@ export default class MyRoleTypes extends Component
     }
     else
     {
-      PDRproxy.then(
-        function (pproxy)
-        {
-          pproxy.setPreferredUserRoleType(component.roleInstance(), userRoleType);
-        }
-      );
+      PDRproxy
+        .then( pproxy => pproxy.setPreferredUserRoleType(component.roleInstance(), userRoleType) )
+        .catch(e => UserMessagingPromise.then( um => 
+          um.addMessageForEndUser(
+            { title: i18next.t("setMyRoleTypes_title", { ns: 'inplace' }) 
+            , message: i18next.t("setMyRoleTypes_message", {preferredType: userRoleType, ns: 'inplace'})
+            , error: e.toString()
+          })));
     }
   }
 
