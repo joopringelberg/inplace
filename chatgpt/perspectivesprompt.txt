@@ -1,0 +1,52 @@
+Your job is to learn a new descriptive language. It is called PL.
+I will describe the language PL to you.
+The language PL is used to describe context types, role types and property types.
+Context types are divided into four groups: domains, cases, activities and groups.
+Role types are divided into three groups: users, things, external roles and contexts.
+Property types are distinguished by their range, which is either String, Number, Boolean, Date or Email.
+Range names must be capitalised.
+A text in PL is called a model.
+A model describes a number of types.
+We call them the user defined types.
+All user defined types must start with a capital.
+To declare a context type in the group of domains, start a line with the keyword "domain" followed by its capitalised user defined name.
+To declare a context type in the group of cases, start a line with the keyword "case" followed by its capitalised user defined name.
+For activities and groups, use the keywords "activity" and "group" respectively.
+All keywords in the language start with a lower case character.
+Each user defined type may be declared just once.
+To declare a role type in the group of user roles, start a line with the keyword "user" followed by its capitalised user defined name. For things and contexts, use the keywords "thing" and "context" respectively.
+All types must be embedded in another type, except for a domain context type.
+Each model has exactly one domain context type. It is never embedded in another type.
+To embed a type B in a type A, write the declaration of B below A and indent it with four spaces.
+A context type may contain other context types.
+It may also contain role types.
+A role type may contain property types.
+To declare a property type, use the keyword "property" and write the user defined property name after that.
+The range of a property type is written in parenthesis just behind the user defined property name.
+A property type has a cardinality which may be either "functional" or "relational". This is written within the parenthesis that capture the property's range, separated by a comma from it.
+A role type has a cardinality which may be either "functional" or "relational". It is written in parenthesis just behind the user defined role name.
+Each context has exactly one role that represents it and it is called its external role. The external role may optionally be described to give it property types.
+A role may be filled by another role. To describe that role B fills role A, write "A filledBy B". If we also specify A's cardinality, we write "A (relational) filledBy B".
+A user role can only be filled by another user role.
+A thing role can be filled by another thing role or a user role.
+A context role can only be filled by the external role of a context.
+An external role cannot be filled.
+When role B fills role A, all of B's properties are available to A as well. This allows us to factor out common properties of two roles to a new role that we then use to fill the two original roles.
+
+In our conversation, I will give you a case description and you should return the PL model for it.
+A case description always starts with StartCaseDescription and always ends with EndCaseDescription.
+When you give me a PL model, it should be a single Javascript string with newline and tab characters. The model should start with four hash signs and end with four hash signs.
+
+Here is an example showcasing all of these rules.
+Given this case description:
+
+StartCaseDescription 
+Model the education domain. A class is taught by a teacher to multiple students. Both are persons with a Name. The teacher has a subject and the pupils have a grade.
+EndCaseDescription
+
+this model should be returned:
+
+'####domain Education\n\tuser Person (relational)\n\t\tproperty Name (String, functional)\n\t\n\tcase Class\n\t\tuser Teacher (functional) filledBy Person\n\t\t\tproperty Subject (String, functional)\n\t\tuser Pupil (relational) filledBy Person\n\t\t\tproperty Grade (Number, functional)\n####'
+
+
+Let me know whether you understood all this. Just answer yes or no.

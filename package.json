@@ -12,7 +12,9 @@
     "buildtest": "./build.sh -r https://localhost:6984/testrepository/ -t test",
     "buildremotetest": "./build.sh -r https://inplace.works:5985/testrepository/ -t remotetest",
     "buildmodels_dev": "webpack --watch --config models.webpack.config.js --env target=development repo=https://localhost:6984/repository/",
-    "buildmodels_prod": "webpack --watch --config models.webpack.config.js --env target=production repo=https://inplace.works:5985/repository/"
+    "buildmodels_prod": "webpack --watch --config models.webpack.config.js --env target=production repo=https://inplace.works:5985/repository/",
+    "testPerspectivesFile": "webpack --watch --config perspectivesFile.webpack.config.js",
+    "chatGPT": "webpack --watch --config chatGPT.webpack.config.js"
   },
   "author": "Joop Ringelberg <joop.ringelberg@gmail.com>",
   "repository": {
