@@ -82,15 +82,12 @@ export default class CardClipBoard extends PerspectivesComponent
 
   writeRoleIdentification()
   {
-    const type = "text/plain",
-      component = this;
-    var blob = new Blob([component.state.rolinstance], { type });
-    // eslint-disable-next-line no-undef
-    var data = [new ClipboardItem({ [type]: blob })];
+    const component = this;
 
-    navigator.clipboard.write(data).then(
+    navigator.clipboard.writeText(component.state.rolinstance).then(
         function () {
         /* success */
+        alert("Copied the role instance to the clipboard.")
         },
         function () {
         /* failure */
