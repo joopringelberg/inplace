@@ -291,8 +291,8 @@ export class NotificationsDisplayer extends PerspectivesComponent
                             })
                           .catch(e => UserMessagingPromise.then( um => 
                             um.addMessageForEndUser(
-                              { title: i18next.t("notifications_title", { ns: 'inplace' }) 
-                              , message: i18next.t("notifications_message", {ns: 'inplace'})
+                              { title: i18next.t("notifications_title", { ns: 'mycontexts' }) 
+                              , message: i18next.t("notifications_message", {ns: 'mycontexts'})
                               , error: e.toString()
                             })));            
                       };

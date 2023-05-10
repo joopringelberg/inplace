@@ -33,9 +33,9 @@ cp ./node_modules/perspectives-serviceworker/dist/perspectives-serviceworker.js 
 webpack --env target=$target repo=$repo
 
 if [ $target == "production" ] ; then
-    scp -r ./production/* joop@inplace.works:/var/www/inplace.works
+    scp -r ./production/* joop@inplace.works:/var/www/mycontexts.com
 fi
 
 if [ $target == "remotetest" ] ; then
-    scp -r ./remotetest/* joop@inplace.works:/var/www/inplace.works/remotetest
+    scp -r ./remotetest/* joop@inplace.works:/var/www/mycontexts.com/remotetest
 fi

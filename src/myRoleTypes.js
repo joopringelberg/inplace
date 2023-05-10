@@ -45,8 +45,8 @@ export default class MyRoleTypes extends Component
           .then( myRoleTypes => component.setState({myRoleTypes: myRoleTypes, roleId: component.roleInstance()}))
           .catch(e => UserMessagingPromise.then( um => 
             um.addMessageForEndUser(
-              { title: i18next.t("app_myroletypes_title", { ns: 'inplace' }) 
-              , message: i18next.t("app_myroletypes_message", {context: component.props.contextid, ns: 'inplace'})
+              { title: i18next.t("app_myroletypes_title", { ns: 'mycontexts' }) 
+              , message: i18next.t("app_myroletypes_message", {context: component.props.contextid, ns: 'mycontexts'})
               , error: e.toString()
             })));
       }
@@ -76,8 +76,8 @@ export default class MyRoleTypes extends Component
         .then( pproxy => pproxy.setPreferredUserRoleType(component.roleInstance(), userRoleType) )
         .catch(e => UserMessagingPromise.then( um => 
           um.addMessageForEndUser(
-            { title: i18next.t("setMyRoleTypes_title", { ns: 'inplace' }) 
-            , message: i18next.t("setMyRoleTypes_message", {preferredType: userRoleType, ns: 'inplace'})
+            { title: i18next.t("setMyRoleTypes_title", { ns: 'mycontexts' }) 
+            , message: i18next.t("setMyRoleTypes_message", {preferredType: userRoleType, ns: 'mycontexts'})
             , error: e.toString()
           })));
     }

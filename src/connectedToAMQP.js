@@ -72,7 +72,7 @@ export default function ConnectedToAMQP(props)
                       }}
                       onDragEnter={ev => ev.target.classList.add("border", "border-primary") }
                       onDragLeave={ev => ev.target.classList.remove("border", "border-primary")}>
-                      <BroadcastIcon alt="Connected" aria-label="InPlace can send and receive messages" size='medium'/>
+                      <BroadcastIcon alt="Connected" aria-label="MyContexts can send and receive messages" size='medium'/>
                   </div>
                   </OverlayTrigger>
                   : <div/>

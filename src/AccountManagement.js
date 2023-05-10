@@ -257,7 +257,7 @@ export default class AccountManagement extends Component
                     </Form.Row>
                     <Form.Row className="pb-3">
                       <Col>
-                      {component.state.usersConfigured ? <Form.Text><span>Enter the username and password for an InPlace user on this computer. Alternatively, </span><Button size="sm" variant="outline-info" onClick={() => component.setState({activeKey:"setup"})}>create a new account.</Button></Form.Text> : <Welcome/>}
+                      {component.state.usersConfigured ? <Form.Text><span>Enter the username and password for a MyContexts user on this computer. Alternatively, </span><Button size="sm" variant="outline-info" onClick={() => component.setState({activeKey:"setup"})}>create a new account.</Button></Form.Text> : <Welcome/>}
                       </Col>
                     </Form.Row>
                     <Form.Group as={Row} controlId="username">
@@ -477,17 +477,17 @@ AccountManagement.propTypes =
 //////////////////////////////////////////////////////////////////////////////
 function Welcome(){
   return <Card>
-          <Card.Header as="h5">Welcome to InPlace</Card.Header>
+          <Card.Header as="h5">Welcome to MyContexts</Card.Header>
           <Card.Body>
-            <Card.Text>There is no user of this InPlace installation yet. Enter the username and password you&apos;ve
+            <Card.Text>There is no user of this MyContexts installation yet. Enter the username and password you&apos;ve
             used to create a Server Admin in Couchdb. If you have not done that yet, follow these instructions:</Card.Text>
             <ol>
               <li>Go to the <a href="http://127.0.0.1:5984/_utils">Fauxton admin interface</a>.</li>
               <li>Enter &quot;admin&quot; for username and the password you&apos;ve set on installing Couchdb.</li>
               <li>Click the lowest button in the left column, select the &quot;Create Server Admin&quot; tab. </li>
-              <li>Enter the name you will use to open InPlace. Enter a password.</li>
+              <li>Enter the name you will use to open MyContexts. Enter a password.</li>
               <li>Click &quot;Create Admin&quot;.</li>
-              <li>Finally close InPlace (this program) and open it again.</li>
+              <li>Finally close MyContexts (this program) and open it again.</li>
             </ol>
           </Card.Body>
         </Card>;
@@ -580,11 +580,11 @@ function getPort(url)
 //       <Card.Body>
 //         <Card.Title role="heading" aria-level="2">No Couchdb detected</Card.Title>
 //         <Card.Text>
-//           InPlace cannot detect a Couchdb instance on your computer. This may have the following reasons:
+//           MyContexts cannot detect a Couchdb instance on your computer. This may have the following reasons:
 //         </Card.Text>
 //         <ol>
 //           <li>Couchdb was not installed. See instructions below.</li>
-//           <li>Couchdb was installed, but is not running. Start Couchdb on your computer, then restart InPlace.</li>
+//           <li>Couchdb was installed, but is not running. Start Couchdb on your computer, then restart MyContexts.</li>
 //           <li>Couchdb is running, but not on the default port 5984. Currently it is not possible to configure the port Perspectives uses to access Couchdb. Try to make Couchdb listen on port 5984.</li>
 //         </ol>
 //         <Card.Title role="heading" aria-level="2">How to install Coudchb</Card.Title>
@@ -598,11 +598,11 @@ function getPort(url)
 //           <li>Create a new System Admin.
 //             <ol>
 //               <li>Click the lowest button in the left column, select the &quot;Create Server Admin&quot; tab.</li>
-//               <li>Enter the name you will use to open InPlace. Enter a password.</li>
+//               <li>Enter the name you will use to open MyContexts. Enter a password.</li>
 //               <li>Click &quot;Create Admin&quot;.</li>
 //             </ol>
 //           </li>
-//           <li>Close InPlace (this application) and start it again. Then enter the username and password you&apos;ve just added to Couchdb.</li>
+//           <li>Close MyContexts (this application) and start it again. Then enter the username and password you&apos;ve just added to Couchdb.</li>
 //         </ol>
 //       </Card.Body>
 //     </Card>);

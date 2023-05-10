@@ -201,10 +201,10 @@ export default class App extends Component
         }
         else
         {
-          // In this situation, the next backwards navigation exits InPlace.
+          // In this situation, the next backwards navigation exits MyContexts.
           // We need a modal dialog that returns a boolean result reflecting the users choice:
-          //  true: yes, I want to leave InPlace;
-          //  false: no, I don't want to leave InPlace.
+          //  true: yes, I want to leave MyContexts;
+          //  false: no, I don't want to leave MyContexts.
           // If true, accept navigation.
           // If false, abort navigation.
           component.setState(
@@ -244,8 +244,8 @@ export default class App extends Component
             })
           .catch(e => UserMessagingPromise.then( um => 
             um.addMessageForEndUser(
-              { title: i18next.t("app_opencontext_title", { ns: 'inplace' }) 
-              , message: i18next.t("app_opencontext_message", {context: e.detail, ns: 'inplace'})
+              { title: i18next.t("app_opencontext_title", { ns: 'mycontexts' }) 
+              , message: i18next.t("app_opencontext_message", {context: e.detail, ns: 'mycontexts'})
               , error: e.toString()
             })));
         e.stopPropagation();
@@ -313,8 +313,8 @@ export default class App extends Component
             })
           .catch(e => UserMessagingPromise.then( um => 
             um.addMessageForEndUser(
-              { title: i18next.t("app_opencontext_title", { ns: 'inplace' }) 
-              , message: i18next.t("app_opencontext_message", {context: queryStringMatchResult[1], ns: 'inplace'})
+              { title: i18next.t("app_opencontext_title", { ns: 'mycontexts' }) 
+              , message: i18next.t("app_opencontext_message", {context: queryStringMatchResult[1], ns: 'mycontexts'})
               , error: e.toString()
             })));
       }

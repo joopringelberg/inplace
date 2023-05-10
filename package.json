@@ -1,20 +1,18 @@
 {
-  "name": "InPlace",
+  "name": "MyContexts",
   "version": "0.19.0",
-  "description": "A client for the browser.",
+  "description": "The client for the Perspectives Distributed Runtime.",
   "private": true,
-  "homepage": "https://inplace.one",
+  "homepage": "https://mycontexts.com",
   "scripts": {
     "watch": "webpack --watch",
     "symlinks": "./createPerspectivesLinks.sh",
     "builddevelopment": "./build.sh -r https://localhost:6984/repository/ -t development",
-    "buildproduction": "./build.sh -r https://inplace.works:5985/repository/ -t production",
+    "buildproduction": "./build.sh -r https://mycontexts.com:5985/repository/ -t production",
     "buildtest": "./build.sh -r https://localhost:6984/testrepository/ -t test",
-    "buildremotetest": "./build.sh -r https://inplace.works:5985/testrepository/ -t remotetest",
+    "buildremotetest": "./build.sh -r https://mycontexts.com:5985/testrepository/ -t remotetest",
     "buildmodels_dev": "webpack --watch --config models.webpack.config.js --env target=development repo=https://localhost:6984/repository/",
-    "buildmodels_prod": "webpack --watch --config models.webpack.config.js --env target=production repo=https://inplace.works:5985/repository/",
-    "testPerspectivesFile": "webpack --watch --config perspectivesFile.webpack.config.js",
-    "chatGPT": "webpack --watch --config chatGPT.webpack.config.js"
+    "buildmodels_prod": "webpack --watch --config models.webpack.config.js --env target=production repo=https://mycontexts.com:5985/repository/"
   },
   "author": "Joop Ringelberg <joop.ringelberg@gmail.com>",
   "repository": {
@@ -58,7 +56,7 @@
     "eslint-plugin-react": "^7.13.0",
     "html-webpack-plugin": "^5.5.0",
     "ignore-loader": "^0.1.2",
-    "style-loader": "^3.3.2",
+    "style-loader": "^4.4.2",
     "webpack": "^5.26.3",
     "webpack-cli": "^5.0.1"
   }

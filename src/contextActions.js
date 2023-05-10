@@ -55,8 +55,8 @@ export default class ContextActions extends PerspectivesComponent
                   component.setState({actions, myRoleType: component.props.myroletype}))
                 .catch(e => UserMessagingPromise.then( um => 
                   um.addMessageForEndUser(
-                    { title: i18next.t("app_contextactions_title", { ns: 'inplace' }) 
-                    , message: i18next.t("app_contextactions_message", {context: component.props.contextid, ns: 'inplace'})
+                    { title: i18next.t("app_contextactions_title", { ns: 'mycontexts' }) 
+                    , message: i18next.t("app_contextactions_message", {context: component.props.contextid, ns: 'mycontexts'})
                     , error: e.toString()
                   })));
           }

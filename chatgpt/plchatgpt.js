@@ -99,9 +99,11 @@ class App extends React.Component
                     }
                     else {
                       // Add the received response to the messages.
-                      component.setState({messages: component.state.messages.concat( [data.completion.message] )});
-                      // Display the response
-                      component.setState({newestResponse: component.extractModel( data.completion.message.content ), nextQuestion: "" });
+                      component.setState(
+                          { messages: component.state.messages.concat( [data.completion.message] )
+                          , newestResponse: component.extractModel( data.completion.message.content )
+                          , nextQuestion: ""
+                          });
                     }
                   }
                 )
@@ -150,6 +152,7 @@ class App extends React.Component
                     as="textarea" 
                     rows={3} 
                     onChange={ event => component.setState({nextQuestion: event.target.value})}
+                    value={component.state.nextQuestion}
                     />
                   <Button variant="primary" onClick={() => component.submit()}>Submit</Button>
               </Container>;

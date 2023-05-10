@@ -47,7 +47,7 @@ class App extends React.Component
                   <h3>Test PerspectivesFile Component</h3>
                     <PerspectivesFile
                       serialisedProperty={sampleProperty}
-                      propertyValues={{values:[]}}
+                      propertyValues={{values:[], propertyVerbs: ["Consult"]}}
                       roleId="MyRole"
                       myRoletype="User">
 

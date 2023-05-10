@@ -88,7 +88,7 @@ export default class NavigationBar extends Component
               // className={"justify-content-between" + (component.props.isbasepage ? " border-bottom border-warning border-3" : "")}
               className={classes}
               expanded={component.state.expanded}>
-              <Navbar.Brand tabIndex="-1" href="#home">InPlace</Navbar.Brand>
+              <Navbar.Brand tabIndex="-1" href="#home">MyContexts</Navbar.Brand>
               <Navbar.Toggle aria-controls="perspectives-toolbar" onClick={toggleNavbar}/>
               <Navbar.Collapse id="perspectives-toolbar">
                 <Nav>

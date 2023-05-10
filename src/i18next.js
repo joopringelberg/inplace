@@ -6,14 +6,14 @@ import {getPreact} from "perspectives-react";
 
 export async function initI18next (LANG_KEY)
 {
-  // Load namespace `inplace` in the required language
-  const inplaceTranslations = await import(`./lang/${LANG_KEY}/inplace.json`);
+  // Load namespace `mycontexts` in the required language
+  const mycontextsTranslations = await import(`./lang/${LANG_KEY}/mycontexts.json`);
   // The chunks split off by Webpack for perspectives-react do not automatically end up in 
-  // the output directory for inplace. We copy them using the copy-webpack-plugin.
+  // the output directory for mycontexts. We copy them using the copy-webpack-plugin.
   const preactTranslations = await getPreact(LANG_KEY)
   const resources = {};
   resources[LANG_KEY] = 
-    { inplace: inplaceTranslations
+    { mycontexts: mycontextsTranslations
     , preact: preactTranslations
   }
 
