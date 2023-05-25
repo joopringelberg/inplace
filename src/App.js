@@ -309,7 +309,16 @@ export default class App extends Component
           .then(
             function(erole)
             {
-              component.setState( {hasContext:true, externalRoleId: erole});
+              PDRproxy.then( function( pproxy )
+                {
+                  pproxy.getRoleName( erole, function (nameArr)
+                    {
+                      document.title = nameArr[0];
+                      history.pushState({ selectedContext: erole, title: nameArr[0] }, "");
+                      component.setState( {hasContext:true, externalRoleId: erole});
+                    },
+                    FIREANDFORGET);
+                });
             })
           .catch(e => UserMessagingPromise.then( um => 
             um.addMessageForEndUser(
