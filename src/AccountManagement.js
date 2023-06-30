@@ -245,6 +245,10 @@ export default class AccountManagement extends Component
 
   render()
   {
+    // getCouchdbUrl and getUseridentifier have changed the cursor to the 'waiting' shape and will return it to the pointer shape when their 
+    // promises resolve. However, that will only happen when the user has logged in.
+    // Consequently, he sees a 'waiting' state cursor. We fix that here by turning the cursor back to a pointer.
+    document.body.style.cursor = "pointer";
     const component = this;
     return  <Container>
               <Tabs activeKey={component.state.activeKey} onSelect={ (k) => component.setState({activeKey: k})}>

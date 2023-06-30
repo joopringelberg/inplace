@@ -145,18 +145,7 @@ export default class App extends Component
       [ SharedWorkerChannelPromise.then( proxy => proxy.channelId)
       , SharedWorkerChannelPromise.then( proxy => proxy.isUserLoggedIn())
       , PDRproxy.then( proxy => proxy.getCouchdbUrl() )
-      , PDRproxy.then( function(proxy)
-        {
-          return new Promise(function (resolver)
-            {
-              proxy.getUserIdentifier(
-                  function(sysId)
-                  {
-                    resolver( sysId[0] );
-                  }
-                );
-            });
-        } )
+      , PDRproxy.then( proxy => proxy.getUserIdentifier())
       ]).then( function( results )
         {
           const setter = { isFirstChannel: results[0] == 1000000 };
