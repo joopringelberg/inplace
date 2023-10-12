@@ -22,15 +22,20 @@ import React, { Component } from "react";
 import "./App.css";
 import PropTypes from "prop-types";
 
+import {PDRproxy} from "perspectives-proxy";
+
 import "./externals.js";
 
 import {
     RemoveRol,
     importTransaction,
     FileDropZone,
-    deconstructContext
+    deconstructContext,
+    ModelDependencies,
+    UserMessagingPromise
   } from "perspectives-react";
 
+import i18next from "i18next";
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 
@@ -65,6 +70,36 @@ export default class NavigationBar extends Component
     super(props);
     this.state = {expanded:false};
   }
+  handleDrop({roleData, cardTitle, addedBehaviour})
+  {
+    if (addedBehaviour && addedBehaviour.includes("fillARole"))
+    {
+      const component = this;
+      // Set information in the CardClipboard external property of "model://perspectives.domains#System$PerspectivesSystem".
+      PDRproxy.then(pproxy =>
+        pproxy.setProperty(
+          component.props.systemexternalrole,
+          ModelDependencies.cardClipBoard,
+          JSON.stringify(
+              { roleData:
+                { rolinstance: roleData.rolinstance
+                , cardTitle
+                , roleType: roleData.roltype
+                , contextType: roleData.contexttype
+                }
+              , addedBehaviour
+              , myroletype: component.props.myroletype
+              }),
+          component.props.myroletype )
+        .catch(e => UserMessagingPromise.then( um => 
+          um.addMessageForEndUser(
+            { title: i18next.t("clipboardSet_title", { ns: 'preact' }) 
+            , message: i18next.t("clipboardSet_message", {ns: 'preact'})
+            , error: e.toString()
+            }))));
+    }
+  }
+
   render()
   {
     function toggleNavbar ()
@@ -91,7 +126,19 @@ export default class NavigationBar extends Component
               <Navbar.Brand tabIndex="-1" href="#home">MyContexts</Navbar.Brand>
               <Navbar.Toggle aria-controls="perspectives-toolbar" onClick={toggleNavbar}/>
               <Navbar.Collapse id="perspectives-toolbar">
-                <Nav>
+                <Nav
+                  onDragOver={ev => ev.preventDefault()}
+                  onDragEnter={ev => ev.target.classList.add("border", "border-primary") }
+                  onDragLeave={ev => ev.target.classList.remove("border", "border-primary")}
+                  onDrop={ev => 
+                    {
+                      component.handleDrop( JSON.parse( ev.dataTransfer.getData("PSRol") ) )
+                      ev.target.classList.remove("border", "p-3", "border-primary");
+                      ev.preventDefault();
+                      ev.stopPropagation();
+                  } }
+
+                >
                   <CardClipBoard systemExternalRole={component.props.systemexternalrole}/>
                   <ContextActions contextid={contextId} myroletype={component.props.myroletype}/>
                   <MyRoleTypes/>

@@ -159,7 +159,7 @@ export default class App extends Component
           }
           if (results[3])
           {
-            setter.systemUser = results[3];
+            setter.systemUser = results[3][0];
           }
           component.setState( setter );
         })
