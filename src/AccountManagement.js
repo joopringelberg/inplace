@@ -194,11 +194,15 @@ export default class AccountManagement extends Component
                           .then(
                             function(success) // eslint-disable-line
                             {
+                              // We do not yet return a reliable boolean value from the PDR.
                               if (!success)
                               {
-                                alert("Unfortunately the basic models could not be compiled.");
+                                alert("Unfortunately the local models could not be (all) compiled. See the console log output for more information.");
                               }
-                              window.location.reload();
+                              // else
+                              // {
+                              //   alert("Succesfully recompiled the models of this installation. Please restart (and omit '?recompilelocalmodels=true')")
+                              // }
                             });
                         });
                   }
