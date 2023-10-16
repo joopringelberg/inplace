@@ -39,8 +39,6 @@ import Tabs from 'react-bootstrap/Tabs';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import PerspectivesGlobals from "./perspectivesGlobals.js";
-
 import {usersHaveBeenConfigured, addUser, authenticateUser, getUser, detectCouchdb, allUsers, removeUser} from "./usermanagement.js";
 
 export default class AccountManagement extends Component
@@ -125,14 +123,12 @@ export default class AccountManagement extends Component
               {
                 proxy.createUser(
                   component.state.username,
-                  user,
-                  PerspectivesGlobals.publicRepository
+                  user
                   // TODO. Handle errors in a better way.
                 ).then(() =>
                   proxy.runPDR(
                     component.state.username,
-                    user,
-                    PerspectivesGlobals.publicRepository
+                    user
                     // TODO. Handle errors in a better way.
                   )
                 ).then(() =>
@@ -175,8 +171,7 @@ export default class AccountManagement extends Component
                         // zelfde parameters en argumenten als runPDR
                         proxy.resetAccount(
                           component.state.username,
-                          user,
-                          PerspectivesGlobals.publicRepository
+                          user
                           )
                           .then(
                             function(success) // eslint-disable-line
@@ -189,13 +184,12 @@ export default class AccountManagement extends Component
                             });
                         });
                   }
-                  else if (component.props.recompilebasicmodels)
+                  else if (component.props.recompilelocalmodels)
                   {
                     SharedWorkerChannelPromise.then( function (proxy)
                       {
-                        proxy.recompileBasicModels(
-                          user,
-                          PerspectivesGlobals.publicRepository
+                        proxy.recompileLocalModels(
+                          user
                           )
                           .then(
                             function(success) // eslint-disable-line
@@ -214,8 +208,7 @@ export default class AccountManagement extends Component
                       {
                         proxy.runPDR(
                           component.state.username,
-                          user,
-                          PerspectivesGlobals.publicRepository
+                          user
                         )
                         .then(() => {
                           component.setState(
@@ -473,7 +466,7 @@ export default class AccountManagement extends Component
 AccountManagement.propTypes =
   { setloggedin: PropTypes.func.isRequired
   , setcouchdburl: PropTypes.func.isRequired
-  , recompilebasicmodels: PropTypes.bool
+  , recompilelocalmodels: PropTypes.bool
   };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -522,7 +515,7 @@ class AllUsers extends React.Component
     const component = this;
     SharedWorkerChannelPromise
       .then( proxy => removeUser( component.state.selectedUser)
-        .then( user => proxy.removeAccount(user.userName, user, PerspectivesGlobals.publicRepository))
+        .then( user => proxy.removeAccount(user.userName, user))
         .then( allUsers )
         .then( users => component.setState({users: users})));
   }

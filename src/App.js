@@ -85,7 +85,7 @@ export default class App extends Component
       , viewname: undefined
       , cardprop: undefined
       , backwardsNavigation: undefined
-      , recompileBasicModels: false
+      , recompileLocalModels: false
       , endUserMessage: {}
       };
     initUserMessaging(
@@ -288,9 +288,9 @@ export default class App extends Component
           , cardprop: params.get("cardprop")
           }} );
       }
-      else if ( params.get("recompilebasicmodels") )
+      else if ( params.get("recompilelocalmodels") )
       {
-        component.setState( { recompileBasicModels: true });
+        component.setState( { recompileLocalModels: true });
       }
       else if ( isSchemedResourceIdentifier(queryStringMatchResult[1]) )
       {
@@ -442,7 +442,7 @@ export default class App extends Component
     else
     {
       return <AccountManagement
-              recompilebasicmodels={ component.state.recompileBasicModels }
+              recompilelocalmodels={ component.state.recompileLocalModels }
               setloggedin={() => component.setState({loggedIn: true})}
               setcouchdburl={url => component.setState({couchdbUrl: url})}
              />;

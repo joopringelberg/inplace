@@ -7,12 +7,9 @@
   "scripts": {
     "watch": "webpack --watch",
     "symlinks": "./createPerspectivesLinks.sh",
-    "builddevelopment": "./build.sh -r https://localhost:6984/repository/ -t development",
-    "buildproduction": "./build.sh -r https://mycontexts.com:5985/repository/ -t production",
-    "buildtest": "./build.sh -r https://localhost:6984/testrepository/ -t test",
-    "buildremotetest": "./build.sh -r https://mycontexts.com:5985/testrepository/ -t remotetest",
-    "buildmodels_dev": "webpack --watch --config models.webpack.config.js --env target=development repo=https://localhost:6984/repository/",
-    "buildmodels_prod": "webpack --watch --config models.webpack.config.js --env target=production repo=https://mycontexts.com:5985/repository/"
+    "builddevelopment": "./build.sh -t development",
+    "buildproduction": "./build.sh -t production",
+    "buildmodels_prod": "webpack --watch --config models.webpack.config.js --env target=production repo=https://perspectives.domains:5987/models_perspectives_domains"
   },
   "author": "Joop Ringelberg <joop.ringelberg@gmail.com>",
   "repository": {

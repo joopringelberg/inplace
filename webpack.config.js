@@ -1,10 +1,9 @@
 const path = require("path");
-const webpack = require('webpack'); //to access built-in plugins
 const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = function(env)
   {
-    const {repo, target} = env;
+    const {target} = env;
     return {
       entry:
         { "index": path.join(__dirname, "src/index.js" )
@@ -62,12 +61,6 @@ module.exports = function(env)
         ]
       },
       plugins: [
-        new webpack.DefinePlugin(
-          {
-            //eslint-disable-next-line no-undef
-            REPOSITORYURL: JSON.stringify( repo )
-          }
-        ),
         new CopyPlugin({
           patterns: [
             { context: path.resolve(__dirname, "node_modules/perspectives-react/dist")
