@@ -14,7 +14,7 @@ module.exports = function(env)
           path: path.resolve(__dirname, target)
         },
       watch: false,
-      mode: "development",
+      mode: target,
       target: "web",
       resolve: {
         alias: {
