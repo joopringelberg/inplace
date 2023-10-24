@@ -1,6 +1,6 @@
 {
   "name": "MyContexts",
-  "version": "0.20.0",
+  "version": "0.21.0",
   "description": "The client for the Perspectives Distributed Runtime.",
   "private": true,
   "homepage": "https://mycontexts.com",
@@ -9,9 +9,7 @@
     "symlinks": "./createPerspectivesLinks.sh",
     "builddevelopment": "./build.sh -t development",
     "buildproduction": "./build.sh -t production",
-    "buildmodels_prod": "webpack --watch --config models.webpack.config.js --env target=production repo=https://perspectives.domains:5987/models_perspectives_domains",
-    "switchToProduction": "sudo ln -sfh /Users/joopringelberg/Code/inplace/production/ /Library/WebServer/Documents/mycontexts",
-    "switchToDevelopment": "sudo ln -sfh /Users/joopringelberg/Code/inplace/development/ /Library/WebServer/Documents/mycontexts"
+    "buildmodels_prod": "webpack --watch --config models.webpack.config.js --env target=production repo=https://perspectives.domains:5987/models_perspectives_domains"
   },
   "author": "Joop Ringelberg <joop.ringelberg@gmail.com>",
   "repository": {
@@ -28,12 +26,12 @@
     "bootstrap": "^4.3.1",
     "highlight.js": "^11.5.1",
     "i18next": "^22.4.13",
-    "perspectives-core": "git+https://github.com/joopringelberg/perspectives-core.git#v0.22.0",
+    "perspectives-core": "git+https://github.com/joopringelberg/perspectives-core.git#v0.23.0",
     "perspectives-highlightjs": "github:joopringelberg/perspectives-highlightjs#v1.3.0",
-    "perspectives-pageworker": "git+https://github.com/joopringelberg/perspectives-pageworker1.git#v0.12.0",
-    "perspectives-proxy": "git+https://github.com/joopringelberg/perspectives-proxy.git#v1.17.0",
-    "perspectives-react": "https://github.com/joopringelberg/perspectives-react.git#v0.22.0",
-    "perspectives-sharedworker": "git+https://github.com/joopringelberg/perspectives-sharedworker.git#v0.12.0",
+    "perspectives-pageworker": "git+https://github.com/joopringelberg/perspectives-pageworker1.git#v0.13.0",
+    "perspectives-proxy": "git+https://github.com/joopringelberg/perspectives-proxy.git#v1.18.0",
+    "perspectives-react": "https://github.com/joopringelberg/perspectives-react.git#v0.23.0",
+    "perspectives-sharedworker": "git+https://github.com/joopringelberg/perspectives-sharedworker.git#v0.13.0",
     "pouchdb-browser": "^7.2.2",
     "prop-types": "^15.7.2",
     "react": "^17.0.1",
