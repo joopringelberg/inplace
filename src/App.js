@@ -273,6 +273,11 @@ export default class App extends Component
     const queryStringMatchResult = window.location.href.match(/\?(.*)/);
     const params = new URLSearchParams(document.location.search.substring(1));
 
+    const additionalState = 
+      { isFirstInstallation: params.get("isfirstinstallation") == "false" ? false : true
+      , useSystemVersion: params.get("usesystemversion")
+      }
+
     if ( queryStringMatchResult )
     {
       // This can be
@@ -282,15 +287,17 @@ export default class App extends Component
       //  * the parameter openroleform=<wellformedroleidentifier>
       if ( params.get("openroleform") )
       {
-        component.setState( {openroleform:
+        additionalState.openroleform = 
           { roleid: params.get("openroleform")
           , viewname: params.get("viewname")
           , cardprop: params.get("cardprop")
-          }} );
+          };
+        component.setState( additionalState );
       }
-      else if ( params.get("recompilelocalmodels") )
+      else if ( params.has("recompilelocalmodels") )
       {
-        component.setState( { recompileLocalModels: true });
+        additionalState.recompileLocalModels = true;
+        component.setState( additionalState );
       }
       else if ( isSchemedResourceIdentifier(queryStringMatchResult[1]) )
       {
@@ -304,7 +311,9 @@ export default class App extends Component
                     {
                       document.title = nameArr[0];
                       history.pushState({ selectedContext: erole, title: nameArr[0] }, "");
-                      component.setState( {hasContext:true, externalRoleId: erole});
+                      additionalState.hasContext = true;
+                      additionalState.externalRoleId = erole
+                      component.setState( additionalState );
                     },
                     FIREANDFORGET);
                 });
@@ -318,6 +327,7 @@ export default class App extends Component
       }
       else
       {
+        component.setState( additionalState );
         PDRproxy
           .then( proxy => proxy.matchContextName( queryStringMatchResult[1] ))
           .then( function (serialisedMapping)
@@ -445,6 +455,8 @@ export default class App extends Component
               recompilelocalmodels={ component.state.recompileLocalModels }
               setloggedin={() => component.setState({loggedIn: true})}
               setcouchdburl={url => component.setState({couchdbUrl: url})}
+              isfirstinstallation={ component.state.isFirstInstallation }
+              usesystemversion={ component.state.useSystemVersion }
              />;
     }
   }

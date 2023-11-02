@@ -9,8 +9,11 @@
     "symlinks": "./createPerspectivesLinks.sh",
     "builddevelopment": "./build.sh -t development",
     "buildproduction": "./build.sh -t production",
-    "buildmodels_prod": "webpack --watch --config models.webpack.config.js --env target=production repo=https://perspectives.domains:5987/models_perspectives_domains"
-  },
+    "buildmodels_prod": "webpack --watch --config models.webpack.config.js --env target=production repo=https://perspectives.domains:5987/models_perspectives_domains",
+    "switchToProduction": "sudo ln -sfh /Users/joopringelberg/Code/inplace/production/ /Library/WebServer/Documents/mycontexts",
+    "switchToDevelopment": "sudo ln -sfh /Users/joopringelberg/Code/inplace/development/ /Library/WebServer/Documents/mycontexts",
+    "publishTest": "scp -r ./development/* joop@inplace.works:/var/www/mycontexts.com/test"
+   },
   "author": "Joop Ringelberg <joop.ringelberg@gmail.com>",
   "repository": {
     "type": "git",

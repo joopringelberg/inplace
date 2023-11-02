@@ -121,9 +121,13 @@ export default class AccountManagement extends Component
           getUser( component.state.username ).then( user =>
             SharedWorkerChannelPromise.then( function (proxy)
               {
-                proxy.createUser(
+                proxy.createAccount(
                   component.state.username,
-                  user
+                  user,
+                  // CreateOptions. Read values from component state, that have been salvaged from query parameters.
+                  { isFirstInstallation: component.props.isfirstinstallation
+                  , useSystemVersion: component.props.usesystemversion
+                  }
                   // TODO. Handle errors in a better way.
                 ).then(() =>
                   proxy.runPDR(
@@ -471,6 +475,8 @@ AccountManagement.propTypes =
   { setloggedin: PropTypes.func.isRequired
   , setcouchdburl: PropTypes.func.isRequired
   , recompilelocalmodels: PropTypes.bool
+  , isfirstinstallation: PropTypes.bool
+  , usesystemversion: PropTypes.string
   };
 
 //////////////////////////////////////////////////////////////////////////////
