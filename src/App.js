@@ -231,11 +231,11 @@ export default class App extends Component
                 , cardprop: undefined
                 , backwardsNavigation: false});
             })
-          .catch(e => UserMessagingPromise.then( um => 
+          .catch(err => UserMessagingPromise.then( um => 
             um.addMessageForEndUser(
               { title: i18next.t("app_opencontext_title", { ns: 'mycontexts' }) 
               , message: i18next.t("app_opencontext_message", {context: e.detail, ns: 'mycontexts'})
-              , error: e.toString()
+              , error: err.toString()
             })));
         e.stopPropagation();
       });
@@ -467,7 +467,7 @@ export default class App extends Component
   }
 }
 
-// This function returns a promise for an erole, or fails.
+// This function returns a promise for the external role of the context of the role s that is passed in, or fails.
 function ensureExternalRole(s)
 {
   if ( isExternalRole( s ) )
@@ -476,7 +476,7 @@ function ensureExternalRole(s)
   }
   else
   {
-    // Assume a context role. Now request the binding and get its context.
+    // Request the binding and then its context.
     return PDRproxy.then( proxy =>
       new Promise( function( resolve, reject )
         {
@@ -489,9 +489,18 @@ function ensureExternalRole(s)
                   {
                     resolve( bindingIds[0] );
                   }
+                  else
+                  {
+                    proxy.getRolContext( bindingIds[0] ).then(
+                      contextArr => resolve( externalRole( contextArr[0] ))
+                    )
+                  }
                 }
-                // Otherwise, either not a context role after all, or no binding. Fail.
-                return reject( new Error( s ));
+                else
+                {
+                  // Otherwise, either not a context role after all, or no binding. Fail.
+                  return reject( new Error( "This role is not an external role and has no filler either, so cannot open a context for role: " + s ));
+                }
               },
             FIREANDFORGET,
             function (e)
