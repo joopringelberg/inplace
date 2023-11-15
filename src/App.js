@@ -272,11 +272,12 @@ export default class App extends Component
     // Select the part after the question mark, if any.
     const queryStringMatchResult = window.location.href.match(/\?(.*)/);
     const params = new URLSearchParams(document.location.search.substring(1));
+    const additionalState = {}
 
-    const additionalState = 
+    component.setState( 
       { isFirstInstallation: params.get("isfirstinstallation") == "false" ? false : true
       , useSystemVersion: params.get("usesystemversion")
-      }
+      });
 
     if ( queryStringMatchResult )
     {
@@ -327,7 +328,6 @@ export default class App extends Component
       }
       else
       {
-        component.setState( additionalState );
         PDRproxy
           .then( proxy => proxy.matchContextName( queryStringMatchResult[1] ))
           .then( function (serialisedMapping)
