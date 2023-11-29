@@ -35,9 +35,10 @@ const localUsers = new Pouchdb("localUsers");
 // }
 
 // Returns a Promise for a boolean value
-export function usersHaveBeenConfigured()
+export async function usersHaveBeenConfigured()
 {
-  return localUsers.info().then( ({doc_count}) => doc_count > 0);
+  const { doc_count } = await localUsers.info();
+  return doc_count > 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

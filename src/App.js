@@ -42,12 +42,14 @@ import {
 
 import Container from 'react-bootstrap/Container';
 
+import Button from 'react-bootstrap/Button';
+
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import NavigationBar from "./navigationbar.js";
 
 import AccountManagement from "./AccountManagement.js";
- 
+
 import {NotificationsDisplayer} from "./notifications.js";
 
 import {SelectContext} from "./selectContext.js";
@@ -55,6 +57,24 @@ import {SelectContext} from "./selectContext.js";
 import i18next from "i18next";
 
 import {initI18next} from "./i18next.js";
+
+import {init} from '@paralleldrive/cuid2';
+
+import { getDefaultSystem } from "./runtimeOptions.js";
+import { addUser, allUsers, getUser, removeUser, usersHaveBeenConfigured } from "./usermanagement.js";
+
+/*
+QUERY PARAMETERS AND VALUES
+  - recompilelocalmodels=true
+  - manualaccountcreation=true
+  - isfirstinstallation=false
+  - usesystemversion=MAJOR.MINOR
+  - deleteaccount=true
+  - opencontext=<external role or contextrole identifier>
+  - openroleform=<role identifier>
+  - viewname=<view identifier>
+  - cardprop=<property type identifier>
+*/
 
 export default class App extends Component
 {
@@ -72,21 +92,28 @@ export default class App extends Component
     this.state =
       { loggedIn:  false
       , isFirstChannel: false
-      , hasContext: false
       , indexedContextNameMapping: undefined
-      , couchdbUrl: undefined
+      , couchdbUrl: ""
+      , isFirstInstallation: true
+      , useSystemVersion: undefined
+      , manualAccountCreation: undefined
+      , systemIdentifier: undefined         // The system Identifier..
+      , recompileLocalModels: false
+      , defaultSystem: undefined
+      , usersConfigured: undefined
       // Props that are likely to change after logging in or opening:
       , showNotifications: false
       , openroleform: {}
       , externalRoleId: undefined     // The external role instance of the context that is currently on display (if any).
       , myRoleType: undefined         // The type of user role the user plays in the context of the externalRoleId (if any).
       , roleId: undefined             // The role that is currently on display (if any).
-      , systemUser: undefined         // The user identifier (his GUID).
       , viewname: undefined
       , cardprop: undefined
       , backwardsNavigation: undefined
-      , recompileLocalModels: false
       , endUserMessage: {}
+      , recompilationState: "pending"
+      , accountDeletionComplete: false
+      
       };
     initUserMessaging(
       function ( message )
@@ -131,178 +158,143 @@ export default class App extends Component
     }
   }
 
-  componentDidMount ()
+  componentDidMount()
   {
     const component = this;
     const beforeUnloadListener = (event) => {
       event.preventDefault();
       return event.returnValue = "Are you sure you want to exit?";
     };
+    const params = new URLSearchParams(document.location.search.substring(1));
 
-    // Check login status first. If we combine it with context name matching, we'll see a login screen first
-    // even if we've logged in before, because we have to wait for the PDRProxy.
-    Promise.all(
-      [ SharedWorkerChannelPromise.then( proxy => proxy.channelId)
-      , SharedWorkerChannelPromise.then( proxy => proxy.isUserLoggedIn())
-      , PDRproxy.then( proxy => proxy.getCouchdbUrl() )
-      , PDRproxy.then( proxy => proxy.getUserIdentifier())
-      ]).then( function( results )
-        {
-          const setter = { isFirstChannel: results[0] == 1000000 };
-          if (results[1] && !component.state.loggedIn )
-          {
-            setter.loggedIn = true;
-          }
-          if (results[2] && !component.state.couchdbUrl )
-          {
-            setter.couchdbUrl = results[2][0];
-          }
-          if (results[3])
-          {
-            setter.systemUser = results[3][0];
-          }
-          component.setState( setter );
-        })
-      .catch(function(e)
-        {
-          // For debugging purposes.
-          // eslint-disable-next-line no-console
-          console.warn( e );
-        });
-    window.onpopstate = function(e)
+    function singleAccount(systemIdentifier)
+    {
+      if (params.get("recompilelocalmodels"))
       {
-        if (e.state && e.state.title)
+        component.setState({render: "recompileLocalModels"})
+        getUser( systemIdentifier )
+          .then( user => component.recompileLocalModels( user ));
+      }
+      else if (params.get("deleteaccount"))
+      {
+        component.setState({render: "deleteAccount"});
+        component.deleteAccount( systemIdentifier );
+      }
+      else if ( params.get( "manualaccountcreation"))
+      {
+        component.setState( 
+          { isFirstInstallation: params.get("isfirstinstallation")
+          , useSystemVersion: params.get("usesystemversion")
+          , render: "createAccountManually"} );              
+      }
+      else
+      {
+        component.setState({render: "startup"});
+        getUser( systemIdentifier )
+          .then( user => SharedWorkerChannelPromise
+            .then( proxy => proxy.runPDR( systemIdentifier, user) )
+            .then( () => component.prepareMyContextsScreen( systemIdentifier )));
+      }
+    }
+
+    SharedWorkerChannelPromise
+      .then( proxy => proxy.pdrStarted())
+      .then( hasStarted => 
         {
-          document.title = e.state.title;
-        }
-        if (e.state && (e.state.selectedContext || e.state.selectedRoleInstance))
-        {
-          // console.log("Popping previous state, now on " + (e.state.selectedContext ? "context state " + e.state.selectedContext : "roleform state " + e.state.selectedRoleInstance));
-          // Restore the selectedContext or selectedRoleInstance, if any.
-          component.setState(
-            { externalRoleId: e.state.selectedContext
-            , roleId: e.state.selectedRoleInstance
-            , viewname: e.state.viewname
-            , cardprop: e.state.cardprop
-            , backwardsNavigation: true} );
-          e.stopPropagation();
-          removeEventListener("beforeunload", beforeUnloadListener, {capture: true});
-        }
+          if (hasStarted)
+          {
+            // As the PDR has started, the user must have logged in (or it has been done automatically with the passwordless defaultSystem).
+            PDRproxy.then( proxy => proxy.getUserIdentifier())
+              .then( systemIdentifier => component.prepareMyContextsScreen( systemIdentifier[0] ) );
+          }
         else
         {
-          // In this situation, the next backwards navigation exits MyContexts.
-          // We need a modal dialog that returns a boolean result reflecting the users choice:
-          //  true: yes, I want to leave MyContexts;
-          //  false: no, I don't want to leave MyContexts.
-          // If true, accept navigation.
-          // If false, abort navigation.
-          component.setState(
-            { externalRoleId: undefined
-            , viewname: undefined
-            , cardprop: undefined
-            , backwardsNavigation: true}
-          );
-          addEventListener("beforeunload", beforeUnloadListener, {capture: true});
-        }
-      };
-    // Invariant: the selectedContext in history and the externalRoleId in App state are equal and
-    // will be the external role of the context that is selected.
-    this.containerRef.current.addEventListener( "OpenContext",
-      function(e)
-      {
-        ensureExternalRole( e.detail )
-          .then(
-            function(erole)
-            {
-              PDRproxy.then( function( pproxy )
+          usersHaveBeenConfigured()
+            .then( usersConfigured => 
+              {
+                if (usersConfigured)
                 {
-                  pproxy.getRoleName( erole, function (nameArr)
-                    {
-                      document.title = nameArr[0];
-                      history.pushState({ selectedContext: erole, title: nameArr[0] }, "");
-                    },
-                    FIREANDFORGET);
-                });
-              // console.log("Pushing context state " + e.detail);
-              component.setState(
-                { externalRoleId: erole
-                , roleId: undefined
-                , viewname: undefined
-                , cardprop: undefined
-                , backwardsNavigation: false});
-            })
-          .catch(err => UserMessagingPromise.then( um => 
-            um.addMessageForEndUser(
-              { title: i18next.t("app_opencontext_title", { ns: 'mycontexts' }) 
-              , message: i18next.t("app_opencontext_message", {context: e.detail, ns: 'mycontexts'})
-              , error: err.toString()
-            })));
-        e.stopPropagation();
-      });
-    this.containerRef.current.addEventListener( "OpenRoleForm",
-      function(e)
-      {
-        const {rolinstance, viewname, cardprop} = e.detail;
-        PDRproxy.then( function( pproxy )
-          {
-            pproxy.getRoleName( rolinstance,
-              function (nameArr)
-                {
-                  document.title = nameArr[0];
-                  history.pushState({ selectedRoleInstance: rolinstance, title: nameArr[0] }, "");
+                  getDefaultSystem()
+                    .then( defaultSystem => 
+                      {
+                        if (defaultSystem)
+                        {
+                          singleAccount( defaultSystem );
+                        }
+                        else
+                        {
+                          allUsers().then( users => 
+                            {
+                              if (users.length == 1)
+                              {
+                                getUser( users[0] )
+                                .then( user => 
+                                  {
+                                    if (user.couchdbUrl)
+                                    {
+                                      component.setState({render: "login", couchdbUrl})
+                                    }
+                                    else
+                                    {
+                                      singleAccount( users[0] );
+                                    }
+                                  });
+                              }
+                              else
+                              {
+                                component.setState({render: "login"});
+                              }
+                            })
+                        }
+                      });
                 }
-            );
-          });
-
-        // console.log("Pushing roleform state " + rolinstance);
-        component.setState(
-            { externalRoleId: undefined
-            , roleId: rolinstance
-            , viewname
-            , cardprop
-            , backwardsNavigation: false });
-        e.stopPropagation();
-      });
-    this.handleQueryString();
+                else
+                {
+                  if (params.get("manualaccountcreation"))
+                  {
+                    component.setState( 
+                      { isFirstInstallation: params.get("isfirstinstallation")
+                      , useSystemVersion: params.get("usesystemversion")
+                      , render: "createAccountManually"} );              
+                  }
+                  else
+                  {
+                    component.setState({render: "createAccountAutomatically"})
+                    component.createAccountAutomatically();
+                  }
+                }
+            });        
+            }
+        } );
   }
 
-  handleQueryString()
+  componentDidUpdate(prevProps, prevState)
   {
     const component = this;
-    // Select the part after the question mark, if any.
-    const queryStringMatchResult = window.location.href.match(/\?(.*)/);
-    const params = new URLSearchParams(document.location.search.substring(1));
-    const additionalState = {}
-
-    component.setState( 
-      { isFirstInstallation: params.get("isfirstinstallation") == "false" ? false : true
-      , useSystemVersion: params.get("usesystemversion")
-      });
-
-    if ( queryStringMatchResult )
+    if (!prevState.loggedIn && this.state.loggedIn)
     {
-      // This can be
-      //  * a well-formed role identifier, assumed to be a context role;
-      //  * a well-formed external role identifier;
-      //  * an arbitrary approximation of an indexed name of a Context.
-      //  * the parameter openroleform=<wellformedroleidentifier>
-      if ( params.get("openroleform") )
+      component.setState({render: "startup"});
+      PDRproxy.then( proxy => proxy.getUserIdentifier())
+        .then( systemIdentifier => component.prepareMyContextsScreen( systemIdentifier[0] ) );
+    }
+  }
+
+  // Only call this function when the PDR is running.
+  prepareMyContextsScreen( systemIdentifier )
+  {
+    const component = this;
+    const params = new URLSearchParams(document.location.search.substring(1));
+    const additionalState = {systemIdentifier};
+    let contextrole;
+
+    component.setHandlers()
+
+    if (params.get("opencontext"))
+    {
+      contextrole = params.get("opencontext");
+      if ( isSchemedResourceIdentifier(contextrole) )
       {
-        additionalState.openroleform = 
-          { roleid: params.get("openroleform")
-          , viewname: params.get("viewname")
-          , cardprop: params.get("cardprop")
-          };
-        component.setState( additionalState );
-      }
-      else if ( params.has("recompilelocalmodels") )
-      {
-        additionalState.recompileLocalModels = true;
-        component.setState( additionalState );
-      }
-      else if ( isSchemedResourceIdentifier(queryStringMatchResult[1]) )
-      {
-        ensureExternalRole( queryStringMatchResult[1])
+        ensureExternalRole( contextrole)
           .then(
             function(erole)
             {
@@ -312,8 +304,8 @@ export default class App extends Component
                     {
                       document.title = nameArr[0];
                       history.pushState({ selectedContext: erole, title: nameArr[0] }, "");
-                      additionalState.hasContext = true;
-                      additionalState.externalRoleId = erole
+                      additionalState.externalRoleId = erole;
+                      additionalState.render = "opencontext";
                       component.setState( additionalState );
                     },
                     FIREANDFORGET);
@@ -322,32 +314,195 @@ export default class App extends Component
           .catch(e => UserMessagingPromise.then( um => 
             um.addMessageForEndUser(
               { title: i18next.t("app_opencontext_title", { ns: 'mycontexts' }) 
-              , message: i18next.t("app_opencontext_message", {context: queryStringMatchResult[1], ns: 'mycontexts'})
+              , message: i18next.t("app_opencontext_message", {context: contextrole, ns: 'mycontexts'})
               , error: e.toString()
             })));
       }
       else
       {
         PDRproxy
-          .then( proxy => proxy.matchContextName( queryStringMatchResult[1] ))
+          .then( proxy => proxy.matchContextName( contextrole ))
           .then( function (serialisedMapping)
             {
               const theMap = JSON.parse( serialisedMapping[0] );
               if ( Object.keys( theMap ).length == 0 )
               {
-                UserMessagingPromise.then( um => um.addMessageForEndUser({title: "Matching request", "message": "Cannot find a match for " + queryStringMatchResult[1]}));
+                UserMessagingPromise.then( um => um.addMessageForEndUser({title: "Matching request", "message": "Cannot find a match for " + contextrole}));
               }
               else if ( Object.keys( theMap ).length == 1 )
               {
-                component.setState( {hasContext:true, externalRoleId: externalRole( Object.values(theMap)[0])});
+                additionalState.externalRoleId = externalRole( Object.values(theMap)[0]);
+                additionalState.render = "opencontext";
+                component.setState( additionalState );
               }
               else
               {
-                component.setState( {hasContext: true, indexedContextNameMapping: theMap });
+                additionalState.indexedContextNameMapping = theMap;
+                additionalState.render = "contextchoice";
+                component.setState( additionalState );
               }
             });
       }
     }
+    else if (params.get("openroleform"))
+    {
+      additionalState.openroleform = 
+      { roleid: params.get("openroleform")
+      , viewname: params.get("viewname")
+      , cardprop: params.get("cardprop")
+      , render: "openroleform"
+      };
+      component.setState( additionalState );
+    }
+    else
+    {
+      additionalState.render = "openEmptyScreen"
+      component.setState(additionalState)
+    }
+  }
+
+  setHandlers()
+  {
+    const component = this;
+    window.onpopstate = function(e)
+    {
+      if (e.state && e.state.title)
+      {
+        document.title = e.state.title;
+      }
+      if (e.state && (e.state.selectedContext || e.state.selectedRoleInstance))
+      {
+        // console.log("Popping previous state, now on " + (e.state.selectedContext ? "context state " + e.state.selectedContext : "roleform state " + e.state.selectedRoleInstance));
+        // Restore the selectedContext or selectedRoleInstance, if any.
+        component.setState(
+          { externalRoleId: e.state.selectedContext
+          , roleId: e.state.selectedRoleInstance
+          , viewname: e.state.viewname
+          , cardprop: e.state.cardprop
+          , backwardsNavigation: true} );
+        e.stopPropagation();
+        removeEventListener("beforeunload", beforeUnloadListener, {capture: true});
+      }
+      else
+      {
+        // In this situation, the next backwards navigation exits MyContexts.
+        // We need a modal dialog that returns a boolean result reflecting the users choice:
+        //  true: yes, I want to leave MyContexts;
+        //  false: no, I don't want to leave MyContexts.
+        // If true, accept navigation.
+        // If false, abort navigation.
+        component.setState(
+          { externalRoleId: undefined
+          , viewname: undefined
+          , cardprop: undefined
+          , backwardsNavigation: true}
+        );
+        addEventListener("beforeunload", beforeUnloadListener, {capture: true});
+      }
+    };
+  // Invariant: the selectedContext in history and the externalRoleId in App state are equal and
+  // will be the external role of the context that is selected.
+  this.containerRef.current.addEventListener( "OpenContext",
+    function(e)
+    {
+      ensureExternalRole( e.detail )
+        .then(
+          function(erole)
+          {
+            PDRproxy.then( function( pproxy )
+              {
+                pproxy.getRoleName( erole, function (nameArr)
+                  {
+                    document.title = nameArr[0];
+                    history.pushState({ selectedContext: erole, title: nameArr[0] }, "");
+                  },
+                  FIREANDFORGET);
+              });
+            // console.log("Pushing context state " + e.detail);
+            component.setState(
+              { externalRoleId: erole
+              , roleId: undefined
+              , viewname: undefined
+              , cardprop: undefined
+              , backwardsNavigation: false});
+          })
+        .catch(err => UserMessagingPromise.then( um => 
+          um.addMessageForEndUser(
+            { title: i18next.t("app_opencontext_title", { ns: 'mycontexts' }) 
+            , message: i18next.t("app_opencontext_message", {context: e.detail, ns: 'mycontexts'})
+            , error: err.toString()
+          })));
+      e.stopPropagation();
+    });
+  this.containerRef.current.addEventListener( "OpenRoleForm",
+    function(e)
+    {
+      const {rolinstance, viewname, cardprop} = e.detail;
+      PDRproxy.then( function( pproxy )
+        {
+          pproxy.getRoleName( rolinstance,
+            function (nameArr)
+              {
+                document.title = nameArr[0];
+                history.pushState({ selectedRoleInstance: rolinstance, title: nameArr[0] }, "");
+              }
+          );
+        });
+
+      // console.log("Pushing roleform state " + rolinstance);
+      component.setState(
+          { externalRoleId: undefined
+          , roleId: rolinstance
+          , viewname
+          , cardprop
+          , backwardsNavigation: false });
+      e.stopPropagation();
+    });
+  }
+
+  deleteAccount( systemIdentifier )
+  {
+    const component = this;
+    SharedWorkerChannelPromise
+      .then( proxy => removeUser( systemIdentifier )
+        .then( user => proxy.removeAccount(user.userName, user))
+        .then( () => component.setState({accountDeletionComplete: true})));
+  }
+
+  recompileLocalModels(user)
+  {
+    const component = this;
+    SharedWorkerChannelPromise.then( function (proxy)
+    {
+      proxy.recompileLocalModels( user )
+        .then(
+          function(success)
+          {
+            component.setState({recompilationState: success ? "success" : "failure"});
+          });
+    });
+  }
+
+  createAccountAutomatically()
+  {
+    const component = this;
+    const newSystemId = cuid2();
+    // create a new user record in localUsers, omitting password and couchdbUrl.
+    addUser( newSystemId )
+    .then(() =>
+      // Now create the user in the PDR.
+      getUser( newSystemId )
+        .then( user =>
+          SharedWorkerChannelPromise
+            .then( proxy => proxy.createAccount(
+              newSystemId,
+              user,
+              // CreateOptions. Read values from component state, that have been salvaged from query parameters.
+              { isFirstInstallation: component.state.isFirstInstallation
+              , useSystemVersion: component.props.usesystemversion
+              } )
+              // TODO. verwerk in splash screen.
+              .then( () => component.setState({configurationComplete: true}) ) ) ) );
   }
 
   handleKeyDown(event, systemExternalRole)
@@ -373,91 +528,177 @@ export default class App extends Component
     }
   }
 
-  computeScreen ()
+  openMyContextsScreen ()
   {
     const component = this;
     function propagate(setter)
     {
       component.setState( setter );
     }
-
-    if (component.state.loggedIn && (component.state.couchdbUrl || component.state.couchdbUrl == ""))
-    {
-      return (
-        <MySystem>
-          <PSContext.Consumer>{ mysystem =>
-            <AppContext.Provider value={
-              { systemExternalRole: externalRole(mysystem.contextinstance)
-              , externalRoleId: component.state.externalRoleId
-              , roleId: component.state.roleId
-              , myRoleType: component.state.myRoleType
-              , systemUser: component.state.systemUser
-              , setEventDispatcher: function(f)
+    return (
+      <MySystem>
+        <PSContext.Consumer>{ mysystem =>
+          <AppContext.Provider value={
+            { systemExternalRole: externalRole(mysystem.contextinstance)
+            , externalRoleId: component.state.externalRoleId
+            , roleId: component.state.roleId
+            , myRoleType: component.state.myRoleType
+            , systemIdentifier: component.state.systemIdentifier
+            , setEventDispatcher: function(f)
+                {
+                  component.eventDispatcher.eventDispatcher = f;
+                }
+            , couchdbUrl: component.state.couchdbUrl}}>
+            <Container>
+              <div onKeyDown={event => component.handleKeyDown(event, externalRole(mysystem.contextinstance) )}>
+                <NavigationBar
+                  systemexternalrole={externalRole(mysystem.contextinstance)}
+                  setshownotifications={value => component.setState({showNotifications: value})}
+                  isbasepage={!component.usesSharedWorker && component.state.isFirstChannel}
+                  eventdispatcher={component.eventDispatcher}
+                  myroletype={component.state.myRoleType}
+                  externalroleid={component.state.externalRoleId}
+                  clearexternalroleid={component.clearExternalRoleId}
+                  />
+                  <Container>
                   {
-                    component.eventDispatcher.eventDispatcher = f;
-                  }
-              , couchdbUrl: component.state.couchdbUrl}}>
-              <Container>
-                <div onKeyDown={event => component.handleKeyDown(event, externalRole(mysystem.contextinstance) )}>
-                  <NavigationBar
-                    systemexternalrole={externalRole(mysystem.contextinstance)}
-                    setshownotifications={value => component.setState({showNotifications: value})}
-                    isbasepage={!component.usesSharedWorker && component.state.isFirstChannel}
-                    eventdispatcher={component.eventDispatcher}
-                    myroletype={component.state.myRoleType}
-                    externalroleid={component.state.externalRoleId}
-                    clearexternalroleid={component.clearExternalRoleId}
+                    component.state.roleId
+                    ?
+                    <PerspectiveForm
+                      roleinstance={component.state.roleId}
                     />
-                    <Container>
-                    {
-                      component.state.roleId
+                    :
+                    (component.state.externalRoleId
                       ?
-                      <PerspectiveForm
-                        roleinstance={component.state.roleId}
+                      <Screen
+                        externalroleinstance={component.state.externalRoleId}
+                        setMyRoleType={ myRoleType => component.setState({myRoleType: myRoleType})}
                       />
                       :
-                      (component.state.externalRoleId
-                        ?
-                        <Screen
-                          externalroleinstance={component.state.externalRoleId}
-                          setMyRoleType={ myRoleType => component.setState({myRoleType: myRoleType})}
-                        />
+                      (component.state.indexedContextNameMapping 
+                        ? 
+                        <SelectContext indexedContextNameMapping={component.state.indexedContextNameMapping}/>
                         :
-                        (component.state.indexedContextNameMapping 
-                          ? 
-                          <SelectContext indexedContextNameMapping={component.state.indexedContextNameMapping}/>
-                          :
-                          null)
-                      )
-                    }</Container>
-                    {
-                      component.state.externalRoleId && component.state.showNotifications ?
-                      <ContextOfRole rolinstance={component.state.externalRoleId}>
-                        <NotificationsDisplayer
-                          systemcontextinstance={mysystem.contextinstance}
-                          shownotifications={component.state.showNotifications}
-                          navigateto={propagate}
-                          />
-                      </ContextOfRole>
-                      : null
-                    }
-                    <EndUserNotifier message={component.state.endUserMessage}/>
-                </div>
-              </Container>
-            </AppContext.Provider>
-          }</PSContext.Consumer>
-        </MySystem>
-      );
+                        null)
+                    )
+                  }</Container>
+                  {
+                    component.state.externalRoleId && component.state.showNotifications ?
+                    <ContextOfRole rolinstance={component.state.externalRoleId}>
+                      <NotificationsDisplayer
+                        systemcontextinstance={mysystem.contextinstance}
+                        shownotifications={component.state.showNotifications}
+                        navigateto={propagate}
+                        />
+                    </ContextOfRole>
+                    : null
+                  }
+                  <EndUserNotifier message={component.state.endUserMessage}/>
+              </div>
+            </Container>
+          </AppContext.Provider>
+        }</PSContext.Consumer>
+      </MySystem>);
+  }
+
+  recompilingLocalModels()
+  {
+    const component = this;
+    const url = new URL(document.location.href);
+    return <div>
+        <h2>Recompiling the local models</h2>
+        <p>Due to a change to the underlying system, all the models you've installed must be recompiled. Please wait.</p>
+        {
+          component.state.recompilationState == "success" ?
+          <>
+            <p>All models recompiled. Press start to continue.</p>
+            <Button size="sm" variant="outline-info" onClick={ () => window.location = url.origin} >Load my contexts</Button>
+          </>
+          :
+          component.state.recompilationState == "failure" ?
+          <p>Unfortunately, not all models could be recompiled. This is a system breakdown.</p>
+          :
+          null
+        }
+      </div>;
+  }
+
+  introductionScreen()
+  {
+    const component = this;
+    const url = new URL(document.location.href);
+    return <>
+      <h2>Welcome to MyContexts</h2>
+      {
+        component.state.configurationComplete ?
+        <>
+        <p><em>Congratulations!</em> You now have access to the web of contexts and roles that make up the Perspectives Universe.</p>
+        <Button size="sm" variant="outline-info" onClick={() => window.location = url.origin}>Enter the context web</Button>
+        </>
+        :
+        null
+      }
+      </>;
+  }
+
+  startup()
+  {
+    return <h2>Please wait while your contexts are being loaded</h2>
+  }
+  
+  deleteAccountScreen()
+  {
+    return <>
+      <h2>Removing your contexts and roles</h2>
+      <p>Please wait until all your stored contexts and roles have been removed completely.</p>
+      {
+        this.state.accountDeletionComplete ?
+        <p>All of your contexts and roles have been removed.</p>
+        :
+        null
+      }
+    </>
+  }
+
+  computeScreen()
+  {
+    const component = this;
+    if (component.state.render)
+    {
+      switch (component.state.render)
+      {
+        case "recompileLocalModels":
+          return component.recompilingLocalModels()
+        case "login":
+          return <AccountManagement
+            setloggedin={() => component.setState({loggedIn: true})}
+            setcouchdburl={url => component.setState({couchdbUrl: url})}
+            isfirstinstallation={ component.state.isFirstInstallation }
+            usesystemversion={ component.state.useSystemVersion }
+            />;
+        case "createAccountManually":
+          return <AccountManagement
+            setloggedin={() => component.setState({loggedIn: true})}
+            setcouchdburl={url => component.setState({couchdbUrl: url})}
+            isfirstinstallation={ component.state.isFirstInstallation }
+            usesystemversion={ component.state.useSystemVersion }
+            />;
+        case "createAccountAutomatically":
+          return component.introductionScreen();
+        case "startup":
+          return component.startup();
+        case "deleteAccount":
+          return component.deleteAccountScreen();
+        case "opencontext":
+        case "openroleform":
+        case "contextchoice":
+        case "openEmptyScreen":
+          return component.openMyContextsScreen();
+      }
     }
     else
     {
-      return <AccountManagement
-              recompilelocalmodels={ component.state.recompileLocalModels }
-              setloggedin={() => component.setState({loggedIn: true})}
-              setcouchdburl={url => component.setState({couchdbUrl: url})}
-              isfirstinstallation={ component.state.isFirstInstallation }
-              usesystemversion={ component.state.useSystemVersion }
-             />;
+      return <div/>;
     }
   }
 
@@ -465,6 +706,7 @@ export default class App extends Component
   {
     return <div ref={this.containerRef}>{ this.computeScreen() }</div>;
   }
+
 }
 
 // This function returns a promise for the external role of the context of the role s that is passed in, or fails.
@@ -511,3 +753,15 @@ function ensureExternalRole(s)
   }
 
 }
+
+// A function that generates a CUID using the current epoch as fingerprint.
+const cuid2 = init({
+  // A custom random function with the same API as Math.random.
+  // You can use this to pass a cryptographically secure random function.
+  random: Math.random,
+  // the length of the id
+  length: 10,
+  // A custom fingerprint for the host environment. This is used to help
+  // prevent collisions when generating ids in a distributed system.
+  fingerprint: Date.now(),
+});

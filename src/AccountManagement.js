@@ -75,8 +75,8 @@ export default class AccountManagement extends Component
 
   componentDidMount()
   {
-    const component = this;
-    usersHaveBeenConfigured().then( b => component.setState({ usersConfigured: b, activeKey: b ? "login" : "setup" }) );
+    const usersConfigured = usersHaveBeenConfigured();
+    this.setState({ usersConfigured, activeKey: usersConfigured ? "login" : "setup" });
   }
 
   createAccount(event)
@@ -129,22 +129,7 @@ export default class AccountManagement extends Component
                   , useSystemVersion: component.props.usesystemversion
                   }
                   // TODO. Handle errors in a better way.
-                ).then(() =>
-                  proxy.runPDR(
-                    component.state.username,
-                    user
-                    // TODO. Handle errors in a better way.
-                  )
-                ).then(() =>
-                  {
-                    component.setState(
-                      { couchdbUrl: user.couchdbUrl
-                      , host: getHost( user.couchdbUrl )
-                      , port: getPort( user.couchdbUrl )
-                    });
-                    component.props.setloggedin();
-                    component.props.setcouchdburl(user.couchdbUrl);
-                  })
+                ).then( () => window.location= new URL(document.location.href).origin )
                 .catch(e => alert( e ));
               })));
     }
@@ -218,15 +203,7 @@ export default class AccountManagement extends Component
                           component.state.username,
                           user
                         )
-                        .then(() => {
-                          component.setState(
-                            { couchdbUrl: user.couchdbUrl
-                            , host: getHost( user.couchdbUrl )
-                            , port: getPort( user.couchdbUrl )
-                            });
-                          component.props.setloggedin();
-                          component.props.setcouchdburl(user.couchdbUrl);
-                          })
+                          .then( () => component.props.setloggedin() )
                           // TODO. Handle errors in a better way.
                           .catch(e => alert( e ));
                       });

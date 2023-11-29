@@ -140,7 +140,7 @@ export default class UnbindTool extends PerspectivesComponent
                           }}
                         onDragEnter={ev => ev.target.classList.add("border", "border-primary") }
                         onDragLeave={ev => ev.target.classList.remove("border", "border-primary")}>
-                        <LinkIcon alt="OpenRoleFormTool" aria-label="Drop a role here to remove its filler" size="medium"/>
+                        <LinkIcon alt="Remove filler tool" aria-label="Drop a role here to remove its filler" size="medium"/>
                     </div>
                 </OverlayTrigger>
                 <Alert
