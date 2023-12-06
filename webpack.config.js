@@ -8,10 +8,11 @@ module.exports = function(env)
       entry:
         { "index": path.join(__dirname, "src/index.js" )
         , "models": path.join(__dirname, "src/models.js")
+        , "manage": path.join(__dirname, "src/manage.js")
       },
-      output: {
-          filename: '[name].js',
-          path: path.resolve(__dirname, target)
+      output: 
+        { filename: '[name].js'
+        , path: path.resolve(__dirname, target)
         },
       watch: false,
       mode: target,
