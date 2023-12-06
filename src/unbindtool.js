@@ -36,7 +36,7 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import {LinkIcon} from '@primer/octicons-react';
 
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
 import i18next from "i18next";
 
 export default class UnbindTool extends PerspectivesComponent
@@ -128,7 +128,7 @@ export default class UnbindTool extends PerspectivesComponent
                     <div
                         ref={eventDiv}
                         onDragOver={ev => ev.preventDefault()}
-                        className="ml-3 mr-3"
+                        className="ml-3 mr-3 text-secondary"
                         aria-dropeffect="execute"
                         aria-describedby="unbindtool-tooltip"
                         tabIndex="0"

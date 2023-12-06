@@ -44,7 +44,9 @@ import Container from 'react-bootstrap/Container';
 
 import Button from 'react-bootstrap/Button';
 
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
+
+import './bootstrap.css'
 
 import NavigationBar from "./navigationbar.js";
 
@@ -62,6 +64,10 @@ import {init} from '@paralleldrive/cuid2';
 
 import { getDefaultSystem } from "./runtimeOptions.js";
 import { addUser, allUsers, getUser, removeUser, usersHaveBeenConfigured } from "./usermanagement.js";
+import IntroductionScreen from "./introductionSplash.js";
+import StartupScreen from "./startupSplash.js";
+import DeleteInstallation from "./deleteInstallationSplash.js";
+import RecompileLocalModelsScreen from "./recompileLocalModelsScreen.js";
 
 /*
 QUERY PARAMETERS AND VALUES
@@ -601,65 +607,6 @@ export default class App extends Component
       </MySystem>);
   }
 
-  recompilingLocalModels()
-  {
-    const component = this;
-    const url = new URL(document.location.href);
-    return <div>
-        <h2>Recompiling the local models</h2>
-        <p>Due to a change to the underlying system, all the models you've installed must be recompiled. Please wait.</p>
-        {
-          component.state.recompilationState == "success" ?
-          <>
-            <p>All models recompiled. Press start to continue.</p>
-            <Button size="sm" variant="outline-info" onClick={ () => window.location = url.origin} >Load my contexts</Button>
-          </>
-          :
-          component.state.recompilationState == "failure" ?
-          <p>Unfortunately, not all models could be recompiled. This is a system breakdown.</p>
-          :
-          null
-        }
-      </div>;
-  }
-
-  introductionScreen()
-  {
-    const component = this;
-    const url = new URL(document.location.href);
-    return <>
-      <h2>Welcome to MyContexts</h2>
-      {
-        component.state.configurationComplete ?
-        <>
-        <p><em>Congratulations!</em> You now have access to the web of contexts and roles that make up the Perspectives Universe.</p>
-        <Button size="sm" variant="outline-info" onClick={() => window.location = url.origin}>Enter the context web</Button>
-        </>
-        :
-        null
-      }
-      </>;
-  }
-
-  startup()
-  {
-    return <h2>Please wait while your contexts are being loaded</h2>
-  }
-  
-  deleteAccountScreen()
-  {
-    return <>
-      <h2>Removing your contexts and roles</h2>
-      <p>Please wait until all your stored contexts and roles have been removed completely.</p>
-      {
-        this.state.accountDeletionComplete ?
-        <p>All of your contexts and roles have been removed.</p>
-        :
-        null
-      }
-    </>
-  }
-
   computeScreen()
   {
     const component = this;
@@ -668,7 +615,7 @@ export default class App extends Component
       switch (component.state.render)
       {
         case "recompileLocalModels":
-          return component.recompilingLocalModels()
+          return <RecompileLocalModelsScreen recompilationstate={component.state.recompilationState}/>;
         case "login":
           return <AccountManagement
             setloggedin={() => component.setState({loggedIn: true})}
@@ -684,11 +631,11 @@ export default class App extends Component
             usesystemversion={ component.state.useSystemVersion }
             />;
         case "createAccountAutomatically":
-          return component.introductionScreen();
+          return <IntroductionScreen configurationcomplete={component.state.configurationComplete}/>;
         case "startup":
-          return component.startup();
+          return <StartupScreen/>;
         case "deleteAccount":
-          return component.deleteAccountScreen();
+          return <DeleteInstallation accountdeletioncomplete={component.state.accountDeletionComplete}/>;
         case "opencontext":
         case "openroleform":
         case "contextchoice":

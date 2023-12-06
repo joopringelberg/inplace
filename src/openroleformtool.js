@@ -34,7 +34,7 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import {PencilIcon} from '@primer/octicons-react';
 
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default class OpenRoleFormTool extends PerspectivesComponent
 {
@@ -89,7 +89,7 @@ export default class OpenRoleFormTool extends PerspectivesComponent
                     <div
                         ref={eventDiv}
                         onDragOver={ev => ev.preventDefault()}
-                        className="ml-3 mr-3"
+                        className="ml-3 mr-3 text-secondary"
                         aria-dropeffect="execute"
                         aria-describedby="formmode-tooltip"
                         tabIndex="0"

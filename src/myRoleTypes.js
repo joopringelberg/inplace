@@ -149,7 +149,7 @@ const CustomToggle = React.forwardRef(({ children, onClick, disabled }, ref) => 
   <a
     href=""
     ref={ref}
-    className={disabled ? "disabledIconStyle" : "iconStyle"}
+    className={disabled ? "text-muted" : "text-secondary"}
     onClick={(e) => {
       e.preventDefault();
       if (!disabled)

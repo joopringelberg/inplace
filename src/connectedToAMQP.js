@@ -28,7 +28,7 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import {BroadcastIcon} from '@primer/octicons-react';
 
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default function ConnectedToAMQP(props)
 {
@@ -62,7 +62,7 @@ export default function ConnectedToAMQP(props)
                   <div
                       ref={eventDiv}
                       onDragOver={ev => ev.preventDefault()}
-                      className="ml-3 mr-3"
+                      className="ml-3 mr-3 text-primary"
                       aria-dropeffect="execute"
                       aria-describedby="trash-tooltip"
                       tabIndex="0"

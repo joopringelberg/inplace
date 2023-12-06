@@ -31,7 +31,7 @@ import {Row, Col, OverlayTrigger, Tooltip, Collapse} from "react-bootstrap";
 
 import {BellIcon, BellSlashIcon, FoldDownIcon, FoldUpIcon} from '@primer/octicons-react';
 
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
 
 import {PerspectivesComponent, RoleTable, addRemoveRoleFromContext, ModelDependencies, UserMessagingPromise} from "perspectives-react";
 
@@ -133,7 +133,7 @@ export class AllowNotifications extends Component
                     >
                     <div
                         ref={eventDiv}
-                        className="ml-3 mr-3"
+                        className="ml-3 mr-3 text-secondary"
                         aria-describedby="notificationstool-tooltip"
                         tabIndex="0"
                         onKeyDown={ e => component.handleKeyDown(e) }
@@ -202,7 +202,7 @@ export class ShowNotifications extends Component
                     >
                     <div
                         ref={eventDiv}
-                        className="ml-3 mr-3"
+                        className="ml-3 mr-3 text-secondary"
                         aria-describedby="showNotifications-tooltip"
                         tabIndex="0"
                         onKeyDown={ e => component.handleKeyDown(e) }

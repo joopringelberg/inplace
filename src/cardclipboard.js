@@ -34,7 +34,7 @@ import {
 import Container from 'react-bootstrap/Container';
 import Badge from 'react-bootstrap/Badge';
 
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
 
 ////////////////////////////////////////////////////////////////////////////////
 // CARDCLIPBOARD
@@ -101,7 +101,7 @@ export default class CardClipBoard extends PerspectivesComponent
     const component = this;
     if (this.state && this.state.cardTitle)
     {
-      return <Container onClick={component.writeRoleIdentification}><Badge variant="info">{this.state.cardTitle}</Badge></Container>;
+      return <Container onClick={component.writeRoleIdentification}><Badge variant="info" className="p-2">{this.state.cardTitle}</Badge></Container>;
     }
     else {
       return null;

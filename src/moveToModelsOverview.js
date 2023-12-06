@@ -28,7 +28,7 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import {HomeIcon} from '@primer/octicons-react';
 
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
 import { Nav } from "react-bootstrap";
 
 export default class MoveToModelsOverview extends Component
@@ -74,7 +74,7 @@ export default class MoveToModelsOverview extends Component
                   >
               <Nav.Item
                   ref={component.ref}
-                  className="ml-3 mr-3"
+                  className="ml-3 mr-3 text-secondary"
                   aria-describedby="moveToModelsOverview-tooltip"
                   tabIndex="0"
                   onKeyDown={ e => component.handleKeyDown(e) }

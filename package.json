@@ -10,9 +10,11 @@
     "builddevelopment": "./build.sh -t development",
     "buildproduction": "./build.sh -t production",
     "buildmodels_prod": "webpack --watch --config models.webpack.config.js --env target=production repo=https://perspectives.domains:5987/models_perspectives_domains",
+    "buildTestStaticScreen": "webpack --watch --config testStaticScreen.webpack.config.js",
     "switchToProduction": "sudo ln -sfh /Users/joopringelberg/Code/inplace/production/ /Library/WebServer/Documents/mycontexts",
     "switchToDevelopment": "sudo ln -sfh /Users/joopringelberg/Code/inplace/development/ /Library/WebServer/Documents/mycontexts",
-    "publishTest": "scp -r ./development/* joop@inplace.works:/var/www/mycontexts.com/test"
+    "publishTest": "scp -r ./development/* joop@inplace.works:/var/www/mycontexts.com/test",
+    "stats": "webpack --env target=development --json > stats.json"
   },
   "author": "Joop Ringelberg <joop.ringelberg@gmail.com>",
   "repository": {
@@ -31,7 +33,6 @@
     "highlight.js": "^11.5.1",
     "i18next": "^22.4.13",
     "i18next-http-backend": "^2.4.2",
-    "perspectives-core": "git+https://github.com/joopringelberg/perspectives-core.git#v0.23.0",
     "perspectives-highlightjs": "github:joopringelberg/perspectives-highlightjs#v1.3.0",
     "perspectives-pageworker": "git+https://github.com/joopringelberg/perspectives-pageworker1.git#v0.13.0",
     "perspectives-proxy": "git+https://github.com/joopringelberg/perspectives-proxy.git#v1.18.0",

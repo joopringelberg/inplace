@@ -37,7 +37,7 @@ import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Tabs from 'react-bootstrap/Tabs';
 
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
 
 import {usersHaveBeenConfigured, addUser, authenticateUser, getUser, detectCouchdb, allUsers, removeUser} from "./usermanagement.js";
 

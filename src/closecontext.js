@@ -28,7 +28,7 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import {SignOutIcon} from '@primer/octicons-react';
 
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default class CloseContext extends Component
 {
@@ -74,7 +74,7 @@ export default class CloseContext extends Component
                   >
               <div
                   ref={component.ref}
-                  className="ml-3 mr-3"
+                  className="ml-3 mr-3 text-secondary"
                   aria-describedby="CloseContext-tooltip"
                   tabIndex="0"
                   onKeyDown={ e => component.handleKeyDown(e) }

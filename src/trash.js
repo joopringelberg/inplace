@@ -27,7 +27,7 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import {TrashcanIcon} from '@primer/octicons-react';
 
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default function Trash(props)
 {
@@ -58,7 +58,7 @@ export default function Trash(props)
                   <div
                       ref={eventDiv}
                       onDragOver={ev => ev.preventDefault()}
-                      className="ml-3 mr-3"
+                      className="ml-3 mr-3 text-secondary"
                       aria-dropeffect="execute"
                       aria-describedby="trash-tooltip"
                       tabIndex="0"

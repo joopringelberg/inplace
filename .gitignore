@@ -11,3 +11,4 @@ release.sh
 /production
 /test
 /remotetest
+stats.json

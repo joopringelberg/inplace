@@ -20,10 +20,13 @@ echo "Building for $target"
 # INPLACE
 cp ./src/index.html ./$target/index.html
 cp ./src/file.png ./$target/file.png
+cp ./src/manage.html ./$target/manage.html
 
 # MODELS
 cp ./src/models.html ./$target/models.html
 
+# None of these is produced by Webpack in this project. However, the sharedworker is loaded, of course, so must necessarily
+# be in the distribution. The same holds for the serviceworker. The pageworker is loaded on demand in Safari.
 cp ./node_modules/perspectives-pageworker/dist/perspectives-pageworker.js ./$target/perspectives-pageworker.js
 cp ./node_modules/perspectives-sharedworker/dist/perspectives-sharedworker.js ./$target/perspectives-sharedworker.js
 cp ./node_modules/perspectives-serviceworker/dist/perspectives-serviceworker.js ./$target/perspectives-serviceworker.js
@@ -36,4 +39,8 @@ fi
 
 if [ $target == "remotetest" ] ; then
     scp -r ./remotetest/* joop@inplace.works:/var/www/mycontexts.com/remotetest
+fi
+
+if [ $target == "development" ] ; then
+    cp ./src/testStaticScreen.html ./$target/testStaticScreen.html
 fi

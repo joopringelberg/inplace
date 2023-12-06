@@ -41,7 +41,7 @@ import Navbar from 'react-bootstrap/Navbar';
 
 import { DesktopDownloadIcon} from '@primer/octicons-react';
 
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
 
 import UnbindTool from "./unbindtool.js";
 
@@ -115,13 +115,12 @@ export default class NavigationBar extends Component
     const classes = component.props.isbasepage ? "justify-content-between border-bottom border-danger border-3" : "justify-content-between";
     return  <Navbar 
               // bg={component.props.isbasepage ? "light" : "info"}
-              variant="light" 
               expand="md" 
               collapseOnSelect
               role="banner" 
               aria-label="Main menu bar" 
               // className={"justify-content-between" + (component.props.isbasepage ? " border-bottom border-warning border-3" : "")}
-              className={classes}
+              className={ "navbar-dark bg-primary " + classes}
               expanded={component.state.expanded}>
               <Navbar.Brand tabIndex="-1" href="#home">MyContexts</Navbar.Brand>
               <Navbar.Toggle aria-controls="perspectives-toolbar" onClick={toggleNavbar}/>
