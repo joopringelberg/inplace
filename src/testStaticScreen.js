@@ -20,9 +20,9 @@
 
 import React from "react";
 import ReactDOM from 'react-dom';
-import ManageScreen from "./manageScreen";
+import NoContextSelected from "./noContextScreen";
 
 
 const params = new URLSearchParams(document.location.search.substring(1));
 
-ReactDOM.render(<ManageScreen/>, document.getElementById('root'));
+ReactDOM.render(<NoContextSelected setselectedcontext={s => alert(s)}/>, document.getElementById('root'));

@@ -21,11 +21,9 @@
 import React from "react";
 
 import
-  { Button
-  , Row
+  { Row
   , Col
   , Container
-  , Card
   } from "react-bootstrap";
 
 import './splash.css';

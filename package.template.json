@@ -43,6 +43,7 @@
     "react": "^17.0.1",
     "react-bootstrap": "^1.6.4",
     "react-dom": "^17.0.1",
+    "react-bootstrap-typeahead": "^6.3.2",
     "@paralleldrive/cuid2": "^2.2.2"
   },
   "devDependencies": {

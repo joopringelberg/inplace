@@ -42,8 +42,6 @@ import {
 
 import Container from 'react-bootstrap/Container';
 
-import Button from 'react-bootstrap/Button';
-
 // import 'bootstrap/dist/css/bootstrap.min.css';
 
 import './bootstrap.css'
@@ -68,6 +66,7 @@ import IntroductionScreen from "./introductionSplash.js";
 import StartupScreen from "./startupSplash.js";
 import DeleteInstallation from "./deleteInstallationSplash.js";
 import RecompileLocalModelsScreen from "./recompileLocalModelsScreen.js";
+import NoContextSelected from "./noContextScreen.js";
 
 /*
 QUERY PARAMETERS AND VALUES
@@ -585,7 +584,8 @@ export default class App extends Component
                         ? 
                         <SelectContext indexedContextNameMapping={component.state.indexedContextNameMapping}/>
                         :
-                        null)
+                        <NoContextSelected/>
+                      )
                     )
                   }</Container>
                   {
