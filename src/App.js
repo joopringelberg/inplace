@@ -67,12 +67,14 @@ import StartupScreen from "./startupSplash.js";
 import DeleteInstallation from "./deleteInstallationSplash.js";
 import RecompileLocalModelsScreen from "./recompileLocalModelsScreen.js";
 import NoContextSelected from "./noContextScreen.js";
+import ReCreateInstancesScreen from "./reCreateInstancesScreen.js";
 
 /*
 QUERY PARAMETERS AND VALUES
   - recompilelocalmodels=true
+  - recreateinstances=true
   - manualaccountcreation=true
-  - isfirstinstallation=false
+  - isfirstinstallation=true
   - usesystemversion=MAJOR.MINOR
   - deleteaccount=true
   - opencontext=<external role or contextrole identifier>
@@ -117,6 +119,7 @@ export default class App extends Component
       , backwardsNavigation: undefined
       , endUserMessage: {}
       , recompilationState: "pending"
+      , reCreationState: "pending"
       , accountDeletionComplete: false
       
       };
@@ -172,36 +175,6 @@ export default class App extends Component
     };
     const params = new URLSearchParams(document.location.search.substring(1));
 
-    function singleAccount(systemIdentifier)
-    {
-      if (params.get("recompilelocalmodels"))
-      {
-        component.setState({render: "recompileLocalModels"})
-        getUser( systemIdentifier )
-          .then( user => component.recompileLocalModels( user ));
-      }
-      else if (params.get("deleteaccount"))
-      {
-        component.setState({render: "deleteAccount"});
-        component.deleteAccount( systemIdentifier );
-      }
-      else if ( params.get( "manualaccountcreation"))
-      {
-        component.setState( 
-          { isFirstInstallation: params.get("isfirstinstallation")
-          , useSystemVersion: params.get("usesystemversion")
-          , render: "createAccountManually"} );              
-      }
-      else
-      {
-        component.setState({render: "startup"});
-        getUser( systemIdentifier )
-          .then( user => SharedWorkerChannelPromise
-            .then( proxy => proxy.runPDR( systemIdentifier, user) )
-            .then( () => component.prepareMyContextsScreen( systemIdentifier )));
-      }
-    }
-
     SharedWorkerChannelPromise
       .then( proxy => proxy.pdrStarted())
       .then( hasStarted => 
@@ -224,7 +197,7 @@ export default class App extends Component
                       {
                         if (defaultSystem)
                         {
-                          singleAccount( defaultSystem );
+                          component.singleAccount( defaultSystem );
                         }
                         else
                         {
@@ -237,11 +210,12 @@ export default class App extends Component
                                   {
                                     if (user.couchdbUrl)
                                     {
-                                      component.setState({render: "login", couchdbUrl})
+                                      // NU MISSEN WE DE ANALYSE VAN SINGLEACCOUNT
+                                      component.setState({render: "login", couchdbUrl: user.couchdbUrl})
                                     }
                                     else
                                     {
-                                      singleAccount( users[0] );
+                                      component.singleAccount( users[0] );
                                     }
                                   });
                               }
@@ -258,7 +232,7 @@ export default class App extends Component
                   if (params.get("manualaccountcreation"))
                   {
                     component.setState( 
-                      { isFirstInstallation: params.get("isfirstinstallation")
+                      { isFirstInstallation: params.get("isfirstinstallation") == null ? true : params.get("isfirstinstallation") == "true"
                       , useSystemVersion: params.get("usesystemversion")
                       , render: "createAccountManually"} );              
                   }
@@ -272,6 +246,45 @@ export default class App extends Component
             }
         } );
   }
+
+  singleAccount(systemIdentifier)
+  {
+    const component = this;
+    const params = new URLSearchParams(document.location.search.substring(1));
+    if (params.get("recompilelocalmodels"))
+    {
+      component.setState({render: "recompileLocalModels"})
+      getUser( systemIdentifier )
+        .then( user => component.recompileLocalModels( user ));
+    }
+    else if (params.get("recreateinstances"))
+    {
+      component.setState({render: "reCreateInstances"});
+      getUser( systemIdentifier )
+        .then( user => component.reCreateInstances( user ) );
+    }
+    else if (params.get("deleteaccount"))
+    {
+      component.setState({render: "deleteAccount"});
+      component.deleteAccount( systemIdentifier );
+    }
+    else if ( params.get( "manualaccountcreation"))
+    {
+      component.setState( 
+        { isFirstInstallation: params.get("isfirstinstallation") == null ? true : params.get("isfirstinstallation") == "true"
+        , useSystemVersion: params.get("usesystemversion")
+        , render: "createAccountManually"} );              
+    }
+    else
+    {
+      component.setState({render: "startup"});
+      getUser( systemIdentifier )
+        .then( user => SharedWorkerChannelPromise
+          .then( proxy => proxy.runPDR( systemIdentifier, user) )
+          .then( () => component.prepareMyContextsScreen( systemIdentifier )));
+    }
+  }
+
 
   componentDidUpdate(prevProps, prevState)
   {
@@ -488,6 +501,20 @@ export default class App extends Component
     });
   }
 
+  reCreateInstances(user)
+  {
+    const component = this;
+    SharedWorkerChannelPromise.then( function (proxy)
+    {
+      proxy.reCreateInstances( user )
+        .then(
+          function(success)
+          {
+            component.setState({reCreationState: success ? "success" : "failure"});
+          });
+    });
+  }
+
   createAccountAutomatically()
   {
     const component = this;
@@ -616,12 +643,15 @@ export default class App extends Component
       {
         case "recompileLocalModels":
           return <RecompileLocalModelsScreen recompilationstate={component.state.recompilationState}/>;
+        case "reCreateInstances":
+          return <ReCreateInstancesScreen recreationstate={component.state.reCreationState}/>;
         case "login":
           return <AccountManagement
             setloggedin={() => component.setState({loggedIn: true})}
             setcouchdburl={url => component.setState({couchdbUrl: url})}
             isfirstinstallation={ component.state.isFirstInstallation }
             usesystemversion={ component.state.useSystemVersion }
+            continuation={ user => component.singleAccount( user )}
             />;
         case "createAccountManually":
           return <AccountManagement
@@ -629,6 +659,7 @@ export default class App extends Component
             setcouchdburl={url => component.setState({couchdbUrl: url})}
             isfirstinstallation={ component.state.isFirstInstallation }
             usesystemversion={ component.state.useSystemVersion }
+            continuation={ user => component.singleAccount( user )}
             />;
         case "createAccountAutomatically":
           return <IntroductionScreen configurationcomplete={component.state.configurationComplete}/>;

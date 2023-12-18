@@ -173,40 +173,9 @@ export default class AccountManagement extends Component
                             });
                         });
                   }
-                  else if (component.props.recompilelocalmodels)
-                  {
-                    SharedWorkerChannelPromise.then( function (proxy)
-                      {
-                        proxy.recompileLocalModels(
-                          user
-                          )
-                          .then(
-                            function(success) // eslint-disable-line
-                            {
-                              // We do not yet return a reliable boolean value from the PDR.
-                              if (!success)
-                              {
-                                alert("Unfortunately the local models could not be (all) compiled. See the console log output for more information.");
-                              }
-                              // else
-                              // {
-                              //   alert("Succesfully recompiled the models of this installation. Please restart (and omit '?recompilelocalmodels=true')")
-                              // }
-                            });
-                        });
-                  }
                   else
                   {
-                    SharedWorkerChannelPromise.then( function (proxy)
-                      {
-                        proxy.runPDR(
-                          component.state.username,
-                          user
-                        )
-                          .then( () => component.props.setloggedin() )
-                          // TODO. Handle errors in a better way.
-                          .catch(e => alert( e ));
-                      });
+                    component.props.continuation( component.state.username )
                   }
                 });
               break;

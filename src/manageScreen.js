@@ -79,6 +79,15 @@ export default function ManageScreen()
                 </Col>
               </Row>
               <Row>
+                <Col className="alert alert-danger">
+                  Remove all data (contexts and roles) and re-create the initial instances on the base of the versions of the basic models stored locally. &nbsp;
+                  <em>NOTE:</em> this is a very destructive operation! All your data will be lost.
+                </Col>
+                <Col className="d-flex align-items-center">
+                  <a className="badge badge-pill badge-danger p-3" href="/?recreateinstances=true">Remove all data and recreate initial contexts and roles</a>
+                </Col>
+              </Row>
+              <Row>
               <Col className="alert alert-light">
                   I have finished here. Just take me to my contexts!
                 </Col>
