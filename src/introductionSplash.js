@@ -42,7 +42,7 @@ export default function IntroductionScreen(props)
       </Container>
       </div>
       <Container>
-      <h3 className="text-center pt-5 pb-5">Perspectives: a model driven user centred IT approach</h3>
+      <h3 className="text-center pt-5 pb-5">Perspectives: a model driven user centered IT approach</h3>
       <Row className="d-flex justify-content-center">
         <Col md={4}>
           <Card className={props.configurationcomplete ? "text-white bg-primary" : "text-white bg-secondary"}>

@@ -32,6 +32,7 @@
     "highlight.js": "^11.5.1",
     "i18next": "^22.4.13",
     "i18next-http-backend": "^2.4.2",
+    "idb-keyval": "^6.2.1",
     "perspectives-core": "git+https://github.com/joopringelberg/perspectives-core.git#PERSPECTIVESCORE",
     "perspectives-highlightjs": "github:joopringelberg/perspectives-highlightjs#PERSPECTIVESHIGHLIGHTJS",
     "perspectives-pageworker": "git+https://github.com/joopringelberg/perspectives-pageworker1.git#PAGEWORKER",

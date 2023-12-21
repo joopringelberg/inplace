@@ -102,7 +102,9 @@ export function removeUser( userName )
 {
   return localUsers.get( userName ).then( pouchdbUser =>
     {
-      return localUsers.remove( pouchdbUser).then( () => pouchdbUser);
+      return localUsers.remove( pouchdbUser)
+        .then( () => pouchdbUser )
+        .catch( e => alert( e ));
     });
 }
 

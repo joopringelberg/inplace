@@ -26,7 +26,24 @@ Some of these parameters may be set with a query string parameter.
 Others are set during the installation process.
 Even more options may be set from within MyContexts itself.
 
-We store these parameter-value combinations in a single JSON document in the database runtimeoptions in IndexedDB.
+We store these parameter-value combinations in a single JSON document per installation in the database runtimeoptions in IndexedDB, under the key that identifies the system of the installation.
+
+Options can be:
+
+  { isFirstInstallation :: Boolean
+  -- Default: null. Provide a value to test setup of an experimental new System version.
+  , useSystemVersion :: Nullable String
+  -- Default: the CryptoKey object that has been created on setting up the installation.
+  , privateKey :: Maybe CryptoKey'
+  -- Default: the CryptoKey object that has been created on setting up the installation. This is extractable.
+  , publicKey :: Maybe CryptoKey'
+  }
+
+However, notice that we cannot put the privateKey or publicKey in the options database, as Pouchdb requires JSON
+(and the CryptoKey objects are no json values).
+
+Instead, we put them into a key-value store with 'idb-keyval'.
+
 */
 
 import Pouchdb from "pouchdb-browser";
@@ -34,36 +51,27 @@ import Pouchdb from "pouchdb-browser";
 // The IndexedDB database "runtimeoptions"
 const runtimeOptionsDB = new Pouchdb("runtimeoptions");
 
+///////////////////////////////////////////////////////////////////////////////
+//// CREATE AND DELETE OPTIONS
+///////////////////////////////////////////////////////////////////////////////
+// Creates a new options document in the runtimeoptions database.
+export function createOptionsDocument ( systemId, options )
+{
+  options._id = systemId;
+  return runtimeOptionsDB.put(options);
+}
+
 // Returns a Promise for a boolean value
 export function optionsHaveBeenConfigured()
 {
   return runtimeOptionsDB.info().then( ({doc_count}) => doc_count > 0);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-//// GETOPTIONS
-///////////////////////////////////////////////////////////////////////////////
-// Returns a promise for the options. If no options have been configured, returns an empty object.
-export function getOptions()
+export function deleteOptions ( systemId )
 {
-  return runtimeOptionsDB.get( "options" ).catch( () => console.log("No options configured, yet") ).then( function(){return {};});;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-//// SET/GETDEFAULTSYSTEM
-//// The identifier of the system that has been installed without entering user credentials.
-///////////////////////////////////////////////////////////////////////////////
-export function setDefaultSystem( systemId )
-{
-  getOptions().then( options => 
+  return runtimeOptionsDB.get( systemId ).then( options =>
     {
-      options.defaultSystem = systemId;
-      runtimeOptionsDB.put( options ) 
-    });
-}
-
-// Returns undefined if no default system has been set.
-export function getDefaultSystem()
-{
-  return getOptions().then( options => options.defaultSystem );
+      return runtimeOptionsDB.remove( options )
+        .catch( e => alert( e ));
+    })
 }

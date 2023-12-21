@@ -33,6 +33,7 @@
     "highlight.js": "^11.5.1",
     "i18next": "^22.4.13",
     "i18next-http-backend": "^2.4.2",
+    "idb-keyval": "^6.2.1",
     "perspectives-highlightjs": "github:joopringelberg/perspectives-highlightjs#v1.3.0",
     "perspectives-pageworker": "git+https://github.com/joopringelberg/perspectives-pageworker1.git#v0.13.0",
     "perspectives-proxy": "git+https://github.com/joopringelberg/perspectives-proxy.git#v1.18.0",

@@ -60,7 +60,9 @@ import {initI18next} from "./i18next.js";
 
 import {init} from '@paralleldrive/cuid2';
 
-import { getDefaultSystem } from "./runtimeOptions.js";
+import { del as deleteCryptoKey, set as setCryptoKey } from 'idb-keyval';
+
+import { createOptionsDocument, deleteOptions, getDefaultSystem } from "./runtimeOptions.js";
 import { addUser, allUsers, getUser, removeUser, usersHaveBeenConfigured } from "./usermanagement.js";
 import IntroductionScreen from "./introductionSplash.js";
 import StartupScreen from "./startupSplash.js";
@@ -82,6 +84,9 @@ QUERY PARAMETERS AND VALUES
   - viewname=<view identifier>
   - cardprop=<property type identifier>
 */
+
+const PUBLICKEY = "_publicKey";
+const PRIVATEKEY = "_privateKey";
 
 export default class App extends Component
 {
@@ -106,7 +111,6 @@ export default class App extends Component
       , manualAccountCreation: undefined
       , systemIdentifier: undefined         // The system Identifier..
       , recompileLocalModels: false
-      , defaultSystem: undefined
       , usersConfigured: undefined
       // Props that are likely to change after logging in or opening:
       , showNotifications: false
@@ -192,40 +196,29 @@ export default class App extends Component
               {
                 if (usersConfigured)
                 {
-                  getDefaultSystem()
-                    .then( defaultSystem => 
+                  allUsers().then( users => 
+                    {
+                      if (users.length == 1)
                       {
-                        if (defaultSystem)
-                        {
-                          component.singleAccount( defaultSystem );
-                        }
-                        else
-                        {
-                          allUsers().then( users => 
+                        getUser( users[0] )
+                        .then( user => 
+                          {
+                            if (user.couchdbUrl)
                             {
-                              if (users.length == 1)
-                              {
-                                getUser( users[0] )
-                                .then( user => 
-                                  {
-                                    if (user.couchdbUrl)
-                                    {
-                                      // NU MISSEN WE DE ANALYSE VAN SINGLEACCOUNT
-                                      component.setState({render: "login", couchdbUrl: user.couchdbUrl})
-                                    }
-                                    else
-                                    {
-                                      component.singleAccount( users[0] );
-                                    }
-                                  });
-                              }
-                              else
-                              {
-                                component.setState({render: "login"});
-                              }
-                            })
-                        }
-                      });
+                              // NU MISSEN WE DE ANALYSE VAN SINGLEACCOUNT
+                              component.setState({render: "login", couchdbUrl: user.couchdbUrl})
+                            }
+                            else
+                            {
+                              component.singleAccount( users[0] );
+                            }
+                          });
+                      }
+                      else
+                      {
+                        component.setState({render: "login"});
+                      }
+                    })
                 }
                 else
                 {
@@ -482,8 +475,11 @@ export default class App extends Component
   {
     const component = this;
     SharedWorkerChannelPromise
-      .then( proxy => removeUser( systemIdentifier )
+      .then( proxy => deleteOptions( systemIdentifier )
+        .then( () => removeUser( systemIdentifier ))
         .then( user => proxy.removeAccount(user.userName, user))
+        .then( () => deleteCryptoKey( systemIdentifier + PUBLICKEY) )
+        .then( () => deleteCryptoKey( systemIdentifier + PRIVATEKEY) )
         .then( () => component.setState({accountDeletionComplete: true})));
   }
 
@@ -521,6 +517,8 @@ export default class App extends Component
     const newSystemId = cuid2();
     // create a new user record in localUsers, omitting password and couchdbUrl.
     addUser( newSystemId )
+    // Create the runtime options document with a private and public key.
+    .then( () => component.createRuntimeOptions(newSystemId, {isFirstInstallation: true}) )
     .then(() =>
       // Now create the user in the PDR.
       getUser( newSystemId )
@@ -535,6 +533,29 @@ export default class App extends Component
               } )
               // TODO. verwerk in splash screen.
               .then( () => component.setState({configurationComplete: true}) ) ) ) );
+  }
+
+  createRuntimeOptions (systemId, options)
+  {
+    const component = this;
+    let keypair;
+    return window.crypto.subtle.generateKey(
+        {
+        name: "ECDSA",
+        namedCurve: "P-384"
+        },
+        true, // extractable.
+        ["sign", "verify"])
+      .then( kp => keypair = kp)
+      .then( () => setCryptoKey( systemId + PUBLICKEY, keypair.publicKey ) )
+      .then( () => window.crypto.subtle.exportKey( "jwk", keypair.privateKey ) )
+      .then( buff => window.crypto.subtle.importKey( "jwk", buff, { name: "ECDSA", namedCurve: "P-384" }, false, ["sign"]) )
+      .then( unextractablePrivateKey => setCryptoKey( systemId + PRIVATEKEY, unextractablePrivateKey))
+      // Put the keypair in state so it can be exported.
+      // We'll delete it from state as soon as that has been done.
+      .then( () => component.setState({keypair} ) )
+      .then( () => createOptionsDocument(systemId, options) )
+      .catch( e => console.log( e ));
   }
 
   handleKeyDown(event, systemExternalRole)
