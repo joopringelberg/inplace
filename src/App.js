@@ -310,7 +310,7 @@ export default class App extends Component
 
     if (params.get("opencontext"))
     {
-      contextrole = params.get("opencontext");
+      contextrole = decodeURIComponent( params.get("opencontext") );
       if ( isSchemedResourceIdentifier(contextrole) )
       {
         ensureExternalRole( contextrole)
