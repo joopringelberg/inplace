@@ -116,22 +116,26 @@ export default class AccountManagement extends Component
           });
       }
       addUser( component.state.username, component.state.password, couchdbUrl )
-        .then(() =>
-          // Now create the user in the PDR.
-          getUser( component.state.username ).then( user =>
-            SharedWorkerChannelPromise.then( function (proxy)
-              {
-                proxy.createAccount(
-                  component.state.username,
-                  user,
-                  // CreateOptions. Read values from component state, that have been salvaged from query parameters.
-                  { isFirstInstallation: component.props.isfirstinstallation
-                  , useSystemVersion: component.props.usesystemversion
-                  }
-                  // TODO. Handle errors in a better way.
-                ).then( () => window.location= new URL(document.location.href).origin )
-                .catch(e => alert( e ));
-              })));
+        .then( () => window.location = new URL( "?newuserid=" + component.state.username,  document.location.href).href )
+        // .then(() =>
+        //   // Handle back control to App.
+        //   // set render = "createAccountAutomatically"
+        //   // set systemIdentifier = component.state.username
+        //   // Now create the user in the PDR.
+        //   getUser( component.state.username ).then( user =>
+        //     SharedWorkerChannelPromise.then( function (proxy)
+        //       {
+        //         proxy.createAccount(
+        //           component.state.username,
+        //           user,
+        //           // CreateOptions. Read values from component state, that have been salvaged from query parameters.
+        //           { isFirstInstallation: component.props.isfirstinstallation
+        //           , useSystemVersion: component.props.usesystemversion
+        //           }
+        //           // TODO. Handle errors in a better way.
+        //         ).then( () => window.location= new URL(document.location.href).origin )
+        //         .catch(e => alert( e ));
+        //       })));
     }
     component.setState({newAccountInfoValidated: true});
   }
@@ -418,9 +422,7 @@ export default class AccountManagement extends Component
 
 // This function is used to set state in a component higher up in the hierarchy.
 AccountManagement.propTypes =
-  { setloggedin: PropTypes.func.isRequired
-  , setcouchdburl: PropTypes.func.isRequired
-  , recompilelocalmodels: PropTypes.bool
+  { recompilelocalmodels: PropTypes.bool
   , isfirstinstallation: PropTypes.bool
   , usesystemversion: PropTypes.string
   };

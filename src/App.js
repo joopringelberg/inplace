@@ -191,52 +191,60 @@ export default class App extends Component
           }
         else
         {
-          usersHaveBeenConfigured()
-            .then( usersConfigured => 
-              {
-                if (usersConfigured)
+          // Vraag hier op of er een param is met een userid
+          if (params.get("newuserid"))
+          {
+            component.setState({render: "createAccountAutomatically"});
+            component.createAccount( params.get("newuserid") );
+          }
+          else
+          {
+            usersHaveBeenConfigured()
+              .then( usersConfigured => 
                 {
-                  allUsers().then( users => 
-                    {
-                      if (users.length == 1)
-                      {
-                        getUser( users[0] )
-                        .then( user => 
-                          {
-                            if (user.couchdbUrl)
-                            {
-                              // NU MISSEN WE DE ANALYSE VAN SINGLEACCOUNT
-                              component.setState({render: "login", couchdbUrl: user.couchdbUrl})
-                            }
-                            else
-                            {
-                              component.singleAccount( users[0] );
-                            }
-                          });
-                      }
-                      else
-                      {
-                        component.setState({render: "login"});
-                      }
-                    })
-                }
-                else
-                {
-                  if (params.get("manualaccountcreation"))
+                  if (usersConfigured)
                   {
-                    component.setState( 
-                      { isFirstInstallation: params.get("isfirstinstallation") == null ? true : params.get("isfirstinstallation") == "true"
-                      , useSystemVersion: params.get("usesystemversion")
-                      , render: "createAccountManually"} );              
+                    allUsers().then( users => 
+                      {
+                        if (users.length == 1)
+                        {
+                          getUser( users[0] )
+                          .then( user => 
+                            {
+                              if (user.couchdbUrl)
+                              {
+                                // NU MISSEN WE DE ANALYSE VAN SINGLEACCOUNT
+                                component.setState({render: "login", couchdbUrl: user.couchdbUrl})
+                              }
+                              else
+                              {
+                                component.singleAccount( users[0] );
+                              }
+                            });
+                        }
+                        else
+                        {
+                          component.setState({render: "login"});
+                        }
+                      })
                   }
                   else
                   {
-                    component.setState({render: "createAccountAutomatically"})
-                    component.createAccountAutomatically();
+                    if (params.get("manualaccountcreation"))
+                    {
+                      component.setState( 
+                        { isFirstInstallation: params.get("isfirstinstallation") == null ? true : params.get("isfirstinstallation") == "true"
+                        , useSystemVersion: params.get("usesystemversion")
+                        , render: "createAccountManually"} );              
+                    }
+                    else
+                    {
+                      component.setState({render: "createAccountAutomatically"})
+                      component.createAccountAutomatically();
+                    }
                   }
-                }
-            });        
-            }
+                });        
+            }}
         } );
   }
 
@@ -517,22 +525,28 @@ export default class App extends Component
     const newSystemId = cuid2();
     // create a new user record in localUsers, omitting password and couchdbUrl.
     addUser( newSystemId )
+      .then( () => component.createAccount(newSystemId) )
+  }
+
+  createAccount(newSystemId)
+  {
+    const component = this;
     // Create the runtime options document with a private and public key.
-    .then( () => component.createRuntimeOptions(newSystemId, {isFirstInstallation: true}) )
-    .then(() =>
-      // Now create the user in the PDR.
-      getUser( newSystemId )
-        .then( user =>
-          SharedWorkerChannelPromise
-            .then( proxy => proxy.createAccount(
-              newSystemId,
-              user,
-              // CreateOptions. Read values from component state, that have been salvaged from query parameters.
-              { isFirstInstallation: component.state.isFirstInstallation
-              , useSystemVersion: component.props.usesystemversion
-              } )
-              // TODO. verwerk in splash screen.
-              .then( () => component.setState({configurationComplete: true}) ) ) ) );
+    return component.createRuntimeOptions(newSystemId, {isFirstInstallation: true})
+      .then(() =>
+        // Now create the user in the PDR.
+        getUser( newSystemId )
+          .then( user =>
+            SharedWorkerChannelPromise
+              .then( proxy => proxy.createAccount(
+                newSystemId,
+                user,
+                // CreateOptions. Read values from component state, that have been salvaged from query parameters.
+                { isFirstInstallation: component.state.isFirstInstallation
+                , useSystemVersion: component.props.usesystemversion
+                } )
+                // TODO. verwerk in splash screen.
+                .then( () => component.setState({configurationComplete: true}) ) ) ) );
   }
 
   createRuntimeOptions (systemId, options)
@@ -668,16 +682,12 @@ export default class App extends Component
           return <ReCreateInstancesScreen recreationstate={component.state.reCreationState}/>;
         case "login":
           return <AccountManagement
-            setloggedin={() => component.setState({loggedIn: true})}
-            setcouchdburl={url => component.setState({couchdbUrl: url})}
             isfirstinstallation={ component.state.isFirstInstallation }
             usesystemversion={ component.state.useSystemVersion }
             continuation={ user => component.singleAccount( user )}
             />;
         case "createAccountManually":
           return <AccountManagement
-            setloggedin={() => component.setState({loggedIn: true})}
-            setcouchdburl={url => component.setState({couchdbUrl: url})}
             isfirstinstallation={ component.state.isFirstInstallation }
             usesystemversion={ component.state.useSystemVersion }
             continuation={ user => component.singleAccount( user )}
