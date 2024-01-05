@@ -17,6 +17,12 @@ done
 
 echo "Building for $target"
 
+if [ $target == remotetest ] ; then
+    mode="development"
+else
+    mode=$target
+fi
+
 # INPLACE
 cp ./src/index.html ./$target/index.html
 cp ./src/file.png ./$target/file.png
@@ -31,7 +37,7 @@ cp ./node_modules/perspectives-pageworker/dist/perspectives-pageworker.js ./$tar
 cp ./node_modules/perspectives-sharedworker/dist/perspectives-sharedworker.js ./$target/perspectives-sharedworker.js
 cp ./node_modules/perspectives-serviceworker/dist/perspectives-serviceworker.js ./$target/perspectives-serviceworker.js
 
-webpack --env target=$target
+webpack --env mode=$mode --env target=$target
 
 if [ $target == "production" ] ; then
     scp -r ./production/* joop@inplace.works:/var/www/mycontexts.com

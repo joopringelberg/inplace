@@ -3,7 +3,7 @@ const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = function(env)
   {
-    const {target} = env;
+    const {target, mode} = env;
     return {
       entry:
         { "index": path.join(__dirname, "src/index.js" )
@@ -15,7 +15,7 @@ module.exports = function(env)
         , path: path.resolve(__dirname, target)
         },
       watch: false,
-      mode: target,
+      mode: mode,
       target: "web",
       resolve: {
         alias: {

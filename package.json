@@ -9,6 +9,7 @@
     "symlinks": "./createPerspectivesLinks.sh",
     "builddevelopment": "./build.sh -t development",
     "buildproduction": "./build.sh -t production",
+    "buildRemoteTest": "./build.sh -t remotetest",
     "buildmodels_prod": "webpack --watch --config models.webpack.config.js --env target=production repo=https://perspectives.domains:5987/models_perspectives_domains",
     "buildTestStaticScreen": "webpack --watch --config testStaticScreen.webpack.config.js",
     "switchToProduction": "sudo ln -sfh /Users/joopringelberg/Code/inplace/production/ /Library/WebServer/Documents/mycontexts",
