@@ -58,13 +58,12 @@ export default function ConnectedToAMQP(props)
                   placement="left"
                   delay={{ show: 250, hide: 400 }}
                   overlay={renderTooltip}
-                >
+                  >
                   <div
                       ref={eventDiv}
                       onDragOver={ev => ev.preventDefault()}
-                      className="ml-3 mr-3 text-primary"
-                      aria-dropeffect="execute"
-                      aria-describedby="trash-tooltip"
+                      className="ml-3 mr-3 text-secondary"
+                      aria-describedby="amqp-tooltip"
                       tabIndex="0"
                       onDrop={ev => {
                         handleDrop( JSON.parse( ev.dataTransfer.getData("PSRol") ) );
@@ -74,8 +73,9 @@ export default function ConnectedToAMQP(props)
                       onDragLeave={ev => ev.target.classList.remove("border", "border-primary")}>
                       <BroadcastIcon alt="Connected" aria-label="MyContexts can send and receive messages" size='medium'/>
                   </div>
-                  </OverlayTrigger>
-                  : <div/>
+                </OverlayTrigger>
+                : 
+                <div/>
             }
             </PSView.Consumer>
           </ViewOnExternalRole>;
