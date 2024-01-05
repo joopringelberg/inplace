@@ -173,10 +173,6 @@ export default class App extends Component
   componentDidMount()
   {
     const component = this;
-    const beforeUnloadListener = (event) => {
-      event.preventDefault();
-      return event.returnValue = "Are you sure you want to exit?";
-    };
     const params = new URLSearchParams(document.location.search.substring(1));
 
     SharedWorkerChannelPromise
@@ -383,6 +379,10 @@ export default class App extends Component
   setHandlers()
   {
     const component = this;
+    const beforeUnloadListener = (event) => {
+      event.preventDefault();
+      return event.returnValue = "Are you sure you want to exit?";
+    };
     window.onpopstate = function(e)
     {
       if (e.state && e.state.title)
