@@ -34,7 +34,8 @@ import './bootstrap.css'
 
 export default function IntroductionScreen(props)
 {
-  const url = new URL(document.location.href);
+  const appLocation = location.origin + location.pathname;
+  const url = new URL(appLocation);
   return <div className="introductionSplash text-muted">
       <div className="bg-primary text-white pb-3">
       <Container>
@@ -51,7 +52,7 @@ export default function IntroductionScreen(props)
               <>
                 <Card.Title>Done!</Card.Title>
                 <Card.Text><em>Congratulations.</em> You now have access to the web of contexts and roles that make up the Perspectives Universe.</Card.Text>
-                <Button size="sm" variant="secondary" onClick={() => window.location = url.origin}>Enter the context web</Button>
+                <Button size="sm" variant="secondary" onClick={() => window.location = url.href}>Enter the context web</Button>
               </>
             :
             <>
@@ -92,7 +93,7 @@ export default function IntroductionScreen(props)
             The next time you visit this site you will go straight into the context web.
             </li>
             <li>
-            To remove the setup data (and do a number of other maintenance things), visit this page: <a className="badge badge-primary" href="https://mycontexts.com/manage.html">https://mycontexts/manage</a> (you may want to bookmark that page now).
+            To remove the setup data (and do a number of other maintenance things), visit this page: <a className="badge badge-primary" href={appLocation + "/manage.html"}>https://mycontexts/manage</a> (you may want to bookmark that page now).
             </li>
           </ul>
         </Col>

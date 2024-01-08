@@ -65,6 +65,7 @@ export default class NoContextSelected extends Component
   render()
   {
     const component = this;
+    const appLocation = location.origin + location.pathname;
     return  <Card ref={this.ref}>
               <Card.Body className="alert alert-secondary">
                 <Card.Title>No context</Card.Title>
@@ -92,7 +93,7 @@ export default class NoContextSelected extends Component
                 <Card.Text>
                   In order to manage your installation in this browser, click the link below.
                 </Card.Text>
-                <Card.Link className="badge badge-pill badge-success p-2" href="https://mycontexts.com/manage.html">Manage page</Card.Link>
+                <Card.Link className="badge badge-pill badge-success p-2" href={appLocation + "/manage.html"}>Manage page</Card.Link>
               </Card.Body>
             </Card>
   }

@@ -32,6 +32,13 @@ import './bootstrap.css'
 
 export default function ManageScreen()
 {
+  function thisAppsLocation()
+  {
+    const segments = location.pathname.split("/");
+    segments.pop();
+    return location.origin +  segments.join("/")
+  }
+  const appLocation = thisAppsLocation();
   return  <div className="introductionSplash text-muted">
             <div className="bg-primary text-white pb-3">
               <Container>
@@ -52,7 +59,7 @@ export default function ManageScreen()
                   the button on the right takes you to a page that will begin to remove all associated data from this browser's database immediately.
                 </Col>
                 <Col className="d-flex align-items-center">
-                  <a className="badge badge-pill badge-danger p-3" href="/?deleteaccount=true">Completely remove your installation</a>
+                  <a className="badge badge-pill badge-danger p-3" href={appLocation + "?deleteaccount=true"}>Completely remove your installation</a>
                 </Col>
               </Row>
               <Row>
@@ -64,7 +71,7 @@ export default function ManageScreen()
                   account somewhere on the web.
                 </Col>
                 <Col className="d-flex align-items-center">
-                  <a className="badge badge-pill badge-secondary p-3" href="/?manualaccountcreation=true">Extended installation creation</a>
+                  <a className="badge badge-pill badge-secondary p-3" href={appLocation + "?manualaccountcreation=true"}>Extended installation creation</a>
                 </Col>
               </Row>
               <Row>
@@ -75,7 +82,7 @@ export default function ManageScreen()
                   facility just in case. It is harmless to run this operation when your models are still compatible.
                 </Col>
                 <Col className="d-flex align-items-center">
-                  <a className="badge badge-pill badge-success p-3" href="/?recompilelocalmodels=true">Recompile local models</a>
+                  <a className="badge badge-pill badge-success p-3" href={appLocation + "?recompilelocalmodels=true"}>Recompile local models</a>
                 </Col>
               </Row>
               <Row>
@@ -84,7 +91,7 @@ export default function ManageScreen()
                   <em>NOTE:</em> this is a very destructive operation! All your data will be lost.
                 </Col>
                 <Col className="d-flex align-items-center">
-                  <a className="badge badge-pill badge-danger p-3" href="/?recreateinstances=true">Remove all data and recreate initial contexts and roles</a>
+                  <a className="badge badge-pill badge-danger p-3" href={appLocation + "?recreateinstances=true"}>Remove all data and recreate initial contexts and roles</a>
                 </Col>
               </Row>
               <Row>
@@ -92,10 +99,11 @@ export default function ManageScreen()
                   I have finished here. Just take me to my contexts!
                 </Col>
                 <Col className="d-flex align-items-center">
-                  <a className="badge badge-pill badge-light p-3" href="/">Start MyContexts</a>
+                  <a className="badge badge-pill badge-light p-3" href={appLocation + "/"}>Start MyContexts</a>
                 </Col>
               </Row>
               
             </Container>
           </div>
 }
+

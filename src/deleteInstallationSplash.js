@@ -34,6 +34,7 @@ import './bootstrap.css'
 
 export default function DeleteInstallation(props)
 {
+  const appLocation = location.origin + location.pathname;
   return  <div className="introductionSplash text-muted">
             <div className="bg-primary text-white pb-3">
               <Container>
@@ -48,8 +49,8 @@ export default function DeleteInstallation(props)
                 {
                   props.accountdeletioncomplete ?
                   <p>Done! All of the contexts and roles stored in this browser's database have been removed.
-                    To create a fresh installation, just go to <a href="https://mycontexts.com">MyContexts.com</a>, 
-                    or visit <a href="https://mycontexts.com/manage.html">MyContexts.com/manage.html</a> for more possibilities.
+                    To create a fresh installation, just go to <a href={appLocation}>MyContexts.com</a>, 
+                    or visit <a href={appLocation + "/manage.html"}>MyContexts.com/manage.html</a> for more possibilities.
                   </p>
                   :
                   null
