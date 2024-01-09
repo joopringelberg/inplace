@@ -12,4 +12,8 @@
   , "unbindtool_message": "Je hebt geen toestemming om de vuller van deze rol te verwijderen."
   , "setMyRoleTypes_title": "Instellen gewenste rol"
   , "setMyRoleTypes_message": "Kan de door jou gewenste rol {{-preferredType}} niet instellen."
+  , "invitationimportdialog_Title": "Importeer uitnodigingsbestand"
+  , "invitationimportdialog_ConfirmationLabel": "Vul de code in die je ontvangen hebt van de persoon die de uitnodiging stuurde:"
+  , "invitationimportdialog_Submit": "Bevestig code"
+  , "invitationimportdialog_InvalidCode": "Deze code is ongeldig. Probeer opnieuw of stop."
 }

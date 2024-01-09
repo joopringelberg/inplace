@@ -12,4 +12,8 @@
   , "unbindtool_message": "You are not allowed to remove the filler of this role."
   , "setMyRoleTypes_title": "Set preferred role"
   , "setMyRoleTypes_message": "Could not set your preferred role to {{-preferredType}}."
+  , "invitationimportdialog_Title": "Import invitation file"
+  , "invitationimportdialog_ConfirmationLabel": "Enter the code received from the person who sent the invitation:"
+  , "invitationimportdialog_Submit": "Submit code"
+  , "invitationimportdialog_InvalidCode": "This code is invalid. Try again or abort."
 }

@@ -70,6 +70,7 @@ import DeleteInstallation from "./deleteInstallationSplash.js";
 import RecompileLocalModelsScreen from "./recompileLocalModelsScreen.js";
 import NoContextSelected from "./noContextScreen.js";
 import ReCreateInstancesScreen from "./reCreateInstancesScreen.js";
+import { InvitationImportDialog } from "./invitationImportDialog.js";
 
 /*
 QUERY PARAMETERS AND VALUES
@@ -126,6 +127,7 @@ export default class App extends Component
       , reCreationState: "pending"
       , accountDeletionComplete: false
       , i8nextReady: false
+      , droppedFile: undefined
       
       };
     initUserMessaging(
@@ -629,6 +631,7 @@ export default class App extends Component
                   myroletype={component.state.myRoleType}
                   externalroleid={component.state.externalRoleId}
                   clearexternalroleid={component.clearExternalRoleId}
+                  setdroppedfile={ theFile => component.setState({droppedFile: theFile})}
                   />
                   <Container>
                   {
@@ -665,6 +668,7 @@ export default class App extends Component
                     : null
                   }
                   <EndUserNotifier message={component.state.endUserMessage}/>
+                  <InvitationImportDialog thefile={component.state.droppedFile} setdroppedfile={ theFile => component.setState({droppedFile: theFile})}/>
               </div>
             </Container>
           </AppContext.Provider>

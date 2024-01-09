@@ -28,7 +28,6 @@ import "./externals.js";
 
 import {
     RemoveRol,
-    importTransaction,
     FileDropZone,
     deconstructContext,
     ModelDependencies,
@@ -156,7 +155,7 @@ export default class NavigationBar extends Component
                   <UnbindTool systemExternalRole={component.props.systemexternalrole} collapsenavbar={collapseNavbar}/>
                   <FileDropZone
                     tooltiptext="Drop an invitation file here or press enter/space"
-                    handlefile={ importTransaction }
+                    handlefile={ component.props.setdroppedfile }
                     extension=".json"
                     className="ml-3 mr-3"
                     collapsenavbar={collapseNavbar}>
@@ -180,4 +179,5 @@ NavigationBar.propTypes =
   , myroletype: PropTypes.string
   , externalroleid: PropTypes.string
   , clearexternalroleid: PropTypes.func.isRequired
+  , setdroppedfile: PropTypes.func.isRequired
   };
