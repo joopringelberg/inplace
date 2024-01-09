@@ -125,6 +125,7 @@ export default class App extends Component
       , recompilationState: "pending"
       , reCreationState: "pending"
       , accountDeletionComplete: false
+      , i8nextReady: false
       
       };
     initUserMessaging(
@@ -174,6 +175,8 @@ export default class App extends Component
   {
     const component = this;
     const params = new URLSearchParams(document.location.search.substring(1));
+
+    initI18next("en").then( () => component.setState({i8nextReady: true}))
 
     SharedWorkerChannelPromise
       .then( proxy => proxy.pdrStarted())
@@ -707,7 +710,16 @@ export default class App extends Component
     }
     else
     {
-      return <div/>;
+      return <div className="introductionSplash text-muted">
+              <div className="bg-primary text-white pb-3">
+                <Container>
+                  <h1 className="text-center pt-5">MyContexts</h1>
+                </Container>
+              </div>
+              <Container>
+                <h3 className="text-center pt-5 pb-5">{ i18next.t("app_application_loads", { ns: 'mycontexts' }) }</h3>
+              </Container>
+              </div>;
     }
   }
 

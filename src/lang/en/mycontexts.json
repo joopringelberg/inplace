@@ -1,6 +1,7 @@
 {
   "app_opencontext_title": "Opening a context"
   , "app_opencontext_message": "Cannot open a context for {{- context}}"
+  , "app_application_loads": "Please wait while the application loads..."
   , "app_contextactions_title": "Context actions unavailable"
   , "app_contextactions_message": "Could not retrieve context actions for {{- context}}"
   , "app_myroletypes_title": "Your role types"

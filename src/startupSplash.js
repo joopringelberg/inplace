@@ -42,12 +42,7 @@ export default function StartupScreen(props)
             </div>
 
             <Container>
-              <Row className="pt-5">
-                <h2>Please wait while MyContexs starts up</h2>
-              </Row>
-              <Row>
-                <p>Starting takes a few seconds...</p>
-              </Row>
+                <h3 className="text-center pt-5">Please wait while MyContexs starts up...</h3>
             </Container>
           </div>
 }
