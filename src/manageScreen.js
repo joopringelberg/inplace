@@ -30,14 +30,10 @@ import './splash.css';
 
 import './bootstrap.css'
 
+import {thisAppsLocation} from "perspectives-react";
+
 export default function ManageScreen()
 {
-  function thisAppsLocation()
-  {
-    const segments = location.pathname.split("/");
-    segments.pop();
-    return location.origin +  segments.join("/")
-  }
   const appLocation = thisAppsLocation();
   return  <div className="introductionSplash text-muted">
             <div className="bg-primary text-white pb-3">
