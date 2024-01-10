@@ -27,6 +27,7 @@ fi
 cp ./src/index.html ./$target/index.html
 cp ./src/file.png ./$target/file.png
 cp ./src/manage.html ./$target/manage.html
+cp ./src/favicon.png ./$target/favicon.png
 
 # MODELS
 cp ./src/models.html ./$target/models.html
@@ -39,9 +40,9 @@ cp ./node_modules/perspectives-serviceworker/dist/perspectives-serviceworker.js 
 
 webpack --env mode=$mode --env target=$target
 
-if [ $target == "production" ] ; then
-    scp -r ./production/* joop@inplace.works:/var/www/mycontexts.com
-fi
+# if [ $target == "production" ] ; then
+#     scp -r ./production/* joop@inplace.works:/var/www/mycontexts.com
+# fi
 
 if [ $target == "remotetest" ] ; then
     scp -r ./remotetest/* joop@inplace.works:/var/www/mycontexts.com/remotetest

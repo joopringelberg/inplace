@@ -15,6 +15,7 @@
     "switchToProduction": "sudo ln -sfh /Users/joopringelberg/Code/inplace/production/ /Library/WebServer/Documents/mycontexts",
     "switchToDevelopment": "sudo ln -sfh /Users/joopringelberg/Code/inplace/development/ /Library/WebServer/Documents/mycontexts",
     "publishTest": "scp -r ./development/* joop@inplace.works:/var/www/mycontexts.com/test",
+    "publishProduction": "scp -r ./production/* joop@inplace.works:/var/www/mycontexts.com",
     "stats": "webpack --env target=development --json > stats.json"
   },
   "author": "Joop Ringelberg <joop.ringelberg@gmail.com>",
