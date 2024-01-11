@@ -95,7 +95,7 @@ export default class App extends Component
   {
     super(props);
     const component = this;
-    initI18next("en");
+    this.i18nextPromise = initI18next("en");
     // This stub is replaced by a function constructed in the addOpenContextOrRoleForm behaviour
     // whenever the user starts dragging a role that supports that behaviour.
     // Notice that we use indirection here. The value of eventDispatcher is a location that holds the actual eventDispatcher.
@@ -178,7 +178,7 @@ export default class App extends Component
     const component = this;
     const params = new URLSearchParams(document.location.search.substring(1));
 
-    initI18next("en").then( () => component.setState({i8nextReady: true}))
+    component.i18nextPromise.then( () => component.setState({i8nextReady: true}))
 
     SharedWorkerChannelPromise
       .then( proxy => proxy.pdrStarted())

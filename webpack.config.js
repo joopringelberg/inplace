@@ -10,6 +10,7 @@ module.exports = function(env)
         { "index": path.join(__dirname, "src/index.js" )
         , "models": path.join(__dirname, "src/models.js")
         , "manage": path.join(__dirname, "src/manage.js")
+        , "perspectives-serviceworker": path.join(__dirname, "src/perspectives-serviceworker.js")
       },
       output: 
         { filename: '[name].js'
