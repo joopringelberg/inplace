@@ -62,7 +62,7 @@ import {init} from '@paralleldrive/cuid2';
 
 import { del as deleteCryptoKey, set as setCryptoKey } from 'idb-keyval';
 
-import { createOptionsDocument, deleteOptions, getDefaultSystem } from "./runtimeOptions.js";
+import { createOptionsDocument, deleteOptions, getDefaultSystem, getOptions } from "./runtimeOptions.js";
 import { addUser, allUsers, getUser, removeUser, usersHaveBeenConfigured } from "./usermanagement.js";
 import IntroductionScreen from "./introductionSplash.js";
 import StartupScreen from "./startupSplash.js";
@@ -263,7 +263,7 @@ export default class App extends Component
     {
       component.setState({render: "reCreateInstances"});
       getUser( systemIdentifier )
-        .then( user => component.reCreateInstances( user ) );
+        .then( user => component.reCreateInstances( systemIdentifier, user ) );
     }
     else if (params.get("deleteaccount"))
     {
@@ -281,9 +281,10 @@ export default class App extends Component
     {
       component.setState({render: "startup"});
       getUser( systemIdentifier )
-        .then( user => SharedWorkerChannelPromise
-          .then( proxy => proxy.runPDR( systemIdentifier, user) )
-          .then( () => component.prepareMyContextsScreen( systemIdentifier )));
+        .then( user => getOptions( systemIdentifier)
+          .then( options => SharedWorkerChannelPromise
+            .then( proxy => proxy.runPDR( systemIdentifier, user, options) )
+            .then( () => component.prepareMyContextsScreen( systemIdentifier ))));
     }
   }
 
@@ -510,17 +511,18 @@ export default class App extends Component
     });
   }
 
-  reCreateInstances(user)
+  reCreateInstances(systemIdentifier, user)
   {
     const component = this;
     SharedWorkerChannelPromise.then( function (proxy)
     {
-      proxy.reCreateInstances( user )
-        .then(
-          function(success)
-          {
-            component.setState({reCreationState: success ? "success" : "failure"});
-          });
+      getOptions( systemIdentifier ).then( options => 
+        proxy.reCreateInstances( user, options )
+          .then(
+            function(success)
+            {
+              component.setState({reCreationState: success ? "success" : "failure"});
+            }));
     });
   }
 
@@ -536,22 +538,20 @@ export default class App extends Component
   createAccount(newSystemId)
   {
     const component = this;
-    // Create the runtime options document with a private and public key.
-    return component.createRuntimeOptions(newSystemId, {isFirstInstallation: true})
-      .then(() =>
+    // Create the runtime options document. Also create and store a private and public key.
+    // Read values from component state, that have been salvaged from query parameters.
+    return component.createRuntimeOptions(newSystemId, 
+        { isFirstInstallation: true
+        , useSystemVersion: component.props.usesystemversion
+        , myContextsVersion: __MyContextsversionNumber__
+        })
+      .then( options =>
         // Now create the user in the PDR.
         getUser( newSystemId )
           .then( user =>
             SharedWorkerChannelPromise
-              .then( proxy => proxy.createAccount(
-                newSystemId,
-                user,
-                // CreateOptions. Read values from component state, that have been salvaged from query parameters.
-                { isFirstInstallation: component.state.isFirstInstallation
-                , useSystemVersion: component.props.usesystemversion
-                } )
-                // TODO. verwerk in splash screen.
-                .then( () => component.setState({configurationComplete: true}) ) ) ) );
+              .then( proxy => proxy.createAccount( newSystemId, user, options )
+              .then( () => component.setState({configurationComplete: true}) ) ) ) );
   }
 
   createRuntimeOptions (systemId, options)

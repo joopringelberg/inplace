@@ -40,6 +40,7 @@ import Tabs from 'react-bootstrap/Tabs';
 // import 'bootstrap/dist/css/bootstrap.min.css';
 
 import {usersHaveBeenConfigured, addUser, authenticateUser, getUser, detectCouchdb, allUsers, removeUser} from "./usermanagement.js";
+import { getOptions } from "./runtimeOptions.js";
 
 export default class AccountManagement extends Component
 {
@@ -161,20 +162,22 @@ export default class AccountManagement extends Component
                   {
                     SharedWorkerChannelPromise.then( function (proxy)
                       {
-                        // zelfde parameters en argumenten als runPDR
-                        proxy.resetAccount(
-                          component.state.username,
-                          user
-                          )
-                          .then(
-                            function(success) // eslint-disable-line
-                            {
-                              if (!success)
+                        getOptions( component.state.username ).then( options => 
+                          // zelfde parameters en argumenten als runPDR
+                          proxy.resetAccount(
+                            component.state.username,
+                            user,
+                            options
+                            )
+                            .then(
+                              function(success) // eslint-disable-line
                               {
-                                alert("Unfortunately your account could not be reset and may be in an undefined state. You can reset by hand by opening Fauxton and removing all three databases whose name starts with your username.");
-                              }
-                              window.location.reload();
-                            });
+                                if (!success)
+                                {
+                                  alert("Unfortunately your account could not be reset and may be in an undefined state. You can reset by hand by opening Fauxton and removing all three databases whose name starts with your username.");
+                                }
+                                window.location.reload();
+                              }));
                         });
                   }
                   else

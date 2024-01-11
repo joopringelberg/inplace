@@ -30,19 +30,27 @@ We store these parameter-value combinations in a single JSON document per instal
 
 Options can be:
 
-  { isFirstInstallation :: Boolean
+  { 
+  -- Default: true. Should be false when someone installs MyContexts on a second device.
+  -- Only relevant on creating an installation (app.createAccount).
+  isFirstInstallation :: Boolean
+
   -- Default: null. Provide a value to test setup of an experimental new System version.
+  -- Only relevant on creating an installation (app.createAccount).
   , useSystemVersion :: Nullable String
-  -- Default: the CryptoKey object that has been created on setting up the installation.
-  , privateKey :: Maybe CryptoKey'
-  -- Default: the CryptoKey object that has been created on setting up the installation. This is extractable.
-  , publicKey :: Maybe CryptoKey'
-  }
+
+  -- Default: the package number taken from package.json
+  -- Relevant for runPDR in order to be able to show to the end user.
+  , myContextsVersion :: String
+
+  -- the members privateKey and publicKey are not used clientside, as we cannot store CryptoKey objects through Pouchdb. 
+  -- we use IDB
+}
 
 However, notice that we cannot put the privateKey or publicKey in the options database, as Pouchdb requires JSON
 (and the CryptoKey objects are no json values).
 
-Instead, we put them into a key-value store with 'idb-keyval'.
+Instead, we put them into a key-value store with 'idb-keyval'. In the PDR, we extract that value and put it back into the runtime options.
 
 */
 
@@ -54,11 +62,11 @@ const runtimeOptionsDB = new Pouchdb("runtimeoptions");
 ///////////////////////////////////////////////////////////////////////////////
 //// CREATE AND DELETE OPTIONS
 ///////////////////////////////////////////////////////////////////////////////
-// Creates a new options document in the runtimeoptions database.
+// Creates a new options document in the runtimeoptions database. Returns a promise for the options as passed in.
 export function createOptionsDocument ( systemId, options )
 {
   options._id = systemId;
-  return runtimeOptionsDB.put(options);
+  return runtimeOptionsDB.put(options).then( () => options );
 }
 
 // Returns a Promise for a boolean value
@@ -74,4 +82,9 @@ export function deleteOptions ( systemId )
       return runtimeOptionsDB.remove( options )
         .catch( e => alert( e ));
     })
+}
+
+export function getOptions( systemId )
+{
+  return runtimeOptionsDB.get( systemId );
 }

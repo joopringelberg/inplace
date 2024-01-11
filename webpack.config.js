@@ -1,5 +1,6 @@
 const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
+const webpack = require('webpack');
 
 module.exports = function(env)
   {
@@ -67,7 +68,10 @@ module.exports = function(env)
             { context: path.resolve(__dirname, "node_modules/perspectives-react/dist")
             , from: "src_lang_*", to: path.resolve(__dirname, target) },
           ],
-        })
+        }),
+        new webpack.DefinePlugin({
+          __MyContextsversionNumber__: JSON.stringify(require("./package.json").version)
+        })        
       ],
       externals: {
         // These are Affjax dependencies when running on node.
