@@ -1,6 +1,6 @@
 {
   "name": "MyContexts",
-  "version": "0.21.0",
+  "version": "0.22.0",
   "description": "The client for the Perspectives Distributed Runtime.",
   "private": true,
   "homepage": "https://mycontexts.com",
@@ -17,7 +17,7 @@
     "publishTest": "scp -r ./development/* joop@inplace.works:/var/www/mycontexts.com/test",
     "publishProduction": "scp -r ./production/* joop@inplace.works:/var/www/mycontexts.com",
     "stats": "webpack --env target=development --json > stats.json"
-  },
+   },
   "author": "Joop Ringelberg <joop.ringelberg@gmail.com>",
   "repository": {
     "type": "git",
@@ -29,24 +29,25 @@
   "license": "GPL-3.0-or-later",
   "dependencies": {
     "@babel/polyfill": "^7.12.1",
-    "@paralleldrive/cuid2": "^2.2.2",
     "@primer/octicons-react": "^11.0.0",
     "bootstrap": "^4.3.1",
     "highlight.js": "^11.5.1",
     "i18next": "^22.4.13",
     "i18next-http-backend": "^2.4.2",
     "idb-keyval": "^6.2.1",
+    "perspectives-core": "git+https://github.com/joopringelberg/perspectives-core.git#v0.24.0",
     "perspectives-highlightjs": "github:joopringelberg/perspectives-highlightjs#v1.3.0",
-    "perspectives-pageworker": "git+https://github.com/joopringelberg/perspectives-pageworker1.git#v0.13.0",
-    "perspectives-proxy": "git+https://github.com/joopringelberg/perspectives-proxy.git#v1.18.0",
-    "perspectives-react": "https://github.com/joopringelberg/perspectives-react.git#v0.23.0",
-    "perspectives-sharedworker": "git+https://github.com/joopringelberg/perspectives-sharedworker.git#v0.13.0",
+    "perspectives-pageworker": "git+https://github.com/joopringelberg/perspectives-pageworker1.git#v0.14.0",
+    "perspectives-proxy": "git+https://github.com/joopringelberg/perspectives-proxy.git#v1.19.0",
+    "perspectives-react": "https://github.com/joopringelberg/perspectives-react.git#v0.24.0",
+    "perspectives-sharedworker": "git+https://github.com/joopringelberg/perspectives-sharedworker.git#v0.14.0",
     "pouchdb-browser": "^7.2.2",
     "prop-types": "^15.7.2",
     "react": "^17.0.1",
     "react-bootstrap": "^1.6.4",
+    "react-dom": "^17.0.1",
     "react-bootstrap-typeahead": "^6.3.2",
-    "react-dom": "^17.0.1"
+    "@paralleldrive/cuid2": "^2.2.2"
   },
   "devDependencies": {
     "@babel/core": "^7.4.5",
