@@ -71,7 +71,8 @@ module.exports = function(env)
           ],
         }),
         new webpack.DefinePlugin({
-          __MyContextsversionNumber__: JSON.stringify(require("./package.json").version)
+          __MyContextsversionNumber__: JSON.stringify(require("./package.json").version),
+          __BUILD__: require("./build.json").build
         })        
       ],
       externals: {

@@ -1,6 +1,8 @@
 
 const fs = require('node:fs');
 
+const build = JSON.parse( fs.readFileSync("./build.json", {encoding: "utf-8"}) ).build;
+
 // See: https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/How_to/Define_app_icons#create_the_necessary_icon_sizes
 const macIcons = ["512.png", "256.png", "128.png", "32.png", "16.png"].map( 
   function(icon) 
@@ -27,4 +29,11 @@ fs.writeFile('./perspectives.webmanifest', JSON.stringify(manifest), err => {
     console.error(err);
   }
   console.log("Manifest written.")
+});
+
+fs.writeFile("./build.json", JSON.stringify({build: build + 1}), err => {
+  if (err) {
+    console.error(err);
+  }
+  console.log("Build increased to " + (build + 1));
 });
