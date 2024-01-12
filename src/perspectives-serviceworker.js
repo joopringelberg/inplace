@@ -22,7 +22,7 @@
 //// SERVICE WORKER
 ////////////////////////////////////////////////////////////////////////////////
 
-const cacheName = "mycontexts" + __MyContextsversionNumber__ + "11";
+const cacheName = "mycontexts" + __MyContextsversionNumber__ + "14";
 
 const toBeCached = [
   "/"

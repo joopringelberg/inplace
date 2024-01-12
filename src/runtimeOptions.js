@@ -77,11 +77,9 @@ export function optionsHaveBeenConfigured()
 
 export function deleteOptions ( systemId )
 {
-  return runtimeOptionsDB.get( systemId ).then( options =>
-    {
-      return runtimeOptionsDB.remove( options )
-        .catch( e => alert( e ));
-    })
+  return runtimeOptionsDB.get( systemId )
+    .then( options => runtimeOptionsDB.remove( options ) )
+    .catch( e => alert( e ));
 }
 
 export function getOptions( systemId )

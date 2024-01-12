@@ -188,7 +188,17 @@ export default class App extends Component
           {
             // As the PDR has started, the user must have logged in (or it has been done automatically with the passwordless defaultSystem).
             PDRproxy.then( proxy => proxy.getUserIdentifier())
-              .then( systemIdentifier => component.prepareMyContextsScreen( systemIdentifier[0] ) );
+              .then( systemIdentifier => 
+                {
+                  if ( params.get("deleteaccount") || params.get("recreateinstances") || params.get("recompilelocalmodels") )
+                  {
+                    component.singleAccount( systemIdentifier[0] );
+                  }
+                  else
+                  {
+                    component.prepareMyContextsScreen( systemIdentifier[0] );
+                  }
+                });
           }
         else
         {
