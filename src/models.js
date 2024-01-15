@@ -57,7 +57,7 @@ class App extends React.Component
         this.repository.allDocs({include_docs: true}).then(
             function(dbs)
             {
-                component.setState({models: dbs.rows.filter( ({id}) => id.match(/^model/))});
+                component.setState({models: dbs.rows.filter( row => row.doc.namespace && row.doc.namespace.match(/^model/))});
             }
         );
         this.state = {models: [], source: "-- Select a model."};
@@ -82,7 +82,7 @@ class App extends React.Component
         )
         if (model)
         {
-            component.setState({source: model.doc.contents.arc})
+            component.setState({source: model.doc.arc})
         }
     }
 

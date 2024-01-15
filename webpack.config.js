@@ -11,6 +11,7 @@ module.exports = function(env)
         , "models": path.join(__dirname, "src/models.js")
         , "manage": path.join(__dirname, "src/manage.js")
         , "perspectives-serviceworker": path.join(__dirname, "src/perspectives-serviceworker.js")
+        , "perspectives-pagedispatcher": path.join(__dirname, "src/perspectives-pagedispatcher.js")
       },
       output: 
         { filename: '[name].js'
@@ -72,7 +73,9 @@ module.exports = function(env)
         }),
         new webpack.DefinePlugin({
           __MyContextsversionNumber__: JSON.stringify(require("./package.json").version),
-          __BUILD__: require("./build.json").build
+          __BUILD__: require("./build.json").build,
+          REPOSITORYURL: "'https://perspectives.domains/models_perspectives_domains/'"
+
         })        
       ],
       externals: {

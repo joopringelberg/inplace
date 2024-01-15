@@ -1,25 +1,24 @@
-5554acc - 68 minutes ago, Increased version to 0.20.0
-f542ecf - 4 weeks ago, We can now navigate back over public pages
-f0556de - 6 weeks ago, MyContexts.com
-02543a1 - 8 weeks ago, Fixed cardClipBoard so it works on FireFox, too.
-aaa2b10 - 3 months ago, First commit
-afdd98e - 3 months ago, setPreferredUserRoleType
-892b41e - 3 months ago, removeBinding
-09c2b4b - 3 months ago, contextAction
-14f242d - 3 months ago, deleteProperty
-f568a05 - 3 months ago, getRolContext
-2545d36 - 3 months ago, getAllMyRoleTypes
-25abf55 - 3 months ago, getContextActions is now promisebased, shows error
-1683b6a - 3 months ago, Removed i18next backend
-0d8e327 - 3 months ago, Webpack should have alias for i8next
-1dbf825 - 3 months ago, Translation assets now copied by Webpack
-8886d19 - 3 months ago, i18next namespaces for inplace and react
-5e771ca - 3 months ago, I18next integrated
-7f4a332 - 3 months ago, Installed i18next and updated some packages
-d3530ce - 3 months ago, UserMessaging
-cb6018b - 4 months ago, Introduced ModelDependencies
-12df370 - 9 months ago, Preparing version v0.19.0
-7e9f626 - 9 months ago, Final tweak to first page detection
-d53b751 - 9 months ago, Subtler indication of base page in Safari
-3b5e846 - 9 months ago, Responsiveness
-1fda143 - 9 months ago, Notifications aren't available in Safari in IOS
+3af189c - 2 hours ago, Version 0.22.0
+c02ce24 - 7 hours ago, Automatically increase build number and include in serviceworker
+3d124a0 - 7 hours ago, Deleting installation in FireFox ran into problems
+32ac263 - 23 hours ago, WebApp for MyContexts
+170c4dc - 29 hours ago, RuntimeOptions for runPDR, reCreateInstances, and CreateAccount. MyContextsVersion
+dcd9572 - 2 days ago, Building and favicon
+0aec7ec - 3 days ago, Importing an Invitation
+fde3e3a - 3 days ago, thisAppsLocation moved to perspectives-react
+e2d2af1 - 3 days ago, Better messages while waiting for the application
+2c74510 - 4 days ago, Navigating in remotetest
+2fdbcf7 - 7 days ago, Display of AMQP connection symbol fixed
+b207c08 - 7 days ago, Building for remote test
+87306ac - 7 days ago, Fixed unloadListener error
+fec9c09 - 9 days ago, URIdecoding the parameter of opencontext.
+718ae80 - 9 days ago, PDR no longer started from AccountManagement
+c4f733b - 3 weeks ago, Cryptographic keys
+e285791 - 4 weeks ago, Re-creating an installation
+f96b04b - 5 weeks ago, A no context screen in MyContexts
+d175b6b - 5 weeks ago, A new installation experience
+c7fb673 - 5 weeks ago, A new experience
+421f984 - 6 weeks ago, Automatic installation
+0dcfd05 - 8 weeks ago, Fixed error in handleQueryString
+b2b08e4 - 8 weeks ago, Opening contexts
+40e86bc - 2 months ago, Refactoring and runtime options
