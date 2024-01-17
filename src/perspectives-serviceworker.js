@@ -24,7 +24,7 @@
 
 const cacheName = "mycontexts" + __MyContextsversionNumber__ + __BUILD__;
 
-const toBeCached = [
+const appFiles = [
   "/"
   , "/favicon.png"
   , "/file.png"
@@ -44,13 +44,15 @@ const toBeCached = [
 
 const macIcons = ["512.png", "256.png", "128.png", "32.png", "16.png"].map( icon => "/appimages/ios/" + icon);
 
+const toBeCached = appFiles.concat( macIcons );
+
 self.addEventListener("install", (e) => {
   console.log("[Service Worker] Install");
   e.waitUntil(
     (async () => {
       const cache = await caches.open(cacheName);
       console.log("[Service Worker] Caching all mycontext sources");
-      await cache.addAll(toBeCached.concat(macIcons))
+      await cache.addAll(toBeCached)
         .then( e => console.log( e ));
     })(),
   );
@@ -59,24 +61,26 @@ self.addEventListener("install", (e) => {
 self.addEventListener("fetch", (e) => {
   e.respondWith(
     (async () => {
-      // As a reminder: these are all requests on the origin https://mycontexts.com
-      // We want to ignore all requests on the directory /remotetest/
-      if ( new URL( e.request.url ).pathname.match( "/remotetest/") )
-      {
-        console.log( `[Service Worker] Passing through remotetest request: ${e.request.url}`);
-      }
-      else
+      const url = new URL( e.request.url )
+      if ( toBeCached.find( fl => url.pathname.match( fl )) )
       {
         const r = await caches.match(e.request);
         if (r) {
           console.log(`[Service Worker] Taking resource from cache: ${e.request.url}`);
           return r;
         }
-        const response = await fetch(e.request);
-        const cache = await caches.open(cacheName);
-        console.log(`[Service Worker] Caching new resource: ${e.request.url}`);
-        cache.put(e.request, response.clone());
-        return response;
+        // const response = await fetch(e.request);
+        // const cache = await caches.open(cacheName);
+        // console.log(`[Service Worker] Caching new resource: ${e.request.url}`);
+        // cache.put(e.request, response.clone());
+        // return response;
+        console.log( `[Service Worker] This resource should have been cached but is not. Passing it through: ${e.request.url}`);
+        return await fetch(e.request);
+      }
+      else
+      {
+        console.log( `[Service Worker] Passing through this request without caching: ${e.request.url}`);
+        return await fetch(e.request);
       }
     })(),
   );
