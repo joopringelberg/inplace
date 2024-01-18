@@ -37,6 +37,8 @@ import {
 import i18next from "i18next";
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Tooltip from 'react-bootstrap/Tooltip';
 
 import { DesktopDownloadIcon} from '@primer/octicons-react';
 
@@ -112,6 +114,14 @@ export default class NavigationBar extends Component
     const component = this;
     const contextId = component.props.externalroleid ? deconstructContext ( component.props.externalroleid ) : null;
     const classes = component.props.isbasepage ? "justify-content-between border-bottom border-danger border-3" : "justify-content-between";
+    const renderTooltip = (props) => (
+      <Tooltip id="MyContexts-tooltip" {...props} show={
+         // eslint-disable-next-line react/prop-types
+        props.show.toString()}>
+        MyContexts version {__MyContextsversionNumber__}.
+        Build {__BUILD__}.
+      </Tooltip> );
+  
     return  <Navbar 
               // bg={component.props.isbasepage ? "light" : "info"}
               expand="md" 
@@ -121,7 +131,13 @@ export default class NavigationBar extends Component
               // className={"justify-content-between" + (component.props.isbasepage ? " border-bottom border-warning border-3" : "")}
               className={ "navbar-dark bg-primary " + classes}
               expanded={component.state.expanded}>
-              <Navbar.Brand tabIndex="-1" href="#home">MyContexts</Navbar.Brand>
+              <OverlayTrigger
+                    placement="bottom-start"
+                    delay={{ show: 250, hide: 400 }}
+                    overlay={renderTooltip}
+                  >
+                <Navbar.Brand tabIndex="-1" href="#home">MyContexts</Navbar.Brand>
+              </OverlayTrigger>
               <Navbar.Toggle aria-controls="perspectives-toolbar" onClick={toggleNavbar}/>
               <Navbar.Collapse id="perspectives-toolbar">
                 <Nav

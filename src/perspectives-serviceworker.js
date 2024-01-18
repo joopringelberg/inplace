@@ -53,7 +53,8 @@ self.addEventListener("install", (e) => {
       const cache = await caches.open(cacheName);
       console.log("[Service Worker] Caching all mycontext sources");
       await cache.addAll(toBeCached)
-        .then( e => console.log( e ));
+        .then( e => console.log( e ))
+        .catch( e => console.log( e ));
     })(),
   );
 });
@@ -62,24 +63,23 @@ self.addEventListener("fetch", (e) => {
   e.respondWith(
     (async () => {
       const url = new URL( e.request.url )
-      if ( toBeCached.find( fl => url.pathname.match( fl )) )
+      if ( toBeCached.find( fl => url.pathname == fl ) )
       {
         const r = await caches.match(e.request);
         if (r) {
-          console.log(`[Service Worker] Taking resource from cache: ${e.request.url}`);
+          console.log(`[Service Worker] Taking resource ${e.request.url} from cache: ${cacheName}.`);
           return r;
         }
-        // const response = await fetch(e.request);
-        // const cache = await caches.open(cacheName);
-        // console.log(`[Service Worker] Caching new resource: ${e.request.url}`);
-        // cache.put(e.request, response.clone());
-        // return response;
-        console.log( `[Service Worker] This resource should have been cached but is not. Passing it through: ${e.request.url}`);
-        return await fetch(e.request);
+        console.log( `[Service Worker] ${e.request.url} should have been cached but is not. Fetching and caching it in cache ${cacheName}.`);
+        const response = await fetch(e.request);
+        const cache = await caches.open(cacheName);
+        cache.put(e.request, response.clone());
+        return response;
+        // return await fetch(e.request);
       }
       else
       {
-        console.log( `[Service Worker] Passing through this request without caching: ${e.request.url}`);
+        // console.log( `[Service Worker] Passing through this request without caching: ${e.request.url}`);
         return await fetch(e.request);
       }
     })(),
@@ -94,6 +94,7 @@ self.addEventListener("activate", (e) => {
           if (key === cacheName) {
             return;
           }
+          console.log( "Deleting cache for key " + key);
           return caches.delete(key);
         }),
       );
