@@ -14,7 +14,7 @@
     "buildTestStaticScreen": "webpack --watch --config testStaticScreen.webpack.config.js",
     "switchToProduction": "sudo ln -sfh /Users/joopringelberg/Code/inplace/production/ /Library/WebServer/Documents/mycontexts",
     "switchToDevelopment": "sudo ln -sfh /Users/joopringelberg/Code/inplace/development/ /Library/WebServer/Documents/mycontexts",
-    "publishTest": "scp -r ./development/* joop@inplace.works:/var/www/mycontexts.com/test",
+    "publishTest": "scp -r ./development/* joop@inplace.works:/var/www/mycontexts.com/remotetest",
     "publishProduction": "scp -r ./production/* joop@inplace.works:/var/www/mycontexts.com",
     "stats": "webpack --env target=development --json > stats.json"
    },
