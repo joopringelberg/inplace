@@ -35,6 +35,14 @@ import './bootstrap.css'
 export default function RecompileLocalModelsScreen(props)
 {
   const url = new URL(document.location.href);
+  if ( props.recompilationstate == "success")
+  {
+    document.body.style.cursor = "pointer";
+  }
+  else
+  {
+    document.body.style.cursor = "wait";
+  }
   return  <div className="introductionSplash text-muted">
             <div className="bg-primary text-white pb-3">
               <Container>

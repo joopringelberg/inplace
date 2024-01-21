@@ -712,6 +712,7 @@ export default class App extends Component
         case "createAccountAutomatically":
           return <IntroductionScreen configurationcomplete={component.state.configurationComplete}/>;
         case "startup":
+          document.body.style.cursor = "wait";
           return <StartupScreen/>;
         case "deleteAccount":
           return <DeleteInstallation accountdeletioncomplete={component.state.accountDeletionComplete}/>;

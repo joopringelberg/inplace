@@ -36,6 +36,14 @@ export default function IntroductionScreen(props)
 {
   const appLocation = location.origin + location.pathname;
   const url = new URL(appLocation);
+  if ( props.configurationcomplete)
+  {
+    document.body.style.cursor = "pointer";
+  }
+  else
+  {
+    document.body.style.cursor = "wait";
+  }
   return <div className="introductionSplash text-muted">
       <div className="bg-primary text-white pb-3">
       <Container>
