@@ -723,7 +723,7 @@ export default class App extends Component
           return component.openMyContextsScreen();
       }
     }
-    else
+    else if (component.state.i8nextReady)
     {
       return <div className="introductionSplash text-muted">
               <div className="bg-primary text-white pb-3">
@@ -735,6 +735,10 @@ export default class App extends Component
                 <h3 className="text-center pt-5 pb-5">{ i18next.t("app_application_loads", { ns: 'mycontexts' }) }</h3>
               </Container>
               </div>;
+    }
+    else 
+    {
+      return <div/>;
     }
   }
 

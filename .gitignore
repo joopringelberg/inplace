@@ -12,3 +12,4 @@ release.sh
 /test
 /remotetest
 stats.json
+build.json
