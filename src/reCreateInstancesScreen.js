@@ -23,9 +23,7 @@ import React from "react";
 import
   { Button
   , Row
-  , Col
   , Container
-  , Card
   } from "react-bootstrap";
 
 import './splash.css';
@@ -34,7 +32,7 @@ import './bootstrap.css'
 
 export default function ReCreateInstancesScreen(props)
 {
-  const url = new URL(document.location.href);
+  const appLocation = location.origin + location.pathname;
   if ( props.recreationstate == "success")
   {
     document.body.style.cursor = "pointer";
@@ -62,7 +60,7 @@ export default function ReCreateInstancesScreen(props)
                 props.recreationstate == "success" ?
                 <>
                   Done! Your instances have been re-created. You may now continue to MyContexts. <span>&nbsp;</span>
-                  <Button size="sm" variant="success" onClick={ () => window.location = url.origin} >Start MyContexts</Button>
+                  <Button size="sm" variant="success" onClick={ () => window.location = appLocation} >Start MyContexts</Button>
                 </>
                 :
                 props.recreationstate == "failure" ?

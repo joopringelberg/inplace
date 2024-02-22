@@ -65,12 +65,12 @@ export default class CardClipBoard extends PerspectivesComponent
             }
             else
             {
-              component.setState({cardTitle: undefined}); // WERKT DIT WEL?
+              component.setState({cardTitle: undefined});
             }
           }
           else
           {
-            component.setState({cardTitle: undefined}); // WERKT DIT WEL?
+            component.setState({cardTitle: undefined});
           }
         },
         CONTINUOUS,
