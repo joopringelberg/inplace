@@ -129,12 +129,12 @@ export default class UnbindTool extends PerspectivesComponent
                         ref={eventDiv}
                         onDragOver={ev => ev.preventDefault()}
                         className="ml-3 mr-3 text-secondary"
-                        aria-dropeffect="execute"
                         aria-describedby="unbindtool-tooltip"
                         tabIndex="0"
                         onKeyDown={ e => component.handleKeyDown(e) }
                         onDrop={ev => {
                           // eslint-disable-next-line react/prop-types
+                          ev.stopPropagation()
                           component.handle( JSON.parse( ev.dataTransfer.getData( "PSRol" ) ) );
                           ev.target.classList.remove("border", "p-3", "border-primary");
                           }}
