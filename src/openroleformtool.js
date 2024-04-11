@@ -98,6 +98,7 @@ export default class OpenRoleFormTool extends PerspectivesComponent
                           // The function in eventDispatcher is put there by the addOpenContextOrRoleForm behaviour triggered
                           // on the element the user started to drag. It causes an OpenRoleForm event to be thrown from that element.
                           // eslint-disable-next-line react/prop-types
+                          ev.stopPropagation()
                           component.props.eventDispatcher.eventDispatcher( JSON.parse( ev.dataTransfer.getData( "PSRol" ) ) );
                           ev.target.classList.remove("border", "p-3", "border-primary");
                           component.props.collapsenavbar();

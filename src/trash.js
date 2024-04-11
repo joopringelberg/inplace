@@ -63,6 +63,7 @@ export default function Trash(props)
                       aria-describedby="trash-tooltip"
                       tabIndex="0"
                       onDrop={ev => {
+                        ev.stopPropagation()
                         handleDrop( JSON.parse( ev.dataTransfer.getData("PSRol") ) );
                         ev.target.classList.remove("border", "p-3", "border-primary");
                       }}

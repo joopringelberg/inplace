@@ -41,15 +41,6 @@ export default function ConnectedToAMQP(props)
 
   const eventDiv = React.createRef();
 
-  function handleDrop({roleData, addedBehaviour})
-  {
-    if (addedBehaviour.includes("removeRoleFromContext"))
-    {
-      // eslint-disable-next-line react/prop-types
-      props.removerol( roleData );
-    }
-  }
-
   return  <ViewOnExternalRole viewname="allProperties">
             <PSView.Consumer>
             {
@@ -61,16 +52,10 @@ export default function ConnectedToAMQP(props)
                   >
                   <div
                       ref={eventDiv}
-                      onDragOver={ev => ev.preventDefault()}
                       className="ml-3 mr-3 text-secondary"
                       aria-describedby="amqp-tooltip"
                       tabIndex="0"
-                      onDrop={ev => {
-                        handleDrop( JSON.parse( ev.dataTransfer.getData("PSRol") ) );
-                        ev.target.classList.remove("border", "p-3", "border-primary");
-                      }}
-                      onDragEnter={ev => ev.target.classList.add("border", "border-primary") }
-                      onDragLeave={ev => ev.target.classList.remove("border", "border-primary")}>
+                  >
                       <BroadcastIcon alt="Connected" aria-label="MyContexts can send and receive messages" size='medium'/>
                   </div>
                 </OverlayTrigger>
