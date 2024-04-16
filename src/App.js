@@ -29,7 +29,6 @@ import {
     AppContext,
     Screen,
     MySystem,
-    ContextOfRole,
     PerspectiveForm,
     isSchemedResourceIdentifier,
     isExternalRole,
@@ -480,7 +479,8 @@ export default class App extends Component
               {
                 document.title = nameArr[0];
                 history.pushState({ selectedRoleInstance: rolinstance, title: nameArr[0] }, "");
-              }
+              },
+              FIREANDFORGET
           );
         });
 
@@ -622,7 +622,6 @@ export default class App extends Component
         <PSContext.Consumer>{ mysystem =>
           <AppContext.Provider value={
             { systemExternalRole: externalRole(mysystem.contextinstance)
-            , externalRoleId: component.state.externalRoleId
             , roleId: component.state.roleId
             , myRoleType: component.state.myRoleType
             , systemIdentifier: component.state.systemIdentifier
@@ -668,13 +667,12 @@ export default class App extends Component
                   }</Container>
                   {
                     component.state.externalRoleId && component.state.showNotifications ?
-                    <ContextOfRole rolinstance={component.state.externalRoleId}>
-                      <NotificationsDisplayer
-                        systemcontextinstance={mysystem.contextinstance}
-                        shownotifications={component.state.showNotifications}
-                        navigateto={propagate}
-                        />
-                    </ContextOfRole>
+                    <NotificationsDisplayer
+                      externalroleid={component.state.externalRoleId}
+                      systemcontextinstance={mysystem.contextinstance}
+                      shownotifications={component.state.showNotifications}
+                      navigateto={propagate}
+                      />
                     : null
                   }
                   <EndUserNotifier message={component.state.endUserMessage}/>

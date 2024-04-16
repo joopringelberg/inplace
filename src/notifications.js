@@ -25,7 +25,7 @@ import "./App.css";
 
 import "./externals.js";
 
-import { PDRproxy } from 'perspectives-proxy';
+import { PDRproxy, FIREANDFORGET, CONTINUOUS } from 'perspectives-proxy';
 
 import {Row, Col, OverlayTrigger, Tooltip, Collapse} from "react-bootstrap";
 
@@ -33,7 +33,7 @@ import {BellIcon, BellSlashIcon, FoldDownIcon, FoldUpIcon} from '@primer/octicon
 
 // import 'bootstrap/dist/css/bootstrap.min.css';
 
-import {PerspectivesComponent, RoleTable, addRemoveRoleFromContext, ModelDependencies, UserMessagingPromise} from "perspectives-react";
+import {PerspectivesComponent, PerspectiveTable, ModelDependencies, UserMessagingPromise} from "perspectives-react";
 
 import i18next from "i18next";
 
@@ -232,75 +232,91 @@ export class NotificationsDisplayer extends PerspectivesComponent
   {
     super(props);
     this.notifications = [];
-
+    this.state = {perspective: undefined};
   }
   componentDidMount()
   {
     const component = this;
 
     PDRproxy.then( pproxy =>
-      pproxy.getRol (component.props.systemcontextinstance,
-        ModelDependencies.allNotifications,
-        function(notifications)
-        {
-          const oldNotifications = component.notifications;
-          let newNotifications;
-          if ( oldNotifications.length === 0 && notifications.length > 1 )
-          {
-            newNotifications = [];
-          }
-          else
-          {
-            newNotifications = notifications.filter(x => !oldNotifications.includes(x));
-          }
-          component.notifications = notifications;
-          if (component.props.shownotifications)
-          {
-            newNotifications.forEach( function(notification)
+      {
+        component.addUnsubscriber(
+          pproxy.getRol (component.props.systemcontextinstance,
+            ModelDependencies.allNotifications,
+            function(notifications)
+            {
+              const oldNotifications = component.notifications;
+              let newNotifications;
+              if ( oldNotifications.length === 0 && notifications.length > 1 )
               {
-                pproxy.getProperty(
-                  notification,
-                  ModelDependencies.notificationMessage,
-                  ModelDependencies.notifications,
-                  function( messages )
+                newNotifications = [];
+              }
+              else
+              {
+                newNotifications = notifications.filter(x => !oldNotifications.includes(x));
+              }
+              component.notifications = notifications;
+              if (component.props.shownotifications)
+              {
+                newNotifications.forEach( function(notification)
                   {
-                    // A minimal message.
-                    const n = new Notification(
-                      messages[0],
-                      { data: {roleId: notification}
-                      });
-                    n.onclick = function(e)
+                    pproxy.getProperty(
+                      notification,
+                      ModelDependencies.notificationMessage,
+                      ModelDependencies.notifications,
+                      function( messages )
                       {
-                        pproxy.getRolContext( notification )
-                          .then(
-                            function (contextIdArray)
-                            {
-                              if (history.state && history.state.selectedContext != contextIdArray[0])
-                              {
-                                history.pushState({ selectedContext: contextIdArray[0] }, "");
-                                // console.log("Pushing context state " + e.detail);
-                                // This changes App state.
-                                component.props.navigateto(
-                                  { selectedContext: contextIdArray[0]
-                                  , selectedRoleInstance: undefined
-                                  , viewname: undefined
-                                  , cardprop: undefined
-                                  , backwardsNavigation: false });
-                              }
-                              e.stopPropagation();
-                            })
-                          .catch(e => UserMessagingPromise.then( um => 
-                            um.addMessageForEndUser(
-                              { title: i18next.t("notifications_title", { ns: 'mycontexts' }) 
-                              , message: i18next.t("notifications_message", {ns: 'mycontexts'})
-                              , error: e.toString()
-                            })));            
-                      };
-                  }
-                );
-              });
-            }
-        }) );
+                        // A minimal message.
+                        const n = new Notification(
+                          messages[0],
+                          { data: {roleId: notification}
+                          });
+                        n.onclick = function(e)
+                          {
+                            pproxy.getRolContext( notification )
+                              .then(
+                                function (contextIdArray)
+                                {
+                                  if (history.state && history.state.selectedContext != contextIdArray[0])
+                                  {
+                                    history.pushState({ selectedContext: contextIdArray[0] }, "");
+                                    // console.log("Pushing context state " + e.detail);
+                                    // This changes App state.
+                                    component.props.navigateto(
+                                      { selectedContext: contextIdArray[0]
+                                      , selectedRoleInstance: undefined
+                                      , viewname: undefined
+                                      , cardprop: undefined
+                                      , backwardsNavigation: false });
+                                  }
+                                  e.stopPropagation();
+                                })
+                              .catch(e => UserMessagingPromise.then( um => 
+                                um.addMessageForEndUser(
+                                  { title: i18next.t("notifications_title", { ns: 'mycontexts' }) 
+                                  , message: i18next.t("notifications_message", {ns: 'mycontexts'})
+                                  , error: e.toString()
+                                })));            
+                          };
+                      },
+                      FIREANDFORGET
+                    );
+                  });
+                }
+            }))
+        component.addUnsubscriber(
+          // getPerspective (roleInstanceOfContext, perspectiveObjectRoleType /*OPTIONAL*/, receiveValues, fireAndForget, errorHandler)
+          pproxy.getPerspective(
+            component.props.externalroleid,
+            ModelDependencies.notifications,
+            function( perspectiveArray )
+            {
+              component.setState({perspective: perspectiveArray[0]});
+            },
+            CONTINUOUS
+          )
+        );
+   } );
   }
 
   render()
@@ -310,23 +326,20 @@ export class NotificationsDisplayer extends PerspectivesComponent
               <div>
                 <Row>
                   <Col>
-                    <RoleTable
-                      viewname="allProperties"
-                      cardcolumn="Message"
-                      roletype={ModelDependencies.notifications}
-                      //contexttocreate
-                      // createButton
-                      // roleRepresentation
-                      behaviours={[addRemoveRoleFromContext]}/>
+                    {
+                      component.state.perspective ? <PerspectiveTable perspective={component.state.perspective}/> : <div/>
+                    }
                   </Col>
                 </Row>
               </div>
-            </Collapse>;
+            </Collapse>
   }
+
 }
 
 NotificationsDisplayer.propTypes =
   { systemcontextinstance: PropTypes.string.isRequired
+  , externalroleid: PropTypes.string.isRequired
   , shownotifications: PropTypes.bool.isRequired
   // navigateto is just setState. Hence, this is an unsafe connection to
   // the component that has NotificationsDisplayer in its render tree,
