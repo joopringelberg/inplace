@@ -233,6 +233,7 @@ export class NotificationsDisplayer extends PerspectivesComponent
     super(props);
     this.notifications = [];
     this.state = {perspective: undefined};
+    this.currentContextNotificationsUnsubscriber = undefined;
   }
   componentDidMount()
   {
@@ -304,7 +305,7 @@ export class NotificationsDisplayer extends PerspectivesComponent
                   });
                 }
             }))
-        component.addUnsubscriber(
+        
           // getPerspective (roleInstanceOfContext, perspectiveObjectRoleType /*OPTIONAL*/, receiveValues, fireAndForget, errorHandler)
           pproxy.getPerspective(
             component.props.externalroleid,
@@ -314,9 +315,31 @@ export class NotificationsDisplayer extends PerspectivesComponent
               component.setState({perspective: perspectiveArray[0]});
             },
             CONTINUOUS
-          )
-        );
-   } );
+          ).then( unsubscriber => component.currentContextNotificationsUnsubscriber = unsubscriber);
+    } );
+  }
+
+  componentDidUpdate(prevProps)
+  {
+    const component = this;
+    if (prevProps.externalroleid != this.props.externalroleid)
+    {
+      PDRproxy.then( pproxy => 
+        {
+          // unsubscriber = {subject: req.subject, corrId: req.corrId}
+          component.currentContextNotificationsUnsubscriber.request = "Unsubscribe";
+          pproxy.send(component.currentContextNotificationsUnsubscriber, function(){});
+          pproxy.getPerspective(
+            component.props.externalroleid,
+            ModelDependencies.notifications,
+            function( perspectiveArray )
+            {
+              component.setState({perspective: perspectiveArray[0]});
+            },
+            CONTINUOUS
+          ).then( unsubscriber => component.currentContextNotificationsUnsubscriber = unsubscriber);
+        });
+    }
   }
 
   render()
