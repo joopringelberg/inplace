@@ -625,6 +625,7 @@ export default class App extends Component
             , roleId: component.state.roleId
             , myRoleType: component.state.myRoleType
             , systemIdentifier: component.state.systemIdentifier
+            , externalRoleId: component.state.externalRoleId
             , setEventDispatcher: function(f)
                 {
                   component.eventDispatcher.eventDispatcher = f;
