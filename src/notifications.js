@@ -239,6 +239,16 @@ export class NotificationsDisplayer extends PerspectivesComponent
   {
     const component = this;
 
+    function generateNotifications( messages )
+    {
+      const next = messages.shift();
+      if (next)
+      {
+        new Notification( next.text, {data: next.data});
+        setTimeout(()=> generateNotifications( messages ), 1000);
+      }
+    }
+
     PDRproxy.then( pproxy =>
       {
         component.addUnsubscriber(
@@ -248,6 +258,7 @@ export class NotificationsDisplayer extends PerspectivesComponent
             {
               const oldNotifications = component.notifications;
               let newNotifications;
+              const notificationData = [];
               if ( oldNotifications.length === 0 && notifications.length > 1 )
               {
                 newNotifications = [];
@@ -257,52 +268,25 @@ export class NotificationsDisplayer extends PerspectivesComponent
                 newNotifications = notifications.filter(x => !oldNotifications.includes(x));
               }
               component.notifications = notifications;
+              console.log(newNotifications);
               if (component.props.shownotifications)
               {
-                newNotifications.forEach( function(notification)
+                Promise.all( newNotifications.map( function(notification)
                   {
-                    pproxy.getProperty(
-                      notification,
-                      ModelDependencies.notificationMessage,
-                      ModelDependencies.notifications,
-                      function( messages )
-                      {
-                        // A minimal message.
-                        const n = new Notification(
-                          messages[0],
-                          { data: {roleId: notification}
-                          });
-                        n.onclick = function(e)
-                          {
-                            pproxy.getRolContext( notification )
-                              .then(
-                                function (contextIdArray)
-                                {
-                                  if (history.state && history.state.selectedContext != contextIdArray[0])
-                                  {
-                                    history.pushState({ selectedContext: contextIdArray[0] }, "");
-                                    // console.log("Pushing context state " + e.detail);
-                                    // This changes App state.
-                                    component.props.navigateto(
-                                      { selectedContext: contextIdArray[0]
-                                      , selectedRoleInstance: undefined
-                                      , viewname: undefined
-                                      , cardprop: undefined
-                                      , backwardsNavigation: false });
-                                  }
-                                  e.stopPropagation();
-                                })
-                              .catch(e => UserMessagingPromise.then( um => 
-                                um.addMessageForEndUser(
-                                  { title: i18next.t("notifications_title", { ns: 'mycontexts' }) 
-                                  , message: i18next.t("notifications_message", {ns: 'mycontexts'})
-                                  , error: e.toString()
-                                })));            
-                          };
-                      },
-                      FIREANDFORGET
-                    );
-                  });
+                    return new Promise((resolve, reject) => 
+                    {
+                      pproxy.getProperty(
+                        notification,
+                        ModelDependencies.notificationMessage,
+                        ModelDependencies.notifications,
+                        function( messages )
+                        {
+                          resolve( {text: messages[0], data: {roleId: notification}});
+                        },
+                        FIREANDFORGET
+                      );                        
+                    });
+                  }) ).then( generateNotifications );
                 }
             }))
         
