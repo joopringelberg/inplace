@@ -101,7 +101,7 @@ export class InvitationImportDialog extends Component
         <Container>
           <Row className="alert alert-secondary">{component.state.message}</Row>
           <Row>
-            <Form.Group as={Row} controlId="formHorizontalEmail">
+            <Form.Group as={Row}>
               <Form.Label column sm={8}>
                 { i18next.t( "invitationimportdialog_ConfirmationLabel", {ns: "mycontexts"})}
               </Form.Label>

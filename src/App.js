@@ -70,6 +70,7 @@ import RecompileLocalModelsScreen from "./recompileLocalModelsScreen.js";
 import NoContextSelected from "./noContextScreen.js";
 import ReCreateInstancesScreen from "./reCreateInstancesScreen.js";
 import { InvitationImportDialog } from "./invitationImportDialog.js";
+import InstallationAborted from "./installationAbortedSplash.js";
 
 /*
 QUERY PARAMETERS AND VALUES
@@ -127,6 +128,13 @@ export default class App extends Component
       , accountDeletionComplete: false
       , i8nextReady: false
       , droppedFile: undefined
+      , exportedPublicKey: undefined
+      , exportedPrivateKey: undefined
+      , keypairSaveResolver: undefined    // use this resolver to continue the installation after the public-private keypair has been saved.
+      , keypairSaveRejecter: undefined    // use this rejecter to abort the installation when the public-private keypair has NOT been saved.
+      , keypairUploadResolver: undefined  // use this resolver to communicate back whether the end user has uploaded a keypair.
+      , keypairUploadRejecter: undefined  // use this rejector when uploading has gone irrecoverably wrong.
+      , reasonForAbortion: ""             // A message string that says something about why the installation went wrong.
       
       };
     initUserMessaging(
@@ -548,26 +556,97 @@ export default class App extends Component
   createAccount(newSystemId)
   {
     const component = this;
+    let options, user, keypairUploaded;
     // Create the runtime options document. Also create and store a private and public key.
     // Read values from component state, that have been salvaged from query parameters.
-    return component.createRuntimeOptions(newSystemId, 
-        { isFirstInstallation: true
-        , useSystemVersion: component.props.usesystemversion
-        , myContextsVersion: __MyContextsversionNumber__
+    return component.askForKeypair(newSystemId)
+      .then( hasKeyPair => 
+        {
+          keypairUploaded = hasKeyPair;
+          if (!hasKeyPair)
+          {
+            return component.createKeypair(newSystemId);
+          }
+          else { return true; }
+          // NOTICE: it may be that we have to create and fulfil a promise here.
         })
-      .then( options =>
-        // Now create the user in the PDR.
-        getUser( newSystemId )
-          .then( user =>
-            SharedWorkerChannelPromise
-              .then( proxy => proxy.createAccount( newSystemId, user, options )
-              .then( () => component.setState({configurationComplete: true}) ) ) ) );
+        .then( () => createOptionsDocument(newSystemId,
+          { isFirstInstallation: true
+          , useSystemVersion: component.props.usesystemversion
+          , myContextsVersion: __MyContextsversionNumber__
+          }) )
+        // Display the modal dialog that forces the user to store the keypair.
+        .then( o => 
+          {
+            options = o;
+            // Only ask to save the keypair if it wasn't uploaded before.
+            if (!keypairUploaded)
+            {
+              return component.saveKeyPair();
+            }
+          })
+        // After the end user has downloaded her keys, create the user in the PDR.
+        .then( () => getUser( newSystemId ) )
+        .then( u =>
+          {
+            user = u;
+            return SharedWorkerChannelPromise.then( proxy => proxy.createAccount( newSystemId, user, options ));
+          })
+        // Finally, we remove the keypair from state. From now on, the only copy of the private key 
+        // is in the file on the end users' hard disk or wherever she chose to store it.
+        .then( () => component.setState({configurationComplete: true, exportedPrivateKey: undefined, exportedPublicKey: undefined}) ) 
+        .catch( e => component.setState({render: "installationaborted", reasonForAbortion: e}));
   }
 
-  createRuntimeOptions (systemId, options)
+  // Show modal dialog with an opportunity to upload a keypair.
+  // If the end user uploads a keypair: sets two crypto keys.
+  // Returns a promise for a Boolean: true in case the end user did in fact upload a keypair, false otherwise.
+  askForKeypair(systemId)
   {
     const component = this;
-    let keypair;
+    function setKeyPair( {privateKey, publicKey} )
+    {
+      return window.crypto.subtle.importKey( "jwk", privateKey, { name: "ECDSA", namedCurve: "P-384" }, false, ["sign"])
+        .then( key => setCryptoKey( systemId + PRIVATEKEY, key ))
+        .then( () => window.crypto.subtle.importKey( "jwk", publicKey, { name: "ECDSA", namedCurve: "P-384" }, true, ["verify"]))
+        .then( key => setCryptoKey( systemId + PUBLICKEY, key ) )
+    }
+
+    return new Promise( (resolver, keypairUploadRejecter) => 
+      {
+        // use the resolver to return either true or false. The rejecter is for emergency cases and will lead to abortion of the installation.
+        component.setState( 
+          { keypairUploadRejecter
+          , keypairUploadResolver: response =>
+            {
+              if (response == false)
+              {
+                resolver( false );
+              }
+              else
+              {
+                // response is a keypair. Import both keys.
+                setKeyPair(response).then( () => resolver( true ));
+              }
+            } } );
+      })
+  }
+
+  saveKeyPair()
+  {
+    const component = this;
+    return new Promise( (keypairSaveResolver, keypairSaveRejecter) =>
+    {
+      // Now display the modal dialog. Resolve the promise when the user completes the download.
+      // Reject any other course of action.
+      component.setState( {keypairSaveResolver, keypairSaveRejecter} );
+    })
+  }
+
+  createKeypair (systemId)
+  {
+    const component = this;
+    let keypair, exportedPrivateKey, exportedPublicKey;
     return window.crypto.subtle.generateKey(
         {
         name: "ECDSA",
@@ -578,12 +657,18 @@ export default class App extends Component
       .then( kp => keypair = kp)
       .then( () => setCryptoKey( systemId + PUBLICKEY, keypair.publicKey ) )
       .then( () => window.crypto.subtle.exportKey( "jwk", keypair.privateKey ) )
-      .then( buff => window.crypto.subtle.importKey( "jwk", buff, { name: "ECDSA", namedCurve: "P-384" }, false, ["sign"]) )
+      .then( buff => 
+        {
+          // We must save the exported private key because it appears as if it can only be exported once.
+          exportedPrivateKey = buff;
+          window.crypto.subtle.importKey( "jwk", buff, { name: "ECDSA", namedCurve: "P-384" }, false, ["sign"])
+        } )
       .then( unextractablePrivateKey => setCryptoKey( systemId + PRIVATEKEY, unextractablePrivateKey))
-      // Put the keypair in state so it can be exported.
-      // We'll delete it from state as soon as that has been done.
-      .then( () => component.setState({keypair} ) )
-      .then( () => createOptionsDocument(systemId, options) )
+      .then( () => window.crypto.subtle.exportKey( "jwk", keypair.publicKey ) )
+      .then( buff => exportedPublicKey = buff)
+      // Put the keys in state so they can be exported.
+      // We'll delete them from state as soon as that has been done.
+      .then( () => component.setState({exportedPrivateKey, exportedPublicKey} ) )
       .catch( e => console.log( e ));
   }
 
@@ -709,7 +794,13 @@ export default class App extends Component
             continuation={ user => component.singleAccount( user )}
             />;
         case "createAccountAutomatically":
-          return <IntroductionScreen configurationcomplete={component.state.configurationComplete}/>;
+          return <IntroductionScreen 
+                  configurationcomplete={component.state.configurationComplete} 
+                  keypairsaverejecter={component.state.keypairSaveRejecter} 
+                  keypairsaveresolver={component.state.keypairSaveResolver} 
+                  keypair={{privateKey: component.state.exportedPrivateKey, publicKey: component.state.exportedPublicKey}}
+                  keypairuploadresolver={component.state.keypairUploadResolver}
+                  keypairuploadrejecter={component.state.keypairUploadRejecter}/>;
         case "startup":
           document.body.style.cursor = "wait";
           return <StartupScreen/>;
@@ -720,6 +811,9 @@ export default class App extends Component
         case "contextchoice":
         case "openEmptyScreen":
           return component.openMyContextsScreen();
+        case "installationaborted":
+          document.body.style.cursor = "auto";
+          return <InstallationAborted reason={component.state.reasonForAbortion}/>
       }
     }
     else if (component.state.i8nextReady)

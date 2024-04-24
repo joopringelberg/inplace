@@ -31,6 +31,8 @@ import
 import './splash.css';
 
 import './bootstrap.css'
+import { SaveKeypairDialog } from "./saveKeypairDialog";
+import { UploadKeypairDialog } from "./uploadKeypairDialog";
 
 export default function IntroductionScreen(props)
 {
@@ -107,5 +109,29 @@ export default function IntroductionScreen(props)
         </Col>
       </Row>
       </Container>
+      {
+        props.keypairsaveresolver && 
+        props.keypairsaverejecter
+        ?
+        <SaveKeypairDialog keypairsaveresolver={props.keypairsaveresolver} keypairsaverejecter={props.keypairsaverejecter} keypair={props.keypair}/>
+        :
+        null
+      }
+      {
+        props.keypairuploadresolver &&
+        props.keypairuploadrejecter
+        ?
+          <UploadKeypairDialog keypairuploadresolver={props.keypairuploadresolver} keypairuploadrejecter={props.keypairuploadrejecter}/>
+        :
+        null
+      }
     </div>;
 }
+
+// props:
+// configurationcomplete
+// keypair: https://developer.mozilla.org/en-US/docs/Web/API/CryptoKeyPair
+// keypairsaveresolver: use this resolver to continue the installation after the public-private keypair has been saved.
+// keypairsaverejecter: use this rejecter to abort the installation when the public-private keypair has NOT been saved.
+// keypairuploadresolver: use this resolver to return either true (meaning a keypair has been uploaded) or false (when not).
+// keypairuploadrejecter: use when the uploading fails and cannot be corrected.
