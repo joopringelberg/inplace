@@ -36,7 +36,8 @@ import {
     ModelDependencies,
     EndUserNotifier,
     initUserMessaging,
-    UserMessagingPromise
+    UserMessagingPromise,
+    takeCUID
   } from "perspectives-react";
 
 import Container from 'react-bootstrap/Container';
@@ -62,7 +63,7 @@ import {init} from '@paralleldrive/cuid2';
 import { del as deleteCryptoKey, set as setCryptoKey } from 'idb-keyval';
 
 import { createOptionsDocument, deleteOptions, getDefaultSystem, getOptions } from "./runtimeOptions.js";
-import { addUser, allUsers, getUser, removeUser, usersHaveBeenConfigured } from "./usermanagement.js";
+import { addUser, modifyUser, allUsers, getUser, removeUser, usersHaveBeenConfigured } from "./usermanagement.js";
 import IntroductionScreen from "./introductionSplash.js";
 import StartupScreen from "./startupSplash.js";
 import DeleteInstallation from "./deleteInstallationSplash.js";
@@ -209,11 +210,11 @@ export default class App extends Component
           }
         else
         {
-          // Vraag hier op of er een param is met een userid
-          if (params.get("newuserid"))
+          // Vraag hier op of er een param is met een username
+          if (params.get("username"))
           {
             component.setState({render: "createAccountAutomatically"});
-            component.createAccount( params.get("newuserid") );
+            component.createAccountInCouchdb( params.get("username") );
           }
           else
           {
@@ -236,6 +237,7 @@ export default class App extends Component
                               }
                               else
                               {
+                                // A single user and not in Couchdb. We can start right away.
                                 component.singleAccount( users[0] );
                               }
                             });
@@ -264,6 +266,10 @@ export default class App extends Component
                 });        
             }}
         } );
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.log(error, errorInfo);
   }
 
   singleAccount(systemIdentifier)
@@ -548,29 +554,57 @@ export default class App extends Component
   {
     const component = this;
     const newSystemId = cuid2();
-    // create a new user record in localUsers, omitting password and couchdbUrl.
-    addUser( newSystemId )
-      .then( () => component.createAccount(newSystemId) )
+    const newPerspectivesUserId = cuid2();
+    component.createAccount(newSystemId, newSystemId, newPerspectivesUserId)
   }
 
-  createAccount(newSystemId)
+  // Whenever this function is called, a user document with systemIdentifier, password and couchdburl has been saved 
+  // with _id equal to the userName (which doubles as systemIdentifier).
+  createAccountInCouchdb( userName )
+  {
+    const newPerspectivesUserId = cuid2();
+    this.createAccount(userName, newPerspectivesUserId);
+  }
+
+  createAccount(newSystemId, newPerspectivesUserId)
   {
     const component = this;
-    let options, user, keypairUploaded;
+    let options, user, keypairUploaded = false, identityDocument = null, definiteSystemId = newSystemId, definitePerspectivesUserId = newPerspectivesUserId;
     // Create the runtime options document. Also create and store a private and public key.
     // Read values from component state, that have been salvaged from query parameters.
+    // 
     return component.askForKeypair(newSystemId)
-      .then( hasKeyPair => 
+      .then( ({hasKeyPair, restoreSystem, doc}) => 
         {
+          // The document has identifiers for the perspectivesSystem and for author that include storage schemes.
+          // However, we have to provide schemaless identifiers to the PDR.
           keypairUploaded = hasKeyPair;
+          identityDocument = doc;
+          if (restoreSystem)
+          {
+            // The end user has explicitly chosen to restore the installation with the identity of a previously existing PerspectivesSystem.
+            definiteSystemId = takeCUID( doc.perspectivesSystem );
+          }
+          if (hasKeyPair)
+          {
+            // When re-using a cryptographic keypair, we MUST use the PerspectivesUser id that this pair is allotted to.
+            definitePerspectivesUserId = takeCUID( doc.author )
+          }
           if (!hasKeyPair)
           {
             return component.createKeypair(newSystemId);
           }
-          else { return true; }
-          // NOTICE: it may be that we have to create and fulfil a promise here.
+          else { 
+            // we need to return a value for the Promise to resolve. Its value is not consumed.
+            return true; 
+          }
         })
-        .then( () => createOptionsDocument(newSystemId,
+        // Create or modify the user document stored with _id equal to definiteSystemId.
+        .then( () => modifyUser( definiteSystemId,
+          { systemIdentifier: definiteSystemId
+          , perspectivesUser: definitePerspectivesUserId
+          } ) )
+        .then( () => createOptionsDocument(definiteSystemId,
           { isFirstInstallation: true
           , useSystemVersion: component.props.usesystemversion
           , myContextsVersion: __MyContextsversionNumber__
@@ -586,12 +620,12 @@ export default class App extends Component
             }
           })
         // After the end user has downloaded her keys, create the user in the PDR.
-        .then( () => getUser( newSystemId ) )
+        .then( () => getUser( definiteSystemId ) )
         .then( u =>
           {
             user = u;
-            return SharedWorkerChannelPromise.then( proxy => proxy.createAccount( newSystemId, user, options ));
-          })
+            return SharedWorkerChannelPromise.then( proxy => proxy.createAccount( definiteSystemId, user, options, identityDocument ));
+          })        
         // Finally, we remove the keypair from state. From now on, the only copy of the private key 
         // is in the file on the end users' hard disk or wherever she chose to store it.
         .then( () => component.setState({configurationComplete: true, exportedPrivateKey: undefined, exportedPublicKey: undefined}) ) 
@@ -600,7 +634,8 @@ export default class App extends Component
 
   // Show modal dialog with an opportunity to upload a keypair.
   // If the end user uploads a keypair: sets two crypto keys.
-  // Returns a promise for a Boolean: true in case the end user did in fact upload a keypair, false otherwise.
+  // Returns a promise for {hasKeyPair :: Boolean, doc :: JSON}. hasKeyPair is true in case the end user did in fact upload a keypair, false otherwise. 
+  // Only when hasKeyPair == true there is a doc value.
   askForKeypair(systemId)
   {
     const component = this;
@@ -621,12 +656,12 @@ export default class App extends Component
             {
               if (response == false)
               {
-                resolver( false );
+                resolver( {hasKeyPair: false} );
               }
               else
               {
-                // response is a keypair. Import both keys.
-                setKeyPair(response).then( () => resolver( true ));
+                // response is {keypair, identityDocument, restoreSystem}. Import both keys and return the identityDocument.
+                setKeyPair(response.keypair).then( () => resolver( {hasKeyPair: true, doc: response.identityDocument, restoreSystem: response.restoreSystem } ));
               }
             } } );
       })

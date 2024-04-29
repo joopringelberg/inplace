@@ -46,12 +46,12 @@ export async function usersHaveBeenConfigured()
 ///////////////////////////////////////////////////////////////////////////////
 // The Purescript type:
 // type PouchdbUser =
-//   { _rev :: Maybe String
-//   , systemIdentifier :: String
-//   , password :: String
+// type PouchdbUser =
+//   { systemIdentifier :: String
+//   , perspectivesUser :: PerspectivesUser
+//   , password :: Maybe String
 //   , couchdbUrl :: Maybe String
-//
-//   -- TODO. Te verwijderen zodra Perspectives.Persistence.API alles heeft overgenomen.
+//   }
 //   -- We do not need the UserName value in the core, as long as we have the systemIdentifier.
 //   , userName :: CDBstate.UserName
 //   }
@@ -74,7 +74,14 @@ export function addUser( userName, password, couchdbUrl )
     .then(function ({_rev})
       {
         // TODO. Replace systemIdentifier with a guid.
-        const user = {_rev, _id: userName, userName, password, couchdbUrl, systemIdentifier: userName };
+        const user = 
+          { _rev
+          , _id: userName
+          , systemIdentifier: userName
+          // , perspectivesUser
+          , password
+          , couchdbUrl
+          };
         return localUsers.put( user );
       })
     .catch(function ()
@@ -83,6 +90,38 @@ export function addUser( userName, password, couchdbUrl )
         const user = { _id: userName, userName, password, couchdbUrl, systemIdentifier: userName };
         return localUsers.put( user );
       });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//// PUTUSER
+///////////////////////////////////////////////////////////////////////////////
+export function putUser( id, doc )
+{
+  return getUser(id)
+    .then(function ({_rev})
+      {
+        doc._rev = _rev;
+        doc._id = id;
+        return localUsers.put( doc );
+      })
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//// MODIFYUSER
+///////////////////////////////////////////////////////////////////////////////
+export function modifyUser( id, newMembers )
+{
+  return getUser(id)
+    .then(function (doc)
+      {
+        Object.keys(newMembers).forEach( key => doc[key] = newMembers[key])
+        return localUsers.put( doc );
+      })
+    .catch(function (err)
+      {
+        newMembers._id = id;
+        return localUsers.put( newMembers );
+      })
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -18,7 +18,7 @@
 // Full text of this license can be found in the LICENSE file in the projects root.
 // END LICENSE
 
-import React from "react";
+import React, { Component } from "react";
 
 import
   { Button
@@ -34,101 +34,110 @@ import './bootstrap.css'
 import { SaveKeypairDialog } from "./saveKeypairDialog";
 import { UploadKeypairDialog } from "./uploadKeypairDialog";
 
-export default function IntroductionScreen(props)
+export default class IntroductionScreen extends Component
 {
-  const appLocation = location.origin + location.pathname;
-  const url = new URL(appLocation);
-  if ( props.configurationcomplete)
+  constructor()
   {
-    document.body.style.cursor = "pointer";
+    super();
   }
-  else
+
+  render()
   {
-    document.body.style.cursor = "wait";
-  }
-  return <div className="introductionSplash text-muted">
-      <div className="bg-primary text-white pb-3">
-      <Container>
-        <h1 className="text-center pt-5">MyContexts</h1>
-      </Container>
-      </div>
-      <Container>
-      <h3 className="text-center pt-5 pb-5">Perspectives: a model driven user centered IT approach</h3>
-      <Row className="d-flex justify-content-center">
-        <Col md={4}>
-          <Card className={props.configurationcomplete ? "text-white bg-primary" : "text-white bg-secondary"}>
-            <Card.Body>{
-            props.configurationcomplete ?
+    const component = this;
+    const appLocation = location.origin + location.pathname;
+    const url = new URL(appLocation);
+    if ( component.props.configurationcomplete)
+    {
+      document.body.style.cursor = "pointer";
+    }
+    else
+    {
+      document.body.style.cursor = "wait";
+    }
+    return <div className="introductionSplash text-muted">
+        <div className="bg-primary text-white pb-3">
+        <Container>
+          <h1 className="text-center pt-5">MyContexts</h1>
+        </Container>
+        </div>
+        <Container>
+        <h3 className="text-center pt-5 pb-5">Perspectives: a model driven user centered IT approach</h3>
+        <Row className="d-flex justify-content-center">
+          <Col md={4}>
+            <Card className={component.props.configurationcomplete ? "text-white bg-primary" : "text-white bg-secondary"}>
+              <Card.Body>{
+              component.props.configurationcomplete ?
+                <>
+                  <Card.Title>Done!</Card.Title>
+                  <Card.Text><em>Congratulations.</em> You now have access to the web of contexts and roles that make up the Perspectives Universe.</Card.Text>
+                  <Button size="sm" variant="secondary" onClick={() => window.location = url.href}>Enter the context web</Button>
+                </>
+              :
               <>
-                <Card.Title>Done!</Card.Title>
-                <Card.Text><em>Congratulations.</em> You now have access to the web of contexts and roles that make up the Perspectives Universe.</Card.Text>
-                <Button size="sm" variant="secondary" onClick={() => window.location = url.href}>Enter the context web</Button>
+                <Card.Title>Doing some work (may take up to 15 seconds)...</Card.Title>
+                <Card.Text>Please wait until things are set up.</Card.Text>
               </>
-            :
-            <>
-              <Card.Title>Doing some work (may take up to 15 seconds)...</Card.Title>
-              <Card.Text>Please wait until things are set up.</Card.Text>
-            </>
-          }</Card.Body></Card>
-        </Col>
-      </Row>
-      <Row className="pt-5">
-        <Col>
-          <h4>Use</h4>
-          <ul className="pl-3">
-            <li>Experience a new web.</li>
-            <li>Cooperate in a safe environment.</li>
-            <li>Just share pages with people you actually work with.</li>
-            <li>Store your own information locally.</li>
-            <li>Everyone does so: no information is kept on a central server.</li>
-          </ul>
-        </Col>
-        <Col>
-          <h4>Extend</h4>
+            }</Card.Body></Card>
+          </Col>
+        </Row>
+        <Row className="pt-5">
+          <Col>
+            <h4>Use</h4>
             <ul className="pl-3">
-              <li>Add functionality by writing a Model.</li>
-              <li>The declarative Perspectives Language is specifically created for cooperation.</li>
-              <li>A model is to MyContexts what an App is to an OS.</li>
-              <li>Models aren't data silos. All models tap into the same data source.</li>
+              <li>Experience a new web.</li>
+              <li>Cooperate in a safe environment.</li>
+              <li>Just share pages with people you actually work with.</li>
+              <li>Store your own information locally.</li>
+              <li>Everyone does so: no information is kept on a central server.</li>
             </ul>
-        </Col>
-        <Col>
-          <h4>Set up</h4>
-          <ul className="pl-3">
-            <li>
-            Browsing the context web requires a little (automatic) setup in your browser (being done right now). 
-            Initial contexts and models are stored automatically in your browsers' database.
-            </li>
-            <li>
-            The next time you visit this site you will go straight into the context web.
-            </li>
-            <li>
-            To remove the setup data (and do a number of other maintenance things), visit this page: <a className="badge badge-primary" href={appLocation + "/manage.html"}>https://mycontexts/manage</a> (you may want to bookmark that page now).
-            </li>
-          </ul>
-        </Col>
-      </Row>
-      </Container>
-      {
-        props.keypairsaveresolver && 
-        props.keypairsaverejecter
-        ?
-        <SaveKeypairDialog keypairsaveresolver={props.keypairsaveresolver} keypairsaverejecter={props.keypairsaverejecter} keypair={props.keypair}/>
-        :
-        null
-      }
-      {
-        props.keypairuploadresolver &&
-        props.keypairuploadrejecter
-        ?
-          <UploadKeypairDialog keypairuploadresolver={props.keypairuploadresolver} keypairuploadrejecter={props.keypairuploadrejecter}/>
-        :
-        null
-      }
-    </div>;
+          </Col>
+          <Col>
+            <h4>Extend</h4>
+              <ul className="pl-3">
+                <li>Add functionality by writing a Model.</li>
+                <li>The declarative Perspectives Language is specifically created for cooperation.</li>
+                <li>A model is to MyContexts what an App is to an OS.</li>
+                <li>Models aren't data silos. All models tap into the same data source.</li>
+              </ul>
+          </Col>
+          <Col>
+            <h4>Set up</h4>
+            <ul className="pl-3">
+              <li>
+              Browsing the context web requires a little (automatic) setup in your browser (being done right now). 
+              Initial contexts and models are stored automatically in your browsers' database.
+              </li>
+              <li>
+              The next time you visit this site you will go straight into the context web.
+              </li>
+              <li>
+              To remove the setup data (and do a number of other maintenance things), visit this page: <a className="badge badge-primary" href={appLocation + "/manage.html"}>https://mycontexts/manage</a> (you may want to bookmark that page now).
+              </li>
+            </ul>
+          </Col>
+        </Row>
+        </Container>
+        {
+          component.props.keypairsaveresolver && 
+          component.props.keypairsaverejecter
+          ?
+          <SaveKeypairDialog keypairsaveresolver={component.props.keypairsaveresolver} keypairsaverejecter={component.props.keypairsaverejecter} keypair={component.props.keypair}/>
+          :
+          null
+        }
+        {
+          component.props.keypairuploadresolver &&
+          component.props.keypairuploadrejecter
+          ?
+            <UploadKeypairDialog keypairuploadresolver={component.props.keypairuploadresolver} keypairuploadrejecter={component.props.keypairuploadrejecter}/>
+          :
+          null
+        }
+      </div>;
+  }
 }
 
-// props:
+// component.props:
 // configurationcomplete
 // keypair: https://developer.mozilla.org/en-US/docs/Web/API/CryptoKeyPair
 // keypairsaveresolver: use this resolver to continue the installation after the public-private keypair has been saved.

@@ -117,7 +117,7 @@ export default class AccountManagement extends Component
           });
       }
       addUser( component.state.username, component.state.password, couchdbUrl )
-        .then( () => window.location = new URL( "?newuserid=" + component.state.username,  document.location.href).href )
+        .then( () => window.location = new URL( "?username=" + component.state.username,  document.location.href).href )
         // .then(() =>
         //   // Handle back control to App.
         //   // set render = "createAccountAutomatically"
