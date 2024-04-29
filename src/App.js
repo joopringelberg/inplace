@@ -72,6 +72,7 @@ import NoContextSelected from "./noContextScreen.js";
 import ReCreateInstancesScreen from "./reCreateInstancesScreen.js";
 import { InvitationImportDialog } from "./invitationImportDialog.js";
 import InstallationAborted from "./installationAbortedSplash.js";
+import { fixUser, getInstalledVersion, initializeMyContextsVersions, runUpgrade, setMyContextsVersion } from "./dataUpgrade.js";
 
 /*
 QUERY PARAMETERS AND VALUES
@@ -208,64 +209,79 @@ export default class App extends Component
                   }
                 });
           }
-        else
-        {
-          // Vraag hier op of er een param is met een username
-          if (params.get("username"))
-          {
-            component.setState({render: "createAccountAutomatically"});
-            component.createAccountInCouchdb( params.get("username") );
-          }
           else
           {
-            usersHaveBeenConfigured()
-              .then( usersConfigured => 
-                {
-                  if (usersConfigured)
+            // Vraag hier op of er een param is met een username
+            if (params.get("username"))
+            {
+              component.setState({render: "createAccountAutomatically"});
+              component.createAccountInCouchdb( params.get("username") );
+            }
+            else
+            {
+              usersHaveBeenConfigured()
+                .then( usersConfigured => 
                   {
-                    allUsers().then( users => 
-                      {
-                        if (users.length == 1)
-                        {
-                          getUser( users[0] )
-                          .then( user => 
-                            {
-                              if (user.couchdbUrl)
-                              {
-                                // NU MISSEN WE DE ANALYSE VAN SINGLEACCOUNT
-                                component.setState({render: "login", couchdbUrl: user.couchdbUrl})
-                              }
-                              else
-                              {
-                                // A single user and not in Couchdb. We can start right away.
-                                component.singleAccount( users[0] );
-                              }
-                            });
-                        }
-                        else
-                        {
-                          component.setState({render: "login"});
-                        }
-                      })
-                  }
-                  else
-                  {
-                    if (params.get("manualaccountcreation"))
+                    if (usersConfigured)
                     {
-                      component.setState( 
-                        { isFirstInstallation: params.get("isfirstinstallation") == null ? true : params.get("isfirstinstallation") == "true"
-                        , useSystemVersion: params.get("usesystemversion")
-                        , render: "createAccountManually"} );              
+                      allUsers().then( users => 
+                        {
+                          if (users.length == 1)
+                          {
+                            component.runDataUpgrades( users[0] )
+                              .then( getUser )
+                              .then( user => 
+                              {
+                                if (user.couchdbUrl)
+                                {
+                                  // NU MISSEN WE DE ANALYSE VAN SINGLEACCOUNT
+                                  component.setState({render: "login", couchdbUrl: user.couchdbUrl})
+                                }
+                                else
+                                {
+                                  // A single user and not in Couchdb. We can start right away.
+                                  component.singleAccount( users[0] );
+                                }
+                              });
+                          }
+                          else
+                          {
+                            component.setState({render: "login"});
+                          }
+                        })
                     }
                     else
                     {
-                      component.setState({render: "createAccountAutomatically"})
-                      component.createAccountAutomatically();
+                      if (params.get("manualaccountcreation"))
+                      {
+                        component.setState( 
+                          { isFirstInstallation: params.get("isfirstinstallation") == null ? true : params.get("isfirstinstallation") == "true"
+                          , useSystemVersion: params.get("usesystemversion")
+                          , render: "createAccountManually"} );              
+                      }
+                      else
+                      {
+                        component.setState({render: "createAccountAutomatically"})
+                        component.createAccountAutomatically();
+                      }
                     }
-                  }
-                });        
-            }}
-        } );
+                  });        
+              }}
+          } );
+  }
+
+  // Runs all applicable upgrades and just returns the systemId that was passed in.
+  runDataUpgrades(systemId)
+  {
+    // Make sure we have a version number. Initializes at "0.22.0".
+    return initializeMyContextsVersions()
+      .then( getInstalledVersion )
+      .then( installedVersion => 
+        {
+          runUpgrade( installedVersion, "0.22.1", () => fixUser(systemId));
+        })
+      .then( () => setMyContextsVersion())
+      .then( () => systemId );
   }
 
   componentDidCatch(error, errorInfo) {
@@ -278,15 +294,23 @@ export default class App extends Component
     const params = new URLSearchParams(document.location.search.substring(1));
     if (params.get("recompilelocalmodels"))
     {
-      component.setState({render: "recompileLocalModels"})
-      getUser( systemIdentifier )
-        .then( user => component.recompileLocalModels( user ));
+      component.runDataUpgrades(systemIdentifier)
+        .then( () => 
+      {
+        component.setState({render: "recompileLocalModels"})
+        getUser( systemIdentifier )
+          .then( user => component.recompileLocalModels( user ));
+      });
     }
     else if (params.get("recreateinstances"))
     {
-      component.setState({render: "reCreateInstances"});
-      getUser( systemIdentifier )
-        .then( user => component.reCreateInstances( systemIdentifier, user ) );
+      component.runDataUpgrades(systemIdentifier)
+        .then( () => 
+        {
+          component.setState({render: "reCreateInstances"});
+          getUser( systemIdentifier )
+            .then( user => component.reCreateInstances( systemIdentifier, user ) );
+            });
     }
     else if (params.get("deleteaccount"))
     {
@@ -302,12 +326,16 @@ export default class App extends Component
     }
     else
     {
-      component.setState({render: "startup"});
-      getUser( systemIdentifier )
-        .then( user => getOptions( systemIdentifier)
-          .then( options => SharedWorkerChannelPromise
-            .then( proxy => proxy.runPDR( systemIdentifier, user, options) )
-            .then( () => component.prepareMyContextsScreen( systemIdentifier ))));
+      component.runDataUpgrades(systemIdentifier)
+        .then( () => 
+        {
+          component.setState({render: "startup"});
+          getUser( systemIdentifier )
+            .then( user => getOptions( systemIdentifier)
+              .then( options => SharedWorkerChannelPromise
+                .then( proxy => proxy.runPDR( systemIdentifier, user, options) )
+                .then( () => component.prepareMyContextsScreen( systemIdentifier ))));
+        });
     }
   }
 
