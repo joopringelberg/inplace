@@ -189,93 +189,94 @@ export default class App extends Component
 
     component.i18nextPromise.then( () => component.setState({i8nextReady: true}))
 
-    SharedWorkerChannelPromise
-      .then( proxy => proxy.pdrStarted())
-      .then( hasStarted => 
-        {
-          if (hasStarted)
-          {
-            // As the PDR has started, the user must have logged in (or it has been done automatically with the passwordless defaultSystem).
-            PDRproxy.then( proxy => proxy.getUserIdentifier())
-              .then( systemIdentifier => 
-                {
-                  if ( params.get("deleteaccount") || params.get("recreateinstances") || params.get("recompilelocalmodels") )
-                  {
-                    component.singleAccount( systemIdentifier[0] );
-                  }
-                  else
-                  {
-                    component.prepareMyContextsScreen( systemIdentifier[0] );
-                  }
-                });
-          }
-          else
-          {
-            // Vraag hier op of er een param is met een username
-            if (params.get("username"))
+    initializeMyContextsVersions()
+      .then( () =>
+        SharedWorkerChannelPromise
+          .then( proxy => proxy.pdrStarted())
+          .then( hasStarted => 
             {
-              component.setState({render: "createAccountAutomatically"});
-              component.createAccountInCouchdb( params.get("username") );
-            }
-            else
-            {
-              usersHaveBeenConfigured()
-                .then( usersConfigured => 
-                  {
-                    if (usersConfigured)
+              if (hasStarted)
+              {
+                // As the PDR has started, the user must have logged in (or it has been done automatically with the passwordless defaultSystem).
+                PDRproxy.then( proxy => proxy.getUserIdentifier())
+                  .then( systemIdentifier => 
                     {
-                      allUsers().then( users => 
-                        {
-                          if (users.length == 1)
-                          {
-                            component.runDataUpgrades( users[0] )
-                              .then( getUser )
-                              .then( user => 
-                              {
-                                if (user.couchdbUrl)
-                                {
-                                  // NU MISSEN WE DE ANALYSE VAN SINGLEACCOUNT
-                                  component.setState({render: "login", couchdbUrl: user.couchdbUrl})
-                                }
-                                else
-                                {
-                                  // A single user and not in Couchdb. We can start right away.
-                                  component.singleAccount( users[0] );
-                                }
-                              });
-                          }
-                          else
-                          {
-                            component.setState({render: "login"});
-                          }
-                        })
-                    }
-                    else
-                    {
-                      if (params.get("manualaccountcreation"))
+                      if ( params.get("deleteaccount") || params.get("recreateinstances") || params.get("recompilelocalmodels") )
                       {
-                        component.setState( 
-                          { isFirstInstallation: params.get("isfirstinstallation") == null ? true : params.get("isfirstinstallation") == "true"
-                          , useSystemVersion: params.get("usesystemversion")
-                          , render: "createAccountManually"} );              
+                        component.singleAccount( systemIdentifier[0] );
                       }
                       else
                       {
-                        component.setState({render: "createAccountAutomatically"})
-                        component.createAccountAutomatically();
+                        component.prepareMyContextsScreen( systemIdentifier[0] );
                       }
-                    }
-                  });        
-              }}
-          } );
+                    });
+              }
+              else
+              {
+                // Vraag hier op of er een param is met een username
+                if (params.get("username"))
+                {
+                  component.setState({render: "createAccountAutomatically"});
+                  component.createAccountInCouchdb( params.get("username") );
+                }
+                else
+                {
+                  usersHaveBeenConfigured()
+                    .then( usersConfigured => 
+                      {
+                        if (usersConfigured)
+                        {
+                          allUsers().then( users => 
+                            {
+                              if (users.length == 1)
+                              {
+                                component.runDataUpgrades( users[0] )
+                                  .then( getUser )
+                                  .then( user => 
+                                  {
+                                    if (user.couchdbUrl)
+                                    {
+                                      // NU MISSEN WE DE ANALYSE VAN SINGLEACCOUNT
+                                      component.setState({render: "login", couchdbUrl: user.couchdbUrl})
+                                    }
+                                    else
+                                    {
+                                      // A single user and not in Couchdb. We can start right away.
+                                      component.singleAccount( users[0] );
+                                    }
+                                  });
+                              }
+                              else
+                              {
+                                component.setState({render: "login"});
+                              }
+                            })
+                        }
+                        else
+                        {
+                          if (params.get("manualaccountcreation"))
+                          {
+                            component.setState( 
+                              { isFirstInstallation: params.get("isfirstinstallation") == null ? true : params.get("isfirstinstallation") == "true"
+                              , useSystemVersion: params.get("usesystemversion")
+                              , render: "createAccountManually"} );              
+                          }
+                          else
+                          {
+                            component.setState({render: "createAccountAutomatically"})
+                            component.createAccountAutomatically();
+                          }
+                        }
+                      });        
+                  }}
+              } ) );
   }
 
   // Runs all applicable upgrades and just returns the systemId that was passed in.
   runDataUpgrades(systemId)
   {
-    // Make sure we have a version number. Initializes at "0.22.0".
-    return initializeMyContextsVersions()
-      .then( getInstalledVersion )
+    // Make sure we have a version number. Initializes to the current version.
+    return getInstalledVersion()
       .then( installedVersion => 
         {
           runUpgrade( installedVersion, "0.22.1", () => fixUser(systemId));

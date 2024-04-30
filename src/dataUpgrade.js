@@ -49,22 +49,38 @@ export function setMyContextsVersion()
       })
 }
 
-// If There was no previous record of `currentMyContextsVersion`, this function will initialize it to "0.22.0";
+// If There was no previous record of `currentMyContextsVersion`, this function will initialize it to the current version that is running.
 export function initializeMyContextsVersions()
 {
-  return idbKeyval.get("currentMyContextsVersion")
-    .then(( installedVersion =>
+  return idbKeyval.get("CurrentPDRVersion")
+    .then( v => 
       {
-        if ( !installedVersion )
+        if (v)
         {
-          return idbKeyval.set("currentMyContextsVersion", "0.22.0");
+          // This cannot be a first installation; otherwise there wouldn't be a value for CurrentPDRVersion.
+          return idbKeyval.get("currentMyContextsVersion")
+            .then(( installedVersion =>
+              {
+                if ( !installedVersion )
+                {
+                  // No value for currentMyContextsVersion: we want to apply patch fixUser, so initialize to "0.22.0".
+                  return idbKeyval.set("currentMyContextsVersion", "0.22.0");
+                }
+                else
+                {
+                  return installedVersion;
+                }
+              }))
+            .catch ( () => idbKeyval.set("currentMyContextsVersion", "0.22.0") );
         }
-        else
+        else 
         {
-          return installedVersion;
+          // No previous installation, just initialize to the version we're installing.
+          idbKeyval.set("currentMyContextsVersion", myContextsVersion);
         }
-      }))
-    .catch ( () => idbKeyval.set("currentMyContextsVersion", "0.22.0") );
+      })
+    // No previous installation, just initialize to the version we're installing.
+    .catch( () => idbKeyval.set("currentMyContextsVersion", myContextsVersion))
 }
 
 export function getInstalledVersion()
