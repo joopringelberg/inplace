@@ -82,7 +82,7 @@ export function fixUser(systemId)
     .then( user => 
       {
         user.userName = undefined;
-        user.perspectivesUser = systemId;
+        user.perspectivesUser = systemId + "_KeyHolder";
         return putUser( user._id, user );
       })
 }
