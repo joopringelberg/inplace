@@ -288,18 +288,18 @@ export class NotificationsDisplayer extends PerspectivesComponent
                     });
                   }) ).then( generateNotifications );
                 }
-            }))
+            }));
         
-          // getPerspective (roleInstanceOfContext, perspectiveObjectRoleType /*OPTIONAL*/, receiveValues, fireAndForget, errorHandler)
-          pproxy.getPerspective(
-            component.props.externalroleid,
-            ModelDependencies.notifications,
-            function( perspectiveArray )
-            {
-              component.setState({perspective: perspectiveArray[0]});
-            },
-            CONTINUOUS
-          ).then( unsubscriber => component.currentContextNotificationsUnsubscriber = unsubscriber);
+        // getPerspective (roleInstanceOfContext, perspectiveObjectRoleType /*OPTIONAL*/, receiveValues, fireAndForget, errorHandler)
+        pproxy.getPerspective(
+          component.props.externalroleid,
+          ModelDependencies.notifications,
+          function( perspectiveArray )
+          {
+            component.setState({perspective: perspectiveArray[0]});
+          },
+          CONTINUOUS
+        ).then( unsubscriber => component.currentContextNotificationsUnsubscriber = unsubscriber);
     } );
   }
 

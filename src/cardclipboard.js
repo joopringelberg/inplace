@@ -50,34 +50,35 @@ export default class CardClipBoard extends PerspectivesComponent
   {
     const component = this;
     PDRproxy.then( pproxy =>
-      pproxy.getProperty(
-        component.props.systemExternalRole,
-        ModelDependencies.cardClipBoard,
-        ModelDependencies.systemExternal,
-        function (valArr)
-        {
-          if (valArr[0])
+      component.addUnsubscriber(
+        pproxy.getProperty(
+          component.props.systemExternalRole,
+          ModelDependencies.cardClipBoard,
+          ModelDependencies.systemExternal,
+          function (valArr)
           {
-            const {roleData} = JSON.parse( valArr[0]);
-            if (roleData.cardTitle)
+            if (valArr[0])
             {
-              component.setState(roleData);
+              const {roleData} = JSON.parse( valArr[0]);
+              if (roleData.cardTitle)
+              {
+                component.setState(roleData);
+              }
+              else
+              {
+                component.setState({cardTitle: undefined});
+              }
             }
             else
             {
               component.setState({cardTitle: undefined});
             }
-          }
-          else
+          },
+          CONTINUOUS,
+          function(e)
           {
-            component.setState({cardTitle: undefined});
-          }
-        },
-        CONTINUOUS,
-        function(e)
-        {
-          UserMessagingPromise.then( um => um.addMessageForEndUser({title: "Clipbboard error", "message": "Cannot read the card clipboard.", error: e.toString()}));
-        }));
+            UserMessagingPromise.then( um => um.addMessageForEndUser({title: "Clipbboard error", "message": "Cannot read the card clipboard.", error: e.toString()}));
+          })));
   }
 
   writeRoleIdentification()
