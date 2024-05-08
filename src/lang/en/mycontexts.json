@@ -30,5 +30,5 @@
   , "uploadkeypairdialog_UploadIdentityDoc": "Upload Identity file"
   , "uploadkeypairdialog_wrongIdentityJson": "The json file that you uploaded is not a valid Identity document."
   , "uploadkeypairdialog_installationSequenceNumber": "If this is the first device that you install MyContexts on, enter 1. For the next device, enter 2, etc. Always reuse the same number for a particular device if you restore an installation!"
-  , "uploadkeypairdialog_installationSequenceNumberMissing": "A sequence number is required."
+  , "uploadkeypairdialog_installationSequenceNumberMissing": "A sequence number is required and it must be at least 1."
 }

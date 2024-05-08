@@ -195,6 +195,7 @@ export class UploadKeypairDialog extends Component
               <Col sm={4}>
                 <Form.Control 
                   required
+                  min={1}
                   autoFocus
                   type="number" 
                   placeholder="1"
