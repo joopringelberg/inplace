@@ -137,6 +137,7 @@ export default class App extends Component
       , keypairUploadResolver: undefined  // use this resolver to communicate back whether the end user has uploaded a keypair.
       , keypairUploadRejecter: undefined  // use this rejector when uploading has gone irrecoverably wrong.
       , reasonForAbortion: ""             // A message string that says something about why the installation went wrong.
+      , perspectivesUsersId: undefined    // The string that identifies the natural person in the Perspectives Universe.
       
       };
     initUserMessaging(
@@ -632,13 +633,13 @@ export default class App extends Component
               { _id: definitePerspectivesUserId
               , systemIdentifier: systemId
               , perspectivesUser: definitePerspectivesUserId
-              , userName: user.userName
+              , userName: user.userName || definitePerspectivesUserId
               , password: user.password
               , couchdbUrl: user.couchdbUrl
               };
             return putUser( definiteUser );
           })
-        .then( () => createOptionsDocument(user.userName,
+        .then( dUser => createOptionsDocument(dUser.userName,
           { isFirstInstallation: !keypairUploaded
           , useSystemVersion: component.props.usesystemversion
           , myContextsVersion: __MyContextsversionNumber__
@@ -737,7 +738,7 @@ export default class App extends Component
       .then( buff => exportedPublicKey = buff)
       // Put the keys in state so they can be exported.
       // We'll delete them from state as soon as that has been done.
-      .then( () => component.setState({exportedPrivateKey, exportedPublicKey} ) )
+      .then( () => component.setState({exportedPrivateKey, exportedPublicKey, perspectivesUsersId} ) )
       .catch( e => console.log( e ));
   }
 
@@ -864,6 +865,7 @@ export default class App extends Component
             />;
         case "createAccountAutomatically":
           return <IntroductionScreen 
+                  perspectivesuserid={component.state.perspectivesUsersId}
                   configurationcomplete={component.state.configurationComplete} 
                   keypairsaverejecter={component.state.keypairSaveRejecter} 
                   keypairsaveresolver={component.state.keypairSaveResolver} 

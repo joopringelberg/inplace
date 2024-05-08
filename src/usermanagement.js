@@ -112,15 +112,16 @@ export function addUser( userName, password, couchdbUrl, perspectivesUser )
 ///////////////////////////////////////////////////////////////////////////////
 // Either modify an existing user, or create a new one.
 // The document provided doesn't have to have a revision: we fetch it first.
+// Returns the document (with the previous revision!)
 export function putUser( doc )
 {
   return getUser(doc._id)
     .then(function ({_rev})
       {
         doc._rev = _rev;
-        return localUsers.put( doc );
+        return localUsers.put( doc ).then( () => doc );
       })
-    .catch( () => localUsers.put( doc ) );
+    .catch( () => localUsers.put( doc ).then( () => doc ) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
