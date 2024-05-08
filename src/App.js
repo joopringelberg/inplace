@@ -72,7 +72,7 @@ import NoContextSelected from "./noContextScreen.js";
 import ReCreateInstancesScreen from "./reCreateInstancesScreen.js";
 import { InvitationImportDialog } from "./invitationImportDialog.js";
 import InstallationAborted from "./installationAbortedSplash.js";
-import { fixUser, getInstalledVersion, initializeMyContextsVersions, runUpgrade, setMyContextsVersion } from "./dataUpgrade.js";
+import { addUserNameToUser, fixUser, getInstalledVersion, initializeMyContextsVersions, runUpgrade, setMyContextsVersion } from "./dataUpgrade.js";
 
 /*
 QUERY PARAMETERS AND VALUES
@@ -282,6 +282,7 @@ export default class App extends Component
       .then( installedVersion => 
         {
           runUpgrade( installedVersion, "0.22.1", () => fixUser(perspectivesUsersId));
+          runUpgrade( installedVersion, "0.22.2", () => addUserNameToUser(perspectivesUsersId));
         })
       .then( () => setMyContextsVersion())
       .then( () => perspectivesUsersId );

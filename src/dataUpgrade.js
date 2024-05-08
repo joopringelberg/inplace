@@ -101,3 +101,13 @@ export function fixUser(perspectivesUsersId)
         return putUser( user );
       })
 }
+
+export function addUserNameToUser(perspectivesUsersId)
+{
+  return getUser(perspectivesUsersId)
+    .then( user => 
+      {
+        user.userName = perspectivesUsersId
+        return putUser( user );
+      })
+}
