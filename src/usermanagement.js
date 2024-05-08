@@ -18,11 +18,36 @@
 // Full text of this license can be found in the LICENSE file in the projects root.
 // END LICENSE
 
+///////////////////////////////////////////////////////////////////////////////
+//// TYPE POUCHDBUSER
+///////////////////////////////////////////////////////////////////////////////
+// The Purescript type:
+// type PouchdbUser =
+// type PouchdbUser =
+//   { systemIdentifier :: String
+//   , perspectivesUser :: PerspectivesUser
+//   , userName :: String
+//   , password :: Maybe String
+//   , couchdbUrl :: Maybe String
+//   }
+
+///////////////////////////////////////////////////////////////////////////////
+//// THE USER DOCUMENT IN INDEXEDDB
+///////////////////////////////////////////////////////////////////////////////
+/*
+The user document equals the PouchdbUser structure, but has two additional member for Pouchdb:
+  - _rev: the revision
+  - _id: the documents identification. This is equal to the perspectivesUser member and it is the identifier of the
+        PerspectivesUsers role instance that uniquely identifies a particular natural person within the Perspectives Universe.
+
+For a Couchdb installation, the Couchdb username equals the PerspectivesUsers identifier. For that reason, we often use the 
+`username` paramater in these functions.
+*/
+
 import Pouchdb from "pouchdb-browser";
 
 // The IndexedDB database "localUsers"
 const localUsers = new Pouchdb("localUsers");
-
 
 ///////////////////////////////////////////////////////////////////////////////
 //// USERSHAVEBEENCONFIGURED
@@ -42,21 +67,6 @@ export async function usersHaveBeenConfigured()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-//// TYPE POUCHDBUSER
-///////////////////////////////////////////////////////////////////////////////
-// The Purescript type:
-// type PouchdbUser =
-// type PouchdbUser =
-//   { systemIdentifier :: String
-//   , perspectivesUser :: PerspectivesUser
-//   , password :: Maybe String
-//   , couchdbUrl :: Maybe String
-//   }
-//   -- We do not need the UserName value in the core, as long as we have the systemIdentifier.
-//   , userName :: CDBstate.UserName
-//   }
-
-///////////////////////////////////////////////////////////////////////////////
 //// ADDUSER
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -67,18 +77,17 @@ export async function usersHaveBeenConfigured()
 //   "rev": "1-A6157A5EA545C99B00FF904EEF05FD9F"
 // }
 // couchdbUrl and password may be undefined.
-export function addUser( userName, password, couchdbUrl )
+export function addUser( userName, password, couchdbUrl, perspectivesUser )
 {
-  // For now, we just copy the userName into systemIdentifier.
   return getUser(userName)
     .then(function ({_rev})
       {
-        // TODO. Replace systemIdentifier with a guid.
         const user = 
           { _rev
           , _id: userName
-          , systemIdentifier: userName
-          // , perspectivesUser
+          // , systemIdentifier
+          , userName
+          , perspectivesUser
           , password
           , couchdbUrl
           };
@@ -86,8 +95,14 @@ export function addUser( userName, password, couchdbUrl )
       })
     .catch(function ()
       {
-        // TODO. Replace systemIdentifier with a guid.
-        const user = { _id: userName, userName, password, couchdbUrl, systemIdentifier: userName };
+        const user = 
+          {_id: userName
+          // , systemIdentifier
+          , userName
+          , perspectivesUser
+          , password
+          , couchdbUrl
+          };
         return localUsers.put( user );
       });
 }
@@ -95,23 +110,26 @@ export function addUser( userName, password, couchdbUrl )
 ///////////////////////////////////////////////////////////////////////////////
 //// PUTUSER
 ///////////////////////////////////////////////////////////////////////////////
-export function putUser( id, doc )
+// Either modify an existing user, or create a new one.
+// The document provided doesn't have to have a revision: we fetch it first.
+export function putUser( doc )
 {
-  return getUser(id)
+  return getUser(doc._id)
     .then(function ({_rev})
       {
         doc._rev = _rev;
-        doc._id = id;
         return localUsers.put( doc );
       })
+    .catch( () => localUsers.put( doc ) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 //// MODIFYUSER
+// OBSOLETE
 ///////////////////////////////////////////////////////////////////////////////
-export function modifyUser( id, newMembers )
+export function modifyUser( perspectivesUsersId, newMembers )
 {
-  return getUser(id)
+  return getUser(perspectivesUsersId)
     .then(function (doc)
       {
         Object.keys(newMembers).forEach( key => doc[key] = newMembers[key])
@@ -119,7 +137,7 @@ export function modifyUser( id, newMembers )
       })
     .catch(function (err)
       {
-        newMembers._id = id;
+        newMembers._id = perspectivesUsersId;
         return localUsers.put( newMembers );
       })
 }
@@ -150,7 +168,7 @@ export function removeUser( userName )
 ///////////////////////////////////////////////////////////////////////////////
 //// ALLUSERS
 ///////////////////////////////////////////////////////////////////////////////
-// Returns a promise for an array of user ids.
+// Returns a promise for an array of PerspectivesUsers identifiers (Couchdb user names).
 export function allUsers()
 {
   return localUsers.allDocs().then(result => result.rows.map( row => row.id));

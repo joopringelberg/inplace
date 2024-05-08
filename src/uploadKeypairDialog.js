@@ -39,6 +39,8 @@ export class UploadKeypairDialog extends Component
       , showIdentityUploadButton: false
       , keypair: undefined
       , restoreSystem: false
+      , installationSequenceNumber: undefined
+      , formValidated: false
     }
   }
 
@@ -107,11 +109,6 @@ export class UploadKeypairDialog extends Component
                 }})
           .catch( reason => component.props.keypairuploadrejecter( reason ))
       }
-      else
-      {
-        component.setState({closed: true});
-        component.props.keypairuploadresolver(false);
-      }
   }
 
   handleIdentityDocUpload(event)
@@ -134,7 +131,7 @@ export class UploadKeypairDialog extends Component
                     component.setState({closed: true});
                     component.props.keypairuploadresolver(
                       { keypair: component.state.keypair
-                      , restoreSystem: component.state.restoreSystem 
+                      , installationSequenceNumber: component.state.installationSequenceNumber 
                       , identityDocument: json});
                   }
                   else
@@ -151,26 +148,25 @@ export class UploadKeypairDialog extends Component
                 }})
           .catch( reason => component.props.keypairuploadrejecter( reason ))
       }
-      else
-      {
-        component.setState({closed: true});
-        component.props.keypairuploadresolver(false);
-      }
   }
 
   reject()
   {
     this.setState({closed: true});
-    this.props.keypairuploadresolver(false);
+    this.props.keypairuploadresolver({ installationSequenceNumber: this.state.installationSequenceNumber });
   }
 
-  setRestore(event)
+  setInstallationSequenceNumber(event)
   {
     const component = this;
-    if (component.state.restoreSystem != event.target.checked)
+    const form = event.currentTarget;
+    event.stopPropagation();
+    event.preventDefault();
+    if (form.checkValidity())
     {
-      component.setState({restoreSystem: event.target.checked});
+      component.setState( {installationSequenceNumber: event.target.value} );
     }
+    component.setState( {formValidated: true});
   }
 
   render()
@@ -189,22 +185,30 @@ export class UploadKeypairDialog extends Component
       </Modal.Body>
       <Modal.Footer>
         <Container>
-          <Row className="mb-2">
-            <Col>
-              <Form>
-                <Form.Check 
-                  id="restoreSystem"
-                  type="checkbox" 
-                  label={ i18next.t( "uploadkeypairdialog_restoreSystem", {ns: "mycontexts"})}
-                  onChange={ e => component.setRestore( e )}
-                />
-              </Form>
-            </Col>
-          </Row>
+          <Form noValidate validated={component.state.formValidated}>
+            <Form.Group as={Row} controlId="installationSequenceNumber">
+              <Col sm={8}>
+                <Form.Label>
+                  { i18next.t( "uploadkeypairdialog_installationSequenceNumber", {ns: "mycontexts"})}
+                </Form.Label>
+              </Col>
+              <Col sm={4}>
+                <Form.Control 
+                  required
+                  autoFocus
+                  type="number" 
+                  placeholder="1"
+                  onChange={ e => component.setInstallationSequenceNumber( e )}
+                  onBlur={ e => component.setInstallationSequenceNumber( e )}
+                  />
+                <Form.Control.Feedback type="invalid">{i18next.t( "uploadkeypairdialog_installationSequenceNumberMissing", {ns: "mycontexts"})}</Form.Control.Feedback>
+              </Col>
+            </Form.Group>
+          </Form>
           <Row>
             <Col>
               <Button 
-                disabled={component.state.showIdentityUploadButton}
+                disabled={component.state.showIdentityUploadButton || !component.state.installationSequenceNumber}
                 variant="primary" 
                 onClick={ e => component.uploadKeypair( e ) }
                 onKeyDown={ e => component.uploadKeypair(e) }
@@ -214,7 +218,7 @@ export class UploadKeypairDialog extends Component
             </Col>
             <Col>
               <Button
-                disabled={!component.state.showIdentityUploadButton}
+                disabled={!component.state.showIdentityUploadButton || !component.state.installationSequenceNumber}
                 variant="primary" 
                 onClick={ e => component.uploadIdentityDoc( e ) }
                 onKeyDown={ e => component.uploadIdentityDoc(e) }
@@ -224,6 +228,7 @@ export class UploadKeypairDialog extends Component
             </Col>
             <Col>
               <Button 
+                disabled={!component.state.installationSequenceNumber}
                 variant="secondary" 
                 onClick={ e => component.reject( e ) }
                 onKeyDown={ e => component.reject(e) }

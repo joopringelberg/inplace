@@ -92,13 +92,12 @@ export function getInstalledVersion()
 ////    ACTUAL UPGRADES
 ////////////////////////////////////////////////////////////////////////////////////
 
-export function fixUser(systemId)
+export function fixUser(perspectivesUsersId)
 {
-  return getUser(systemId)
+  return getUser(perspectivesUsersId)
     .then( user => 
       {
-        user.userName = undefined;
-        user.perspectivesUser = systemId + "_KeyHolder";
-        return putUser( user._id, user );
+        user.perspectivesUser = perspectivesUsersId + "_KeyHolder";
+        return putUser( user );
       })
 }

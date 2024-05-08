@@ -62,8 +62,8 @@ import {init} from '@paralleldrive/cuid2';
 
 import { del as deleteCryptoKey, set as setCryptoKey } from 'idb-keyval';
 
-import { createOptionsDocument, deleteOptions, getDefaultSystem, getOptions } from "./runtimeOptions.js";
-import { addUser, modifyUser, allUsers, getUser, removeUser, usersHaveBeenConfigured } from "./usermanagement.js";
+import { createOptionsDocument, deleteOptions, getOptions } from "./runtimeOptions.js";
+import { putUser, allUsers, getUser, removeUser, usersHaveBeenConfigured } from "./usermanagement.js";
 import IntroductionScreen from "./introductionSplash.js";
 import StartupScreen from "./startupSplash.js";
 import DeleteInstallation from "./deleteInstallationSplash.js";
@@ -198,16 +198,17 @@ export default class App extends Component
               if (hasStarted)
               {
                 // As the PDR has started, the user must have logged in (or it has been done automatically with the passwordless defaultSystem).
-                PDRproxy.then( proxy => proxy.getUserIdentifier())
-                  .then( systemIdentifier => 
+                PDRproxy.then( proxy => proxy.getPerspectivesUser())
+                  .then( perspectivesUser => 
                     {
                       if ( params.get("deleteaccount") || params.get("recreateinstances") || params.get("recompilelocalmodels") )
                       {
-                        component.singleAccount( systemIdentifier[0] );
+                        component.singleAccount( perspectivesUser[0] );
                       }
                       else
                       {
-                        component.prepareMyContextsScreen( systemIdentifier[0] );
+                        getUser( perspectivesUser[0] )
+                          .then( ({systemIdentifier}) => component.prepareMyContextsScreen( systemIdentifier ));
                       }
                     });
               }
@@ -272,51 +273,51 @@ export default class App extends Component
               } ) );
   }
 
-  // Runs all applicable upgrades and just returns the systemId that was passed in.
-  runDataUpgrades(systemId)
+  // Runs all applicable upgrades and just returns the perspectivesUsersId that was passed in.
+  runDataUpgrades(perspectivesUsersId)
   {
     // Make sure we have a version number. Initializes to the current version.
     return getInstalledVersion()
       .then( installedVersion => 
         {
-          runUpgrade( installedVersion, "0.22.1", () => fixUser(systemId));
+          runUpgrade( installedVersion, "0.22.1", () => fixUser(perspectivesUsersId));
         })
       .then( () => setMyContextsVersion())
-      .then( () => systemId );
+      .then( () => perspectivesUsersId );
   }
 
   componentDidCatch(error, errorInfo) {
     console.log(error, errorInfo);
   }
 
-  singleAccount(systemIdentifier)
+  singleAccount(perspectivesUsersId)
   {
     const component = this;
     const params = new URLSearchParams(document.location.search.substring(1));
     if (params.get("recompilelocalmodels"))
     {
-      component.runDataUpgrades(systemIdentifier)
+      component.runDataUpgrades(perspectivesUsersId)
         .then( () => 
       {
         component.setState({render: "recompileLocalModels"})
-        getUser( systemIdentifier )
+        getUser( perspectivesUsersId )
           .then( user => component.recompileLocalModels( user ));
       });
     }
     else if (params.get("recreateinstances"))
     {
-      component.runDataUpgrades(systemIdentifier)
+      component.runDataUpgrades(perspectivesUsersId)
         .then( () => 
         {
           component.setState({render: "reCreateInstances"});
-          getUser( systemIdentifier )
-            .then( user => component.reCreateInstances( systemIdentifier, user ) );
+          getUser( perspectivesUsersId )
+            .then( user => component.reCreateInstances( perspectivesUsersId, user ) );
             });
     }
     else if (params.get("deleteaccount"))
     {
       component.setState({render: "deleteAccount"});
-      component.deleteAccount( systemIdentifier );
+      component.deleteAccount( perspectivesUsersId );
     }
     else if ( params.get( "manualaccountcreation"))
     {
@@ -327,15 +328,15 @@ export default class App extends Component
     }
     else
     {
-      component.runDataUpgrades(systemIdentifier)
+      component.runDataUpgrades(perspectivesUsersId)
         .then( () => 
         {
           component.setState({render: "startup"});
-          getUser( systemIdentifier )
-            .then( user => getOptions( systemIdentifier)
+          getUser( perspectivesUsersId )
+            .then( user => getOptions( perspectivesUsersId)
               .then( options => SharedWorkerChannelPromise
-                .then( proxy => proxy.runPDR( systemIdentifier, user, options) )
-                .then( () => component.prepareMyContextsScreen( systemIdentifier ))));
+                .then( proxy => proxy.runPDR( perspectivesUsersId, user, options) )
+                .then( () => component.prepareMyContextsScreen( user.systemIdentifier ))));
         });
     }
   }
@@ -347,8 +348,8 @@ export default class App extends Component
     if (!prevState.loggedIn && this.state.loggedIn)
     {
       component.setState({render: "startup"});
-      PDRproxy.then( proxy => proxy.getUserIdentifier())
-        .then( systemIdentifier => component.prepareMyContextsScreen( systemIdentifier[0] ) );
+      PDRproxy.then( proxy => proxy.getSystemIdentifier())
+        .then ( systemIdentifiers => component.prepareMyContextsScreen( systemIdentifiers[0] ))
     }
   }
 
@@ -538,15 +539,15 @@ export default class App extends Component
     });
   }
 
-  deleteAccount( systemIdentifier )
+  deleteAccount( perspectivesUsersId )
   {
     const component = this;
     SharedWorkerChannelPromise
-      .then( proxy => deleteOptions( systemIdentifier )
-        .then( () => removeUser( systemIdentifier ))
+      .then( proxy => deleteOptions( perspectivesUsersId )
+        .then( () => removeUser( perspectivesUsersId ))
         .then( user => proxy.removeAccount(user.userName, user))
-        .then( () => deleteCryptoKey( systemIdentifier + PUBLICKEY) )
-        .then( () => deleteCryptoKey( systemIdentifier + PRIVATEKEY) )
+        .then( () => deleteCryptoKey( perspectivesUsersId + PUBLICKEY) )
+        .then( () => deleteCryptoKey( perspectivesUsersId + PRIVATEKEY) )
         .then( () => component.setState({accountDeletionComplete: true})));
   }
 
@@ -564,12 +565,12 @@ export default class App extends Component
     });
   }
 
-  reCreateInstances(systemIdentifier, user)
+  reCreateInstances(perspectivesUsersId, user)
   {
     const component = this;
     SharedWorkerChannelPromise.then( function (proxy)
     {
-      getOptions( systemIdentifier ).then( options => 
+      getOptions( perspectivesUsersId ).then( options => 
         proxy.reCreateInstances( user, options )
           .then(
             function(success)
@@ -581,60 +582,64 @@ export default class App extends Component
 
   createAccountAutomatically()
   {
-    const component = this;
-    const newSystemId = cuid2();
     const newPerspectivesUserId = cuid2();
-    component.createAccount(newSystemId, newSystemId, newPerspectivesUserId)
+    this.createAccount(newPerspectivesUserId, {})
   }
 
   // Whenever this function is called, a user document with systemIdentifier, password and couchdburl has been saved 
-  // with _id equal to the userName (which doubles as systemIdentifier).
+  // with _id equal to the userName (which doubles as perspectivesUser, the identifier of the natural person in the Perspectives Universe).
   createAccountInCouchdb( userName )
   {
-    const newPerspectivesUserId = cuid2();
-    this.createAccount(userName, newPerspectivesUserId);
+    getUser(userName).then( user => this.createAccount(userName, user))
   }
 
-  createAccount(newSystemId, newPerspectivesUserId)
+  createAccount(newPerspectivesUserId, user)
   {
     const component = this;
-    let options, user, keypairUploaded = false, identityDocument = null, definiteSystemId = newSystemId, definitePerspectivesUserId = newPerspectivesUserId;
+    let options, systemId,
+      keypairUploaded = false, 
+      identityDoc = null, 
+      definitePerspectivesUserId = newPerspectivesUserId;
     // Create the runtime options document. Also create and store a private and public key.
     // Read values from component state, that have been salvaged from query parameters.
     // 
-    return component.askForKeypair(newSystemId)
-      .then( ({hasKeyPair, restoreSystem, doc}) => 
+    return component.askForKeypair()
+      .then( ({keypair, installationSequenceNumber, identityDocument}) => 
         {
           // The document has identifiers for the perspectivesSystem and for author that include storage schemes.
           // However, we have to provide schemaless identifiers to the PDR.
-          keypairUploaded = hasKeyPair;
-          identityDocument = doc;
-          if (restoreSystem)
-          {
-            // The end user has explicitly chosen to restore the installation with the identity of a previously existing PerspectivesSystem.
-            definiteSystemId = takeCUID( doc.perspectivesSystem );
-          }
-          if (hasKeyPair)
+          keypairUploaded = !!keypair;
+          identityDoc = identityDocument;
+          if (keypairUploaded)
           {
             // When re-using a cryptographic keypair, we MUST use the PerspectivesUser id that this pair is allotted to.
-            definitePerspectivesUserId = takeCUID( doc.author )
+            definitePerspectivesUserId = takeCUID( identityDoc.author )
           }
-          if (!hasKeyPair)
+          systemId = definitePerspectivesUserId + installationSequenceNumber
+          if (!keypairUploaded)
           {
-            return component.createKeypair(newSystemId);
+            return component.createKeypair(definitePerspectivesUserId);
           }
           else { 
             // we need to return a value for the Promise to resolve. Its value is not consumed.
             return true; 
           }
         })
-        // Create or modify the user document stored with _id equal to definiteSystemId.
-        .then( () => modifyUser( definiteSystemId,
-          { systemIdentifier: definiteSystemId
-          , perspectivesUser: definitePerspectivesUserId
-          } ) )
-        .then( () => createOptionsDocument(definiteSystemId,
-          { isFirstInstallation: true
+        // Create or modify the user document stored with _id equal to systemId.
+        .then( () => 
+          {
+            const definiteUser = 
+              { _id: definitePerspectivesUserId
+              , systemIdentifier: systemId
+              , perspectivesUser: definitePerspectivesUserId
+              , userName: user.userName
+              , password: user.password
+              , couchdbUrl: user.couchdbUrl
+              };
+            return putUser( definiteUser );
+          })
+        .then( () => createOptionsDocument(user.userName,
+          { isFirstInstallation: !keypairUploaded
           , useSystemVersion: component.props.usesystemversion
           , myContextsVersion: __MyContextsversionNumber__
           }) )
@@ -649,31 +654,28 @@ export default class App extends Component
             }
           })
         // After the end user has downloaded her keys, create the user in the PDR.
-        .then( () => getUser( definiteSystemId ) )
-        .then( u =>
-          {
-            user = u;
-            return SharedWorkerChannelPromise.then( proxy => proxy.createAccount( definiteSystemId, user, options, identityDocument ));
-          })        
+        .then( () => getUser( definitePerspectivesUserId ) )
+        .then( u => SharedWorkerChannelPromise.then( proxy => proxy.createAccount( definitePerspectivesUserId, u, options, identityDoc )) )
         // Finally, we remove the keypair from state. From now on, the only copy of the private key 
         // is in the file on the end users' hard disk or wherever she chose to store it.
         .then( () => component.setState({configurationComplete: true, exportedPrivateKey: undefined, exportedPublicKey: undefined}) ) 
-        .catch( e => component.setState({render: "installationaborted", reasonForAbortion: e}));
+        .catch( e => component.setState({render: "installationaborted", reasonForAbortion: e.message || e.reason}));
   }
 
   // Show modal dialog with an opportunity to upload a keypair.
   // If the end user uploads a keypair: sets two crypto keys.
-  // Returns a promise for {hasKeyPair :: Boolean, doc :: JSON}. hasKeyPair is true in case the end user did in fact upload a keypair, false otherwise. 
-  // Only when hasKeyPair == true there is a doc value.
-  askForKeypair(systemId)
+  // Returns a promise for {keypair, identityDocument, installationSequenceNumber}.
+  // keypair and identityDocument are optional.
+  askForKeypair()
   {
+    // takeCUID( response.identityDocument.author )
     const component = this;
-    function setKeyPair( {privateKey, publicKey} )
+    function setKeyPair( {privateKey, publicKey}, definitePerspectivesUserId )
     {
       return window.crypto.subtle.importKey( "jwk", privateKey, { name: "ECDSA", namedCurve: "P-384" }, false, ["sign"])
-        .then( key => setCryptoKey( systemId + PRIVATEKEY, key ))
+        .then( key => setCryptoKey( definitePerspectivesUserId + PRIVATEKEY, key ))
         .then( () => window.crypto.subtle.importKey( "jwk", publicKey, { name: "ECDSA", namedCurve: "P-384" }, true, ["verify"]))
-        .then( key => setCryptoKey( systemId + PUBLICKEY, key ) )
+        .then( key => setCryptoKey( definitePerspectivesUserId + PUBLICKEY, key ) )
     }
 
     return new Promise( (resolver, keypairUploadRejecter) => 
@@ -683,17 +685,20 @@ export default class App extends Component
           { keypairUploadRejecter
           , keypairUploadResolver: response =>
             {
-              if (response == false)
+              const author = response.identityDocument ? takeCUID( response.identityDocument.author ) : undefined;
+              // response is {keypair, identityDocument, installationSequenceNumber}. Import both keys and return the identityDocument.
+              if ( response.keypair )
               {
-                resolver( {hasKeyPair: false} );
+                setKeyPair(response.keypair, author)
+                  .then( () => resolver( response ) )
               }
-              else
+              else 
               {
-                // response is {keypair, identityDocument, restoreSystem}. Import both keys and return the identityDocument.
-                setKeyPair(response.keypair).then( () => resolver( {hasKeyPair: true, doc: response.identityDocument, restoreSystem: response.restoreSystem } ));
+                resolver (response );
               }
-            } } );
-      })
+            }
+          });
+      } );
   }
 
   saveKeyPair()
@@ -707,7 +712,7 @@ export default class App extends Component
     })
   }
 
-  createKeypair (systemId)
+  createKeypair (perspectivesUsersId)
   {
     const component = this;
     let keypair, exportedPrivateKey, exportedPublicKey;
@@ -719,15 +724,15 @@ export default class App extends Component
         true, // extractable.
         ["sign", "verify"])
       .then( kp => keypair = kp)
-      .then( () => setCryptoKey( systemId + PUBLICKEY, keypair.publicKey ) )
+      .then( () => setCryptoKey( perspectivesUsersId + PUBLICKEY, keypair.publicKey ) )
       .then( () => window.crypto.subtle.exportKey( "jwk", keypair.privateKey ) )
       .then( buff => 
         {
           // We must save the exported private key because it appears as if it can only be exported once.
           exportedPrivateKey = buff;
-          window.crypto.subtle.importKey( "jwk", buff, { name: "ECDSA", namedCurve: "P-384" }, false, ["sign"])
+          return window.crypto.subtle.importKey( "jwk", buff, { name: "ECDSA", namedCurve: "P-384" }, false, ["sign"])
         } )
-      .then( unextractablePrivateKey => setCryptoKey( systemId + PRIVATEKEY, unextractablePrivateKey))
+      .then( unextractablePrivateKey => setCryptoKey( perspectivesUsersId + PRIVATEKEY, unextractablePrivateKey))
       .then( () => window.crypto.subtle.exportKey( "jwk", keypair.publicKey ) )
       .then( buff => exportedPublicKey = buff)
       // Put the keys in state so they can be exported.

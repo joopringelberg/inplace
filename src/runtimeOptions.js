@@ -26,7 +26,13 @@ Some of these parameters may be set with a query string parameter.
 Others are set during the installation process.
 Even more options may be set from within MyContexts itself.
 
-We store these parameter-value combinations in a single JSON document per installation in the database runtimeoptions in IndexedDB, under the key that identifies the system of the installation.
+These parameter-value combinations are specific for an installation.
+We keep them in a single JSON document per installation in the database runtimeoptions in IndexedDB.
+This means that the installations' System identifier is the most logical choice as key.
+However, as the options document is used to authenticate against for Couchdb installations, we must be able to find it using 
+the PerspectivesUsers identifier.
+This leads to the following design decision: for a given (Chrome) profile, only a single Couchdb installation can be made for any 
+given PerspectivesUsers identifier. Or, simply put: one Couchdb installation per Chrome profile, identified by the Couchdb user name.
 
 Options can be:
 
@@ -63,9 +69,9 @@ const runtimeOptionsDB = new Pouchdb("runtimeoptions");
 //// CREATE AND DELETE OPTIONS
 ///////////////////////////////////////////////////////////////////////////////
 // Creates a new options document in the runtimeoptions database. Returns a promise for the options as passed in.
-export function createOptionsDocument ( systemId, options )
+export function createOptionsDocument ( userName, options )
 {
-  options._id = systemId;
+  options._id = userName;
   return runtimeOptionsDB.put(options).then( () => options );
 }
 
@@ -75,14 +81,14 @@ export function optionsHaveBeenConfigured()
   return runtimeOptionsDB.info().then( ({doc_count}) => doc_count > 0);
 }
 
-export function deleteOptions ( systemId )
+export function deleteOptions ( perspectivesUsersId )
 {
-  return runtimeOptionsDB.get( systemId )
+  return runtimeOptionsDB.get( perspectivesUsersId )
     .then( options => runtimeOptionsDB.remove( options ) )
     .catch( e => alert( e ));
 }
 
-export function getOptions( systemId )
+export function getOptions( perspectivesUsersId )
 {
-  return runtimeOptionsDB.get( systemId );
+  return runtimeOptionsDB.get( perspectivesUsersId );
 }

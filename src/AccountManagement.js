@@ -116,27 +116,10 @@ export default class AccountManagement extends Component
             }
           });
       }
-      addUser( component.state.username, component.state.password, couchdbUrl )
+      // Notice that we include the entered username both as userName for Couchdb, and as PerspectivesUsers identifier.
+      // This need not be. We can generate a CUID here for the PerspectivesUsers identifier.
+      addUser( component.state.username, component.state.password, couchdbUrl, component.state.username )
         .then( () => window.location = new URL( "?username=" + component.state.username,  document.location.href).href )
-        // .then(() =>
-        //   // Handle back control to App.
-        //   // set render = "createAccountAutomatically"
-        //   // set systemIdentifier = component.state.username
-        //   // Now create the user in the PDR.
-        //   getUser( component.state.username ).then( user =>
-        //     SharedWorkerChannelPromise.then( function (proxy)
-        //       {
-        //         proxy.createAccount(
-        //           component.state.username,
-        //           user,
-        //           // CreateOptions. Read values from component state, that have been salvaged from query parameters.
-        //           { isFirstInstallation: component.props.isfirstinstallation
-        //           , useSystemVersion: component.props.usesystemversion
-        //           }
-        //           // TODO. Handle errors in a better way.
-        //         ).then( () => window.location= new URL(document.location.href).origin )
-        //         .catch(e => alert( e ));
-        //       })));
     }
     component.setState({newAccountInfoValidated: true});
   }
@@ -162,6 +145,8 @@ export default class AccountManagement extends Component
                   {
                     SharedWorkerChannelPromise.then( function (proxy)
                       {
+                        // As authentication only happens for Couchdb installations, 
+                        // the Couchdb username equals the PerspectivesUsers identifier.
                         getOptions( component.state.username ).then( options => 
                           // zelfde parameters en argumenten als runPDR
                           proxy.resetAccount(
@@ -199,7 +184,7 @@ export default class AccountManagement extends Component
 
   render()
   {
-    // getCouchdbUrl and getUseridentifier have changed the cursor to the 'waiting' shape and will return it to the pointer shape when their 
+    // getCouchdbUrl and getSystemIdentifier have changed the cursor to the 'waiting' shape and will return it to the pointer shape when their 
     // promises resolve. However, that will only happen when the user has logged in.
     // Consequently, he sees a 'waiting' state cursor. We fix that here by turning the cursor back to a pointer.
     document.body.style.cursor = "pointer";

@@ -29,5 +29,6 @@
   , "installationAborted_toManagePage": "Ik wil naar de management pagina om te zien wat ik kan doen."
   , "uploadkeypairdialog_UploadIdentityDoc": "Upload identity bestand"
   , "uploadkeypairdialog_wrongIdentityJson": "Het json bestand dat je hebt aangeboden is geen geldig Identity bestand."
-  , "uploadkeypairdialog_restoreSystem": "Gebruik de documenten om een vorige installatie te herstellen."
+  , "uploadkeypairdialog_installationSequenceNumber": "Als dit het eerste apparaat is waar je MyContexts op installeert, vul dan 1 in. Voor het volgende apparaat, vul 2 in, enz. Hergebruik hetzelfde nummer voor een bepaald apparaat als je een installatie herstelt!"
+  , "uploadkeypairdialog_installationSequenceNumberMissing": "Een volgnummer is verplicht."
 }
