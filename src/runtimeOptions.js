@@ -33,6 +33,9 @@ However, as the options document is used to authenticate against for Couchdb ins
 the PerspectivesUsers identifier.
 This leads to the following design decision: for a given (Chrome) profile, only a single Couchdb installation can be made for any 
 given PerspectivesUsers identifier. Or, simply put: one Couchdb installation per Chrome profile, identified by the Couchdb user name.
+For an IndexedDB installation, we use the PerspectivesUserId.
+That implies that for a given (Chrome) profile, only a single IndexedDb installation can be made. 
+The overall design decision is then that a profile supports exactly one Perspectives installation.
 
 Options can be:
 

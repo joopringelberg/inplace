@@ -129,7 +129,7 @@ export default class IntroductionScreen extends Component
           component.props.keypairuploadresolver &&
           component.props.keypairuploadrejecter
           ?
-            <UploadKeypairDialog keypairuploadresolver={component.props.keypairuploadresolver} keypairuploadrejecter={component.props.keypairuploadrejecter}/>
+            <UploadKeypairDialog keypairuploadresolver={component.props.keypairuploadresolver} keypairuploadrejecter={component.props.keypairuploadrejecter} perspectivesuserid={component.props.perspectivesuserid}/>
           :
           null
         }

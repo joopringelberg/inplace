@@ -57,7 +57,7 @@ export class SaveKeypairDialog extends Component
     {
       event.stopPropagation();
       event.preventDefault();
-      const file = new File( [JSON.stringify(component.props.keypair)], "perspectivesCryptographicKeypair.json", {type: "application/json"});
+      const file = new File( [JSON.stringify(component.props.keypair)], component.props.perspectivesuserid + "_keypair.json", {type: "application/json"});
       const element = document.createElement('a');
       const url = window.URL.createObjectURL(file);
       element.style.display = 'none';
