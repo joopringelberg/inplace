@@ -190,6 +190,17 @@ export function authenticateUser( userName, pwd )
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+//// PERSPECTIVESUSER2USERNAME
+//// As there can only be a single installation for a given PerspectivesUsers instance
+//// in any browser profile, there is a one-to-one correspondence between userName and PerspectivesUser.
+///////////////////////////////////////////////////////////////////////////////
+export function perspectivesUser2userName( perspectivesUser )
+{
+  return localUsers.allDocs({include_docs: true}).then(result => result.rows.find( row => row.doc.perspectivesUser == perspectivesUser ).doc.userName );
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
 //// DETECTCOUCHDB
 ///////////////////////////////////////////////////////////////////////////////
 // Returns a promise for a Boolean. False if the Couchdb endpoint does not exist, true otherwise.

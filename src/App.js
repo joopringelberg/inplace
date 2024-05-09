@@ -63,7 +63,7 @@ import {init} from '@paralleldrive/cuid2';
 import { del as deleteCryptoKey, set as setCryptoKey } from 'idb-keyval';
 
 import { createOptionsDocument, deleteOptions, getOptions } from "./runtimeOptions.js";
-import { putUser, allUsers, getUser, removeUser, usersHaveBeenConfigured } from "./usermanagement.js";
+import { putUser, allUsers, getUser, removeUser, usersHaveBeenConfigured, perspectivesUser2userName } from "./usermanagement.js";
 import IntroductionScreen from "./introductionSplash.js";
 import StartupScreen from "./startupSplash.js";
 import DeleteInstallation from "./deleteInstallationSplash.js";
@@ -204,11 +204,12 @@ export default class App extends Component
                     {
                       if ( params.get("deleteaccount") || params.get("recreateinstances") || params.get("recompilelocalmodels") )
                       {
-                        component.singleAccount( perspectivesUser[0] );
+                        component.singleAccount( takeCUID( perspectivesUser[0] ) );
                       }
                       else
                       {
-                        getUser( perspectivesUser[0] )
+                        perspectivesUser2userName( takeCUID( perspectivesUser[0] ) )
+                          .then( getUser )
                           .then( ({systemIdentifier}) => component.prepareMyContextsScreen( systemIdentifier ));
                       }
                     });
