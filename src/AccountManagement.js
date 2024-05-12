@@ -52,7 +52,7 @@ export default class AccountManagement extends Component
       { activeKey: "login"
       , usersConfigured: false
       , loginInfoValidated: false
-      , username: ""
+      , username: ''
       , setusername: function(usr)
         {
           getUser( usr )
@@ -63,12 +63,12 @@ export default class AccountManagement extends Component
       , user: {}
       , wrongCredentials: false
       , newAccountInfoValidated: false
-      , backend: undefined
-      , port: undefined // couchdbPort
-      , host: undefined //couchdbHost
+      , backend: ''
+      , port: '' // couchdbPort
+      , host: '' //couchdbHost
       , checkingOnCouchdb: false
       , couchdbMissing: false
-      , password: undefined
+      , password: ''
       , resetAccount: false
 
     };
