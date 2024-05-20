@@ -41,6 +41,7 @@ import Tabs from 'react-bootstrap/Tabs';
 
 import {usersHaveBeenConfigured, addUser, authenticateUser, getUser, detectCouchdb, allUsers, removeUser} from "./usermanagement.js";
 import { getOptions } from "./runtimeOptions.js";
+import { hideCursorWaitingOverlay } from "./cursor.js";
 
 export default class AccountManagement extends Component
 {
@@ -187,7 +188,7 @@ export default class AccountManagement extends Component
     // getCouchdbUrl and getSystemIdentifier have changed the cursor to the 'waiting' shape and will return it to the pointer shape when their 
     // promises resolve. However, that will only happen when the user has logged in.
     // Consequently, he sees a 'waiting' state cursor. We fix that here by turning the cursor back to a pointer.
-    document.body.style.cursor = "pointer";
+    hideCursorWaitingOverlay();
     const component = this;
     return  <Container>
               <Tabs activeKey={component.state.activeKey} onSelect={ (k) => component.setState({activeKey: k})}>

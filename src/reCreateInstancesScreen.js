@@ -29,17 +29,18 @@ import
 import './splash.css';
 
 import './bootstrap.css'
+import { hideCursorWaitingOverlay, showCursorWaitingOverlay } from "./cursor";
 
 export default function ReCreateInstancesScreen(props)
 {
   const appLocation = location.origin + location.pathname;
   if ( props.recreationstate == "success")
   {
-    document.body.style.cursor = "pointer";
+    hideCursorWaitingOverlay();
   }
   else
   {
-    document.body.style.cursor = "wait";
+    showCursorWaitingOverlay();
   }
   return  <div className="introductionSplash text-muted">
             <div className="bg-primary text-white pb-3">

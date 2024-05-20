@@ -73,6 +73,7 @@ import ReCreateInstancesScreen from "./reCreateInstancesScreen.js";
 import { InvitationImportDialog } from "./invitationImportDialog.js";
 import InstallationAborted from "./installationAbortedSplash.js";
 import { addUserNameToUser, fixUser, getInstalledVersion, initializeMyContextsVersions, runUpgrade, setMyContextsVersion } from "./dataUpgrade.js";
+import { hideCursorWaitingOverlay, showCursorWaitingOverlay } from "./cursor.js";
 
 /*
 QUERY PARAMETERS AND VALUES
@@ -774,6 +775,7 @@ export default class App extends Component
     {
       component.setState( setter );
     }
+    hideCursorWaitingOverlay();
     return (
       <MySystem>
         <PSContext.Consumer>{ mysystem =>
@@ -875,7 +877,7 @@ export default class App extends Component
                   keypairuploadresolver={component.state.keypairUploadResolver}
                   keypairuploadrejecter={component.state.keypairUploadRejecter}/>;
         case "startup":
-          document.body.style.cursor = "wait";
+          showCursorWaitingOverlay();
           return <StartupScreen/>;
         case "deleteAccount":
           return <DeleteInstallation accountdeletioncomplete={component.state.accountDeletionComplete}/>;
@@ -885,7 +887,7 @@ export default class App extends Component
         case "openEmptyScreen":
           return component.openMyContextsScreen();
         case "installationaborted":
-          document.body.style.cursor = "auto";
+          hideCursorWaitingOverlay();
           return <InstallationAborted reason={component.state.reasonForAbortion}/>
       }
     }

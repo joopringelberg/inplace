@@ -33,6 +33,7 @@ import './splash.css';
 import './bootstrap.css'
 import { SaveKeypairDialog } from "./saveKeypairDialog";
 import { UploadKeypairDialog } from "./uploadKeypairDialog";
+import { hideCursorWaitingOverlay, showCursorWaitingOverlay } from "./cursor";
 
 export default class IntroductionScreen extends Component
 {
@@ -48,11 +49,11 @@ export default class IntroductionScreen extends Component
     const url = new URL(appLocation);
     if ( component.props.configurationcomplete)
     {
-      document.body.style.cursor = "pointer";
+      hideCursorWaitingOverlay();
     }
     else
     {
-      document.body.style.cursor = "wait";
+      showCursorWaitingOverlay();
     }
     return <div className="introductionSplash text-muted">
         <div className="bg-primary text-white pb-3">

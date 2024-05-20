@@ -31,17 +31,18 @@ import
 import './splash.css';
 
 import './bootstrap.css'
+import { hideCursorWaitingOverlay, showCursorWaitingOverlay } from "./cursor";
 
 export default function RecompileLocalModelsScreen(props)
 {
   const url = new URL(document.location.href);
   if ( props.recompilationstate == "success")
   {
-    document.body.style.cursor = "pointer";
+    hideCursorWaitingOverlay();
   }
   else
   {
-    document.body.style.cursor = "wait";
+    showCursorWaitingOverlay();
   }
   return  <div className="introductionSplash text-muted">
             <div className="bg-primary text-white pb-3">
