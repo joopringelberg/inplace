@@ -23,6 +23,7 @@ import PropTypes from "prop-types";
 
 import i18next from "i18next";
 import { Container, Button, Modal, Row, Col, Form} from "react-bootstrap";
+import { hideCursorWaitingOverlay } from "./cursor";
 
 // Render in the App. 
 // To trigger a message, set message and acknowledge.
@@ -172,6 +173,7 @@ export class UploadKeypairDialog extends Component
   render()
   {
     const component = this;
+    hideCursorWaitingOverlay();
     return <Modal 
       backdrop="static"
       show={!!component.props.keypairuploadresolver && !component.state.closed}>

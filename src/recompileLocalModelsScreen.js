@@ -35,7 +35,8 @@ import { hideCursorWaitingOverlay, showCursorWaitingOverlay } from "./cursor";
 
 export default function RecompileLocalModelsScreen(props)
 {
-  const url = new URL(document.location.href);
+  const appLocation = location.origin + location.pathname;
+
   if ( props.recompilationstate == "success")
   {
     hideCursorWaitingOverlay();
@@ -63,7 +64,7 @@ export default function RecompileLocalModelsScreen(props)
                 props.recompilationstate == "success" ?
                 <>
                   Done! All models compiled successfully. You may now continue to MyContexts. <span>&nbsp;</span>
-                  <Button size="sm" variant="success" onClick={ () => window.location = url.origin} >Start MyContexts</Button>
+                  <Button size="sm" variant="success" onClick={ () => window.location = appLocation} >Start MyContexts</Button>
                 </>
                 :
                 props.recompilationstate == "failure" ?

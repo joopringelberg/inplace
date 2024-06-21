@@ -658,7 +658,11 @@ export default class App extends Component
             }
           })
         // After the end user has downloaded her keys, create the user in the PDR.
-        .then( () => getUser( definitePerspectivesUserId ) )
+        .then( () => 
+          {
+            showCursorWaitingOverlay();
+            return getUser( definitePerspectivesUserId )
+          } )
         .then( u => SharedWorkerChannelPromise.then( proxy => proxy.createAccount( definitePerspectivesUserId, u, options, identityDoc )) )
         // Finally, we remove the keypair from state. From now on, the only copy of the private key 
         // is in the file on the end users' hard disk or wherever she chose to store it.

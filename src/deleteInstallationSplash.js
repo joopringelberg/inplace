@@ -28,10 +28,15 @@ import
 import './splash.css';
 
 import './bootstrap.css'
+import { hideCursorWaitingOverlay } from "./cursor";
 
 export default function DeleteInstallation(props)
 {
   const appLocation = location.origin + location.pathname;
+  if (props.accountdeletioncomplete)
+    {
+      hideCursorWaitingOverlay();
+    }
   return  <div className="introductionSplash text-muted">
             <div className="bg-primary text-white pb-3">
               <Container>
