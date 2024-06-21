@@ -50,12 +50,11 @@ export default class NoContextSelected extends Component
     const component = this;
     PDRproxy
     // Calling `matchContextName` with an empty string will return all IndexedContext names.
-    .then( proxy => proxy.matchContextName( "" ))
-    .then( function (serialisedMapping)
+    .then( proxy => proxy.matchContextName( "", function (serialisedMapping)
       {
         component.setState({ options: Object.entries( JSON.parse( serialisedMapping[0] ) )
           .map(arr => {return {id: arr[1], label: arr[0].match(/\$(.*)/)[1] }}) });
-      })
+      }));
   }
 
   select({id})
