@@ -99,7 +99,7 @@ export class UploadKeypairDialog extends Component
                   else
                   {
                     component.setState({closed: true});
-                    component.props.keypairuploadrejecter( i18next.t("uploadkeypairdialog_wrongJson", {ns: 'mycontexts'}) );
+                    component.props.keypairuploadrejecter( {reason: i18next.t("uploadkeypairdialog_wrongJson", {ns: 'mycontexts'}) });
                   }
                 }
               catch(e)
@@ -138,7 +138,7 @@ export class UploadKeypairDialog extends Component
                   else
                   {
                     component.setState({closed: true});
-                    component.props.keypairuploadrejecter( i18next.t("uploadkeypairdialog_wrongIdentityJson", {ns: 'mycontexts'}) );
+                    component.props.keypairuploadrejecter( {reason: i18next.t("uploadkeypairdialog_wrongIdentityJson", {ns: 'mycontexts'}) });
                   }
                 }
               catch(e)

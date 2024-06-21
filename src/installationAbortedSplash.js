@@ -49,7 +49,7 @@ export default function InstallationAborted(props)
               <h3 className="text-center pt-5">{ i18next.t("installationAborted_message", {ns: 'mycontexts'}) }</h3>
               <Row>
                 <Col>
-                  <Alert variant="info">{ props.reason ? props.reason.toString() : "No further information" }</Alert>
+                  <Alert variant="info">{ props.reason || "No further information" }</Alert>
                 </Col>
               </Row>
               <Row>
