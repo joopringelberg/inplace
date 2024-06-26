@@ -794,7 +794,7 @@ export default class App extends Component
                   component.eventDispatcher.eventDispatcher = f;
                 }
             , couchdbUrl: component.state.couchdbUrl}}>
-            <Container>
+            <Container id="__MyContextsContainer__">
               <div onKeyDown={event => component.handleKeyDown(event, externalRole(mysystem.contextinstance) )}>
                 <NavigationBar
                   systemexternalrole={externalRole(mysystem.contextinstance)}
