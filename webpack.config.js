@@ -74,8 +74,8 @@ module.exports = function(env)
         new webpack.DefinePlugin({
           __MyContextsversionNumber__: JSON.stringify(require("./package.json").version),
           __BUILD__: require("./build.json").build,
-          REPOSITORYURL: "'https://perspectives.domains/models_perspectives_domains/'"
-
+          __REPOSITORYURL__: "'https://perspectives.domains/models_perspectives_domains/'",
+          __STARTPAGE__: "'pub:https://perspectives.domains/cw_perspectives_domains/#perspectives_domains-BrokerServices$External'"
         })        
       ],
       externals: {

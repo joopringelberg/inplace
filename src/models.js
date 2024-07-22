@@ -45,7 +45,7 @@ import Form from 'react-bootstrap/Form';
 import Col from 'react-bootstrap/Col';
 
 // REPOSITORYURL will be substituted by Webpack. It's value is set in package.json.
-const repositoryUrl = REPOSITORYURL;
+const repositoryUrl = __REPOSITORYURL__;
 
 class App extends React.Component
 {

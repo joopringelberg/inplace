@@ -363,6 +363,7 @@ export default class App extends Component
     const component = this;
     const params = new URLSearchParams(document.location.search.substring(1));
     const additionalState = {systemIdentifier};
+    const mycontextStartPage = __STARTPAGE__;
     let contextrole;
 
     component.setHandlers()
@@ -434,8 +435,14 @@ export default class App extends Component
     }
     else
     {
-      additionalState.render = "openEmptyScreen"
-      component.setState(additionalState)
+      // We execute this once on starting up the client, once for every tab or screen.
+      // additionalState.render = "openEmptyScreen"
+      // component.setState(additionalState)
+      document.title = "Welcome to MyContexts";
+      history.pushState({ selectedContext: mycontextStartPage, title: "Welcome to MyContexts" }, "");
+      additionalState.externalRoleId = mycontextStartPage;
+      additionalState.render = "opencontext";
+      component.setState( additionalState );
     }
   }
 
