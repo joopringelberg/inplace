@@ -75,7 +75,7 @@ module.exports = function(env)
           __MyContextsversionNumber__: JSON.stringify(require("./package.json").version),
           __BUILD__: require("./build.json").build,
           __REPOSITORYURL__: "'https://perspectives.domains/models_perspectives_domains/'",
-          __STARTPAGE__: "'pub:https://perspectives.domains/cw_perspectives_domains/#perspectives_domains-BrokerServices$External'"
+          __STARTPAGE__: "'pub:https://perspectives.domains/cw_qzins1lceb/#uo6cansg5p$External'"
         })        
       ],
       externals: {
