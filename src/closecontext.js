@@ -21,6 +21,7 @@
 import React, {Component} from "react";
 import "./App.css";
 import PropTypes from "prop-types";
+import {PDRproxy} from 'perspectives-proxy';
 
 import "./externals.js";
 
@@ -53,6 +54,8 @@ export default class CloseContext extends Component
     const component = this;
     component.props.clearexternalroleid();
     component.props.collapsenavbar();
+    // Save resources in cache, because the user might close the application afterwards.
+    PDRproxy.then( proxy => proxy.save() );
   }
 
   render()
