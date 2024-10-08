@@ -956,6 +956,10 @@ function ensureExternalRole(s)
                 {
                   resolve( externalRole( table[s] ))
                 }
+                else if (Object.keys(table).length == 1)
+                {
+                  resolve( externalRole( Object.values(table)[0]) );
+                }
                 else
                 {
                   proxy.getBinding( s,
