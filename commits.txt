@@ -1,0 +1,2 @@
+dc06390 - 8 hours ago, MyContexts has a new starting page.
+0251cf6 - 2 days ago, OpenContext now handles fuzzy matched indexed context names.
