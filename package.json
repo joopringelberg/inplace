@@ -18,7 +18,7 @@
     "publishProduction": "scp -r ./production/* joop@inplace.works:/var/www/mycontexts.com",
     "publishDevelopment": "scp -r ./development/* joop@inplace.works:/var/www/mycontexts.com",
     "stats": "webpack --env target=development --json > stats.json"
-   },
+  },
   "author": "Joop Ringelberg <joop.ringelberg@gmail.com>",
   "repository": {
     "type": "git",
@@ -30,6 +30,7 @@
   "license": "GPL-3.0-or-later",
   "dependencies": {
     "@babel/polyfill": "^7.12.1",
+    "@paralleldrive/cuid2": "^2.2.2",
     "@primer/octicons-react": "^11.0.0",
     "bootstrap": "^4.3.1",
     "highlight.js": "^11.5.1",
@@ -46,9 +47,8 @@
     "prop-types": "^15.7.2",
     "react": "^17.0.1",
     "react-bootstrap": "^1.6.4",
-    "react-dom": "^17.0.1",
     "react-bootstrap-typeahead": "^6.3.2",
-    "@paralleldrive/cuid2": "^2.2.2"
+    "react-dom": "^17.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.4.5",
