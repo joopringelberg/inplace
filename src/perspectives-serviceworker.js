@@ -48,6 +48,8 @@ const toBeCached = appFiles.concat( macIcons );
 
 self.addEventListener("install", (e) => {
   console.log("[Service Worker] Install");
+  self.skipWaiting();
+  
   e.waitUntil(
     (async () => {
       const cache = await caches.open(cacheName);
@@ -87,6 +89,7 @@ self.addEventListener("fetch", (e) => {
 });
 
 self.addEventListener("activate", (e) => {
+  e.waitUntil(clients.claim());
   e.waitUntil(
     caches.keys().then((keyList) => {
       return Promise.all(

@@ -559,7 +559,29 @@ export default class App extends Component
         .then( user => proxy.removeAccount(user.userName, user))
         .then( () => deleteCryptoKey( perspectivesUsersId + PUBLICKEY) )
         .then( () => deleteCryptoKey( perspectivesUsersId + PRIVATEKEY) )
-        .then( () => component.setState({accountDeletionComplete: true})));
+        .then( () => component.setState({accountDeletionComplete: true}))
+        .then( () => {
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then((registrations) => {
+              for (let registration of registrations) {
+                registration.unregister();
+              }
+            });
+          if ('caches' in window) {
+            caches.keys().then((cacheNames) => {
+              cacheNames.forEach((cacheName) => {
+                caches.delete(cacheName);
+              });
+            });
+          }
+          localStorage.clear();
+          indexedDB.databases().then((dbs) => {
+            dbs.forEach((db) => {
+              indexedDB.deleteDatabase(db.name);
+            });
+          });          
+          }})
+      );
   }
 
   recompileLocalModels(user)
