@@ -194,16 +194,16 @@ export default class AccountManagement extends Component
               <Tabs activeKey={component.state.activeKey} onSelect={ (k) => component.setState({activeKey: k})}>
                 <Tab eventKey="login" title="Login">
                   <Form noValidate validated={component.state.loginInfoValidated} onSubmit={e => component.authenticate(e)} className="m-3">
-                    <Form.Row>
+                    <Row>
                       <header className="App-header">
                         <h3>Login</h3>
                       </header>
-                    </Form.Row>
-                    <Form.Row className="pb-3">
+                    </Row>
+                    <Row className="pb-3">
                       <Col>
                       {component.state.usersConfigured ? <Form.Text><span>Enter the username and password for a MyContexts user on this computer. Alternatively, </span><Button size="sm" variant="outline-info" onClick={() => component.setState({activeKey:"setup"})}>create a new account.</Button></Form.Text> : <Welcome/>}
                       </Col>
-                    </Form.Row>
+                    </Row>
                     <Form.Group as={Row} controlId="username">
                       <Col sm="4">
                         <Form.Label>Login name:</Form.Label>
@@ -257,12 +257,12 @@ export default class AccountManagement extends Component
                 </Tab>
                 <Tab eventKey="setup" title="Create account">
                   <Form noValidate validated={component.state.newAccountInfoValidated} onSubmit={e => component.createAccount(e)} className="m-3">
-                    <Form.Row>
+                    <Row>
                       <header className="App-header">
                         <h3>Storing data</h3>
                       </header>
-                    </Form.Row>
-                    <Form.Row className="pb-3">
+                    </Row>
+                    <Row className="pb-3">
                       <div className="mb-3">
                         <Form.Group id="StorageLocation">
                           <Form.Label htmlFor="StorageLocation">Where do you want to store your data?</Form.Label>
@@ -306,7 +306,7 @@ export default class AccountManagement extends Component
                           </Form.Group>
                           <Form.Control.Feedback type="invalid">Please choose one of the options</Form.Control.Feedback>
                       </div>
-                    </Form.Row>
+                    </Row>
                     {
                       ( component.state.backend == "localcouchdb" || component.state.backend == "remotecouchdb") ?
                         <Form.Group as={Row} controlId="port">
@@ -354,11 +354,11 @@ export default class AccountManagement extends Component
                       !component.state.checkingOnCouchdb && component.state.couchdbMissing ? <Form.Text className="text-danger">Account not created. Couchdb is (currently) not available on this address.
                         Please check what you entered{component.state.backend == "localcouchdb" ? " and make sure your Couchdb is running." : "."}</Form.Text> : null
                     }
-                    <Form.Row>
+                    <Row>
                       <header className="App-header">
                         <h3>Choose a username (and maybe a password)</h3>
                       </header>
-                    </Form.Row>
+                    </Row>
                     <Form.Group as={Row} controlId="newusername">
                       <Col sm="4">
                         <Form.Label>Choose a name to login with (your username):</Form.Label>
@@ -395,11 +395,11 @@ export default class AccountManagement extends Component
                 </Tab>
                 <Tab eventKey="remove" title="Remove accounts">
                   <Form noValidate className="m-3">
-                    <Form.Row>
+                    <Row>
                       <header className="App-header">
                         <h3>Remove selected account</h3>
                       </header>
-                    </Form.Row>
+                    </Row>
                     <AllUsers/>
                   </Form>
                 </Tab>

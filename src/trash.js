@@ -25,7 +25,7 @@ import "./externals.js";
 
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
-import {TrashcanIcon} from '@primer/octicons-react';
+import {TrashIcon} from '@primer/octicons-react';
 
 // import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -69,7 +69,7 @@ export default function Trash(props)
                       }}
                       onDragEnter={ev => ev.target.classList.add("border", "border-primary") }
                       onDragLeave={ev => ev.target.classList.remove("border", "border-primary")}>
-                      <TrashcanIcon alt="Thrashcan" aria-label="Drop a card here to remove it" size='medium'/>
+                      <TrashIcon alt="Thrashcan" aria-label="Drop a card here to remove it" size='medium'/>
                   </div>
             </OverlayTrigger>;
 }
