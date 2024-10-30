@@ -32,6 +32,13 @@ See `package.json`.
 ## Dependency management
 See [Publishing a new version](https://github.com/joopringelberg/perspectives-core/blob/master/technical%20readme.md#publishing-a-new-version) in the Perspectives Core (PDR) project.
 
+### Publish a new package version
+1. Increase the package number in `package.template.json`.
+2. Update the version numbers in `bumpversions.sh` and run it.
+3. Commit.
+4. Create tag.
+5. Push tag.
+
 ### Test-using this program
 It should be noted that this program is in an alpha-stage!
 

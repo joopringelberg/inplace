@@ -1,6 +1,6 @@
 {
   "name": "MyContexts",
-  "version": "0.24.2",
+  "version": "0.24.3",
   "description": "The client for the Perspectives Distributed Runtime.",
   "private": true,
   "homepage": "https://mycontexts.com",
