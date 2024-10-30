@@ -102,7 +102,7 @@ export default class CardClipBoard extends PerspectivesComponent
     const component = this;
     if (this.state && this.state.cardTitle)
     {
-      return <Container onClick={component.writeRoleIdentification}><Badge variant="info" className="p-2">{this.state.cardTitle}</Badge></Container>;
+      return <Container onClick={component.writeRoleIdentification}><Badge className="p-2 bg-info text-dark">{this.state.cardTitle}</Badge></Container>;
     }
     else {
       return null;
