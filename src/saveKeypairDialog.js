@@ -20,10 +20,6 @@
 
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import 
-  {
-  importTransaction,
-  } from "perspectives-react";
 
 import i18next from "i18next";
 import { Container, Button, Modal, Row, Col } from "react-bootstrap";
@@ -35,11 +31,16 @@ import { Container, Button, Modal, Row, Col } from "react-bootstrap";
 //  - set props.message to undefined, so the Modal is no longer shown.
 export class SaveKeypairDialog extends Component
 {
-  constructor()
+  constructor(props)
   {
     super();
+    const jsonString = JSON.stringify(props.keypair);
+    const base64Data = btoa(encodeURIComponent(jsonString));
+    const fileName = props.perspectivesuserid + "_keypair.json";
     this.state = 
       { closed: false
+      , base64Data
+      , fileName
     }
   }
 
@@ -50,34 +51,13 @@ export class SaveKeypairDialog extends Component
     this.props.keypairsaverejecter( i18next.t("keypairNotSaved_message", {ns: 'mycontexts'}) );
   }
 
-  download( event )
+  closeDialog(event)
   {
     const component = this;
-    function doit()
-    {
-      event.stopPropagation();
-      event.preventDefault();
-      const file = new File( [JSON.stringify(component.props.keypair)], component.props.perspectivesuserid + "_keypair.json", {type: "application/json"});
-      const element = document.createElement('a');
-      const url = window.URL.createObjectURL(file);
-      element.style.display = 'none';
-      element.href = url;
-      element.setAttribute('download', file.name);
-      document.body.appendChild(element);  
-      element.click();
-      document.body.removeChild(element);
-      window.URL.revokeObjectURL(url);
-      component.setState({closed: true})
-      component.props.keypairsaveresolver();
-    }
-    if ( event.type == "click")
-    {
-      doit();
-    }
-    else if ( event.keyCode == 32 )
-    {
-      doit();
-    }    
+    event.stopPropagation();
+    event.preventDefault();
+    component.setState({closed: true})
+    component.props.keypairsaveresolver();
   }
 
   // Returns a promise for a jston File object that holds the structure {publicKey, privateKey}.
@@ -102,17 +82,25 @@ export class SaveKeypairDialog extends Component
       </Modal.Body>
       <Modal.Footer>
         <Container>
-          <Col>
-
-            <Button 
-              variant="primary" 
-              onClick={ e => component.download( e ) }
-              onKeyDown={ e => component.download(e) }
-              >
-              { i18next.t( "savekeypairdialog_Download", {ns: "mycontexts"} ) }
-            </Button>
-
-          </Col>
+          <Row>
+            <Col>
+              <Button 
+                variant="primary" 
+                href={`data:application/json;base64,${component.state.base64Data}`}
+                download={component.state.fileName}
+                >
+                { i18next.t( "savekeypairdialog_Download", {ns: "mycontexts"} ) }
+              </Button>
+            </Col>
+            <Col>
+              <Button 
+                variant="secondary" 
+                onClick={e => component.closeDialog(e)}
+                >
+                { "Continue" }
+              </Button>
+            </Col>
+          </Row>
         </Container>
       </Modal.Footer>
     </Modal>
@@ -123,4 +111,5 @@ SaveKeypairDialog.propTypes =
   { keypairsaveresolver: PropTypes.func.isRequired
   , keypairsaverejecter: PropTypes.func.isRequired
   , keypair: PropTypes.any.isRequired
+  , perspectivesuserid: PropTypes.func.isRequired
   };

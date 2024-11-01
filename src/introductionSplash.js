@@ -122,7 +122,7 @@ export default class IntroductionScreen extends Component
           component.props.keypairsaveresolver && 
           component.props.keypairsaverejecter
           ?
-          <SaveKeypairDialog keypairsaveresolver={component.props.keypairsaveresolver} keypairsaverejecter={component.props.keypairsaverejecter} keypair={component.props.keypair}/>
+          <SaveKeypairDialog keypairsaveresolver={component.props.keypairsaveresolver} keypairsaverejecter={component.props.keypairsaverejecter} keypair={component.props.keypair} perspectivesuserid={component.props.perspectivesuserid}/>
           :
           null
         }
