@@ -79,8 +79,11 @@ export function initializeMyContextsVersions()
           idbKeyval.set("currentMyContextsVersion", myContextsVersion);
         }
       })
-    // No previous installation, just initialize to the version we're installing.
-    .catch( () => idbKeyval.set("currentMyContextsVersion", myContextsVersion))
+    // PROBABLY the keyval-store has been created, but the keyval object has been removed.
+    .catch( e => {
+      console.log(e);
+      indexedDB.deleteDatabase("keyval-store");
+    })
 }
 
 export function getInstalledVersion()
