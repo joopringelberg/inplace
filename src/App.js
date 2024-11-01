@@ -96,6 +96,10 @@ export default class App extends Component
 {
   constructor(props)
   {
+    function isIOS() {
+      return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    }
+
     super(props);
     const component = this;
     this.i18nextPromise = initI18next("en");
@@ -173,7 +177,7 @@ export default class App extends Component
         });
       }
 
-    if (this.usesSharedWorker)
+    if (this.usesSharedWorker && !isIOS()) // EN WANNEER NIET IOS!!
     {
       configurePDRproxy("sharedWorkerChannel");
     }
