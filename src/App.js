@@ -367,7 +367,6 @@ export default class App extends Component
     const component = this;
     const params = new URLSearchParams(document.location.search.substring(1));
     const additionalState = {systemIdentifier};
-    const mycontextStartPage = __STARTPAGE__;
     let contextrole;
 
     component.setHandlers()
@@ -395,21 +394,26 @@ export default class App extends Component
                 });
             })
           .catch(e => UserMessagingPromise.then( um => 
-            um.addMessageForEndUser(
-              { title: i18next.t("app_opencontext_title", { ns: 'mycontexts' }) 
-              , message: i18next.t("app_opencontext_message", {context: contextrole, ns: 'mycontexts'})
-              , error: e.toString()
-            })));
+            {
+              component.openWelcomePage(systemIdentifier);
+              um.addMessageForEndUser(
+                { title: i18next.t("app_opencontext_title", { ns: 'mycontexts' }) 
+                , message: i18next.t("app_opencontext_message", {context: contextrole, ns: 'mycontexts'})
+                , error: e.toString()
+              })
+            }
+          ));
       }
       else
       {
         PDRproxy
-          .then( proxy => proxy.matchContextName( contextrole ))
-          .then( function (serialisedMapping)
+          .then( proxy => proxy.matchContextName( contextrole,
+            function (serialisedMapping)
             {
               const theMap = JSON.parse( serialisedMapping[0] );
               if ( Object.keys( theMap ).length == 0 )
               {
+                component.openWelcomePage(systemIdentifier);
                 UserMessagingPromise.then( um => um.addMessageForEndUser({title: "Matching request", "message": "Cannot find a match for " + contextrole}));
               }
               else if ( Object.keys( theMap ).length == 1 )
@@ -424,7 +428,8 @@ export default class App extends Component
                 additionalState.render = "contextchoice";
                 component.setState( additionalState );
               }
-            });
+            },
+          FIREANDFORGET) );
       }
     }
     else if (params.get("openroleform"))
@@ -439,15 +444,23 @@ export default class App extends Component
     }
     else
     {
-      // We execute this once on starting up the client, once for every tab or screen.
-      // additionalState.render = "openEmptyScreen"
-      // component.setState(additionalState)
-      document.title = "Welcome to MyContexts";
-      history.pushState({ selectedContext: mycontextStartPage, title: "Welcome to MyContexts" }, "");
-      additionalState.externalRoleId = mycontextStartPage;
-      additionalState.render = "opencontext";
-      component.setState( additionalState );
+      component.openWelcomePage(systemIdentifier);
     }
+  }
+
+  openWelcomePage(systemIdentifier)
+  {
+    const component = this;
+    const mycontextStartPage = __STARTPAGE__;
+    const additionalState = {systemIdentifier};
+    // We execute this once on starting up the client, once for every tab or screen.
+    // additionalState.render = "openEmptyScreen"
+    // component.setState(additionalState)
+    document.title = "Welcome to MyContexts";
+    history.pushState({ selectedContext: mycontextStartPage, title: "Welcome to MyContexts" }, "");
+    additionalState.externalRoleId = mycontextStartPage;
+    additionalState.render = "opencontext";
+    component.setState( additionalState );
   }
 
   setHandlers()
@@ -975,7 +988,7 @@ function ensureExternalRole(s)
       new Promise( function( resolve, reject )
         {
           proxy.matchContextName( s, 
-            ( function (serialisedtable)
+            function (serialisedtable)
               {
                 const table = JSON.parse( serialisedtable[0]);
                 if (table[s])
@@ -1016,7 +1029,7 @@ function ensureExternalRole(s)
                       return reject(e);
                     });
                 }
-              })
+              }
             , FIREANDFORGET );
         }));
   }

@@ -81,11 +81,20 @@ export default class CardClipBoard extends PerspectivesComponent
           })));
   }
 
-  writeRoleIdentification()
+  // The card id is copied to the navigater clipboard anyway.
+  writeRoleIdentification(event)
   {
     const component = this;
-
-    navigator.clipboard.writeText(component.state.rolinstance).then(
+    if ( event.shiftKey )
+    {
+      // Re-evaluate the state of the role on the clipboard.
+      PDRproxy.then( pproxy =>
+        pproxy.evaluateRoleState( component.state.rolinstance )
+      );
+    }
+    else 
+    {
+      navigator.clipboard.writeText( encodeURIComponent(component.state.rolinstance) ).then(
         function () {
         /* success */
         alert("Copied the role instance to the clipboard.")
@@ -94,7 +103,8 @@ export default class CardClipBoard extends PerspectivesComponent
         /* failure */
         alert("Programming alert: Could not write to clipboard!");
         }
-    );
+      );
+    }
   }
 
   render ()
