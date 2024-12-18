@@ -111,5 +111,5 @@ SaveKeypairDialog.propTypes =
   { keypairsaveresolver: PropTypes.func.isRequired
   , keypairsaverejecter: PropTypes.func.isRequired
   , keypair: PropTypes.any.isRequired
-  , perspectivesuserid: PropTypes.func.isRequired
+  , perspectivesuserid: PropTypes.string.isRequired
   };
