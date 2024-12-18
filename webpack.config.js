@@ -78,6 +78,14 @@ module.exports = function(env) {
         __REPOSITORYURL__: "'https://perspectives.domains/models_perspectives_domains/'",
         __STARTPAGE__: "'pub:https://perspectives.domains/cw_j4qovsczpm/#bxjprzq9q6$External'"
       })
-    ]
+    ],
+    externals: {
+      "perspectives-core": {
+        commonjs: "perspectives-core",
+        commonjs2: "perspectives-core",
+        amd: "perspectives-core",
+        root: "perspectives-core"
+      }
+    }
   };
 };
