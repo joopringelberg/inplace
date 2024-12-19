@@ -1,5 +1,5 @@
 {
-  "name": "MyContexts",
+  "name": "mycontexts",
   "version": "0.24.3",
   "description": "The client for the Perspectives Distributed Runtime.",
   "private": true,
@@ -7,10 +7,10 @@
   "scripts": {
     "watch": "webpack --watch",
     "symlinks": "./createPerspectivesLinks.sh",
-    "builddevelopment": "./build.sh -t development",
-    "buildproduction": "./build.sh -t production",
-    "buildRemoteTest": "./build.sh -t remotetest",
-    "buildmodels_prod": "webpack --watch --config models.webpack.config.js --env target=production repo=https://perspectives.domains:5987/models_perspectives_domains",
+    "buildDevelopment": "webpack --config webpack.config.js --env mode=development --env target=development",
+    "buildProduction": "webpack --config webpack.config.js --env mode=production --env target=production",
+    "buildRemoteTest": "webpack --config webpack.config.js --env mode=development --env target=remotetest",
+    "buildMyContextsInRemoteTest": "webpack --config mycontexts.webpack.config.js --env mode=development --env target=remotetest",
     "buildTestStaticScreen": "webpack --watch --config testStaticScreen.webpack.config.js",
     "switchToProduction": "sudo ln -sfh /Users/joopringelberg/Code/inplace/production/ /Library/WebServer/Documents/mycontexts",
     "switchToDevelopment": "sudo ln -sfh /Users/joopringelberg/Code/inplace/development/ /Library/WebServer/Documents/mycontexts",
@@ -56,6 +56,7 @@
     "@babel/preset-env": "^7.25.8",
     "@babel/preset-react": "^7.25.7",
     "babel-loader": "^9.2.1",
+    "clean-webpack-plugin": "^4.0.0",
     "copy-webpack-plugin": "^12.0.2",
     "css-loader": "^7.1.2",
     "eslint": "^9.13.0",
@@ -63,6 +64,7 @@
     "source-map-loader": "^5.0.0",
     "style-loader": "^4.0.0",
     "webpack": "^5.95.0",
-    "webpack-cli": "^5.1.4"
+    "webpack-cli": "^5.1.4",
+    "webpack-shell-plugin-next": "^2.3.2"
   }
 }

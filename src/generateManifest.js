@@ -1,6 +1,9 @@
 
 const fs = require('node:fs');
 
+// Call this script with parameter target, e.g. node ./src/generateManifest.js --target=./dist
+const target = process.argv[2];
+
 const build = JSON.parse( fs.readFileSync("./build.json", {encoding: "utf-8"}) ).build;
 
 // See: https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/How_to/Define_app_icons#create_the_necessary_icon_sizes
@@ -29,6 +32,13 @@ fs.writeFile('./perspectives.webmanifest', JSON.stringify(manifest), err => {
     console.error(err);
   }
   console.log("Manifest written.")
+  // Copy the manifest to the target directory.
+  fs.copyFile('./perspectives.webmanifest', target + "/perspectives.webmanifest", err => {
+    if (err) {
+      console.error(err);
+    }
+    console.log("Manifest copied to " + target);
+  });
 });
 
 fs.writeFile("./build.json", JSON.stringify({build: build + 1}), err => {

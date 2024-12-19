@@ -25,7 +25,6 @@ The same holds for perspectives-react.
 */
 import React from "react";
 
-import * as PerspectivesReact from "perspectives-react";
 
 import PerspectivesGlobals from "./perspectivesGlobals.js";
 
@@ -38,7 +37,6 @@ import * as PropTypes from "prop-types";
 import * as ReactBootstrap from "react-bootstrap"
 
 window.React = React;
-window.PerspectivesReact = PerspectivesReact;
 window.PerspectivesGlobals = PerspectivesGlobals;
 window.ReactDOM = ReactDOM;
 window.PrimerOcticonsReact = PrimerOcticonsReact;
