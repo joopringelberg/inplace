@@ -92,6 +92,8 @@ QUERY PARAMETERS AND VALUES
 const PUBLICKEY = "_publicKey";
 const PRIVATEKEY = "_privateKey";
 
+await initI18next();
+
 export default class App extends Component
 {
   constructor(props)
@@ -102,7 +104,6 @@ export default class App extends Component
 
     super(props);
     const component = this;
-    this.i18nextPromise = initI18next("en");
     // This stub is replaced by a function constructed in the addOpenContextOrRoleForm behaviour
     // whenever the user starts dragging a role that supports that behaviour.
     // Notice that we use indirection here. The value of eventDispatcher is a location that holds the actual eventDispatcher.
@@ -145,6 +146,12 @@ export default class App extends Component
       , perspectivesUsersId: undefined    // The string that identifies the natural person in the Perspectives Universe.
       
       };
+      // Check if i18next is initialized
+      if (!i18next.isInitialized) {
+        i18next.on('initialized', () => {
+          this.setState({ i18nReady: true });
+        });
+      }
     initUserMessaging(
       function ( message )
         {
@@ -192,8 +199,6 @@ export default class App extends Component
   {
     const component = this;
     const params = new URLSearchParams(document.location.search.substring(1));
-
-    component.i18nextPromise.then( () => component.setState({i8nextReady: true}))
 
     initializeMyContextsVersions()
       .then( () =>

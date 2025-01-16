@@ -35,6 +35,7 @@
     "bootstrap": "^5.3.3",
     "highlight.js": "^11.10.0",
     "i18next": "^23.16.0",
+    "i18next-browser-languagedetector": "^8.0.2",
     "i18next-http-backend": "^2.6.2",
     "idb-keyval": "^6.2.1",
     "perspectives-core": "git+https://github.com/joopringelberg/perspectives-core.git#v0.26.5",
