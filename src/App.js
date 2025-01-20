@@ -20,7 +20,7 @@
 
 import React, { Component } from "react";
 import "./App.css";
-import { SharedWorkerChannelPromise, configurePDRproxy, PDRproxy, FIREANDFORGET } from 'perspectives-proxy';
+import { SharedWorkerChannelPromise, configurePDRproxy, PDRproxy, FIREANDFORGET, CONTINUOUS } from 'perspectives-proxy';
 
 import "./externals.js";
 
@@ -56,7 +56,7 @@ import {SelectContext} from "./selectContext.js";
 
 import i18next from "i18next";
 
-import {initI18next} from "./i18next.js";
+import {initI18next, loadLanguageResources} from "./i18next.js";
 
 import {init} from '@paralleldrive/cuid2';
 
@@ -152,6 +152,7 @@ export default class App extends Component
           this.setState({ i18nReady: true });
         });
       }
+    component.subscribeLanguageChange();
     initUserMessaging(
       function ( message )
         {
@@ -283,6 +284,35 @@ export default class App extends Component
                       });        
                   }}
               } ) );
+  }
+
+  subscribeLanguageChange()
+  {
+    const component = this;
+    let proxy;
+    PDRproxy
+      .then( pproxy => {
+        proxy = pproxy;
+        return proxy.getSystemIdentifier()
+        })
+      .then( systemIdentifiers => {
+        const systemIdentifier = systemIdentifiers[0];
+        proxy.getProperty(
+          "def:#" + externalRole(systemIdentifier),
+          ModelDependencies.currentLanguage,
+          ModelDependencies.systemExternal,
+          function (valArr)
+          {
+            const changeLanguage = valArr[0];
+            if (changeLanguage && changeLanguage != component.state.currentLanguage)
+            {
+              loadLanguageResources( changeLanguage ).then( () => {
+                i18next.changeLanguage( changeLanguage );
+                component.setState({currentLanguage: changeLanguage});  
+              })
+            }
+          },
+          CONTINUOUS)});
   }
 
   // Runs all applicable upgrades and just returns the perspectivesUsersId that was passed in.

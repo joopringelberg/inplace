@@ -34,7 +34,7 @@
     "@primer/octicons-react": "^19.12.0",
     "bootstrap": "^5.3.3",
     "highlight.js": "^11.10.0",
-    "i18next": "^23.16.0",
+    "i18next": "^24.2.1",
     "i18next-browser-languagedetector": "^8.0.2",
     "i18next-http-backend": "^2.6.2",
     "idb-keyval": "^6.2.1",

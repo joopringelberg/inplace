@@ -10,40 +10,22 @@ const idbKeyval = require('idb-keyval')
 
 export async function initI18next ()
 {
-  const idbDetector = {
-    name: 'idbDetector',
-  
-    async lookup(options) {
-      // options -> are passed in options
-      const result = await idbKeyval.get("currentLanguage");
-      return result;
-    },
-  
-    cacheUserLanguage(lng, options) {
-      // options -> are passed in options
-      // lng -> current language, will be called after init and on changeLanguage
-      idbKeyval.set("currentLanguage", lng);
+  let currentLanguage = await idbKeyval.get("currentLanguage");
+
+  i18next.on('initialized', () => {
+    if (!currentLanguage)
+    {
+      idbKeyval.set("currentLanguage", i18next.language);
+      currentLanguage = i18next.language;
     }
-  };
-
-  const languageDetector = new LanguageDetector();
-  languageDetector.addDetector(idbDetector);
-
-  i18next.on('languageChanged', () => {
-    const LANG_KEY = i18next.language;
-    // Save in IDB. This setting is leading for the PDR, too.
-    idbKeyval.set("currentLanguage", LANG_KEY);
-    Promise.all([
-      import(`./lang/${LANG_KEY}/mycontexts.json`).then( t => i18next.addResourceBundle(LANG_KEY, "mycontexts", t)),
-      getPreact(LANG_KEY).then( t => i18next.addResourceBundle(LANG_KEY, "preact", t))
-    ])
+    loadLanguageResources(currentLanguage)
     .then( () => i18next.loadNamespaces(["mycontexts", "preact"]))
     .then( () => i18next)
-});
+    });
 
   return i18next
     .use(HttpApi)
-    .use(languageDetector)
+    .use(LanguageDetector)
     .init({
       supportedLngs: ["en", "nl"],
       // Enabled useful console output when developing
@@ -51,12 +33,15 @@ export async function initI18next ()
       // Disable loading of dev locale
       fallbackLng: false,
       ns: [],
-      detection: {
-        // Detection options
-        order: ["idbDetector", "navigator"], // Use custom detector first
-        caches: ["idbDetector"], // Cache detected language using custom detector
-      }
+      lng: currentLanguage
       })
     ;
 }
 
+export function loadLanguageResources (currentLanguage)
+{
+  return Promise.all([
+    import(`./lang/${currentLanguage}/mycontexts.json`).then( t => i18next.addResourceBundle(currentLanguage, "mycontexts", t)),
+    getPreact(currentLanguage).then( t => i18next.addResourceBundle(currentLanguage, "preact", t))
+  ])
+}
