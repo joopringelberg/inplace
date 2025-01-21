@@ -39,7 +39,8 @@ const appFiles = [
   , "/src_lang_en_mycontexts_json.js"
   , "/src_lang_en_preact_json.perspectives-react.js"
   , "/src_lang_nl_mycontexts_json.js"
-  , "/src_lang_nl_preact_json.perspectives-react.js"
+  , "/src_lang_nl_preact_json.perspectives-react.js",
+  , "/perspectives-core.js"
 ];
 
 const macIcons = ["512.png", "256.png", "128.png", "32.png", "16.png"].map( icon => "/appimages/ios/" + icon);

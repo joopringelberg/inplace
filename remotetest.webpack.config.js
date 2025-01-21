@@ -4,15 +4,20 @@ const WebpackShellPluginNext = require('webpack-shell-plugin-next');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const webpack = require('webpack');
 
+// env.target is the target directory for the build.
+// Files that are constructed are copied to the target directory.
+// The target directory is also the directory that is copied to the MyContexts server.
+// If target is "development" or "production", the files are copied to the root of the site.
+// If target is "remotetest", the files are copied to the remotetest subdirectory of the site.
+
+// env.mode is the mode of the build. It is either "development" or "production".
+
 module.exports = function(env) {
   const { target, mode } = env;
   return {
     entry: {
       "index": path.join(__dirname, "src/index.js"),
-      "models": path.join(__dirname, "src/models.js"),
-      "manage": path.join(__dirname, "src/manage.js"),
-      "perspectives-serviceworker": path.join(__dirname, "src/perspectives-serviceworker.js"),
-      "perspectives-pagedispatcher": path.join(__dirname, "src/perspectives-pagedispatcher.js")
+      "perspectives-serviceworker": path.join(__dirname, "src/perspectives-serviceworker.js")
     },
     output: {
       filename: '[name].js',
@@ -61,49 +66,10 @@ module.exports = function(env) {
       ]
     },
     plugins: [
-      new CleanWebpackPlugin(), // Add this line to clean the target directory before each build
+      new CleanWebpackPlugin(), // Even though we clean the local target directory, we will not clean the remote target directory.
       new CopyPlugin({
         patterns: [
           { context: path.resolve(__dirname, "node_modules/perspectives-react/dist"), from: "src_lang_*", to: path.resolve(__dirname, target) },
-          {
-            from: path.resolve(__dirname, "node_modules/perspectives-core/dist/*.*"),
-            to: ({ context, absoluteFilename }) => {
-              return path.join(__dirname, target, path.basename(absoluteFilename));
-            }
-          },
-          // Add a pattern to copy the files index.html, file.png, manage.html,favicon.png, models.html, and the directory AppImages to the target directory.
-          {
-            from: path.resolve(__dirname, "src/index.html"),
-            to: path.resolve(__dirname, target)
-          },
-          {
-            from: path.resolve(__dirname, "src/file.png"),
-            to: path.resolve(__dirname, target)
-          },
-          {
-            from: path.resolve(__dirname, "src/manage.html"),
-            to: path.resolve(__dirname, target)
-          },
-          {
-            from: path.resolve(__dirname, "src/favicon.png"),
-            to: path.resolve(__dirname, target)
-          },
-          {
-            from: path.resolve(__dirname, "src/AppImages"),
-            to: path.resolve(__dirname, target, "AppImages")
-          },
-          {
-            from: path.resolve(__dirname, "src/models.html"),
-            to: path.resolve(__dirname, target )
-          },
-          {
-            from: path.resolve(__dirname, "node_modules/perspectives-pageworker/dist/perspectives-pageworker.js"),
-            to: path.resolve(__dirname, target)
-          },
-          {
-            from: path.resolve(__dirname, "node_modules/perspectives-sharedworker/dist/perspectives-sharedworker.js"),
-            to: path.resolve(__dirname, target)
-          }
         ],
       }),
       new WebpackShellPluginNext({
@@ -112,7 +78,7 @@ module.exports = function(env) {
             // this script generates the manifest and copies it to the target directory.
             `node ./src/generateManifest.js` + " " + target,
             // run the postWebpack.sh shell script. It copies the generated files to the remote target directory.
-            `./rebuildRemoteTarget.sh --target ${target}`
+            `./addToRemoteTarget.sh --target ${target}`
           ],
           blocking: true,
           parallel: false

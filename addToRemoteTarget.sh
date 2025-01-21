@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-# The purpose of this file is to copy a number of files to it.
+# The purpose of this file is to copy a number of files to the MyContexts server.
+# If target is "development" or "production", the files are copied to the root of the site.
+# If target is "remotetest", the files are copied to the remotetest subdirectory of the site.
 
 # Pass this script this option --target: should be "production", "development" or "remotetest"
 # Example usage: ./postWebpack.sh --target remotetest

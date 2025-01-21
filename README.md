@@ -16,6 +16,9 @@ This client runs in the browser. It is a general container that allows you to lo
 * If `perspectives-sharedworker` or `perspectives-pageworker` have changed, run `buildRemoteTest`.
 * If `perspectives-react` has changed, run `buildMyContextsInRemoteTest`.
 
+### To publish to the mycontexts.com root directory
+In order to build and copy all relevant files, use `buildMyContextsInRoot`.
+
 ### Symlinks for easy updates
 `package.json` contains a run target `symlinks` (it runs the script `createPerspectivessLinks.sh`) that will replace the subdirectories
 * perspectives-react
